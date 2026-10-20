@@ -40,16 +40,6 @@ Visit the [Lecture Library](https://zachjon1.github.io/cs341-discrete-structures
 
 **Supplementary:** [MIT Mathematics for Computer Science](https://ocw.mit.edu/courses/6-1200j-mathematics-for-computer-science-spring-2024/).
 
-## Maintaining the Website
-
-To add new lecture notes:
-
-1. Upload the lecture PDF into the `notes/` folder.
-2. Update `data/lectures.json` with the lecture information and PDF link.
-3. Commit the changes. The lecture library will reflect the updated catalog.
-
-YouTube playlist links can be configured in `data/site.json`.
-
 ---
 
 
