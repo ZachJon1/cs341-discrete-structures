@@ -4,10 +4,35 @@
     "title": "Sizes of Infinity",
     "topic": "Sets & Functions",
     "summary": "Cardinality, countable and uncountable sets, and Cantor’s diagonal argument.",
-    "notes": "",
+    "notes": "notes/CS341_Lecture_21_Student.pdf",
+    "notes_filled": "notes/CS341_Lecture_21_Student_KEY.pdf",
     "slides": "",
     "video": "",
     "updated": "",
-    "status": "planned"
+    "status": "published"
+  },
+  {
+    "number": 22,
+    "title": "Assume, Then Derive — Direct Proof",
+    "topic": "Proof Techniques",
+    "summary": "Direct proof: assume the hypothesis and logically derive the conclusion.",
+    "notes": "notes/CS341_Lecture_22_Student.pdf",
+    "notes_filled": "notes/CS341_Lecture_22_Student_KEY.pdf",
+    "slides": "",
+    "video": "",
+    "updated": "",
+    "status": "published"
+  },
+  {
+    "number": 23,
+    "title": "When Direct Proof Stalls — Proof by Contrapositive",
+    "topic": "Proof Techniques",
+    "summary": "Proof by contrapositive: establish an implication by proving its logically equivalent contrapositive.",
+    "notes": "notes/CS341_Lecture_23_Student.pdf",
+    "notes_filled": "notes/CS341_Lecture_23_Student_KEY.pdf",
+    "slides": "",
+    "video": "",
+    "updated": "",
+    "status": "published"
   }
 ]
