@@ -14,8 +14,6 @@ This repository provides lecture notes, study resources, and supplementary learn
 - **[Lecture Notes](https://zachjon1.github.io/cs341-discrete-structures/lectures.html)** — Lecture materials, PDFs, and video recordings as they become available.
 - **[Study Resources](https://zachjon1.github.io/cs341-discrete-structures/resources.html)** — Recommended textbooks and supplementary learning materials.
 
-*Website links require GitHub Pages to be enabled.*
-
 ## Topics Covered
 
 - Mathematical Logic and Truth Tables
