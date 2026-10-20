@@ -24,9 +24,9 @@
     if (!response.ok) throw new Error(`Could not load ${path}`);
     return await response.json();
   };
-  const isAvailable = l => Boolean(cleanHref(l.notes) || cleanHref(l.slides) || cleanHref(l.video));
+  const isAvailable = l => Boolean(cleanHref(l.notes) || cleanHref(l.notes_filled) || cleanHref(l.slides) || cleanHref(l.video));
   const resourceLinks = l => {
-    const fields = [['notes','Study notes ↗'],['slides','Slides ↗'],['video','Watch video ↗']];
+    const fields = [['notes','Student notes ↗'],['notes_filled','Filled notes / key ↗'],['slides','Slides ↗'],['video','Watch video ↗']];
     const links = fields.filter(([key]) => cleanHref(l[key])).map(([key,label]) => {
       const href = cleanHref(l[key]);
       const external = /^https:\/\//i.test(href);
