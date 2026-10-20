@@ -1,0 +1,98 @@
+[
+  {
+    "week": 1,
+    "date": "Aug 17",
+    "title": "Logic I",
+    "description": "Course orientation; propositions, negation, conjunction, disjunction, truth tables, and proof-writing expectations."
+  },
+  {
+    "week": 2,
+    "date": "Aug 24",
+    "title": "Logic II",
+    "description": "Implication, biconditional, converse/inverse/contrapositive, tautologies, equivalence, CNF and DNF."
+  },
+  {
+    "week": 3,
+    "date": "Aug 31",
+    "title": "Predicate logic and sets",
+    "description": "Predicates, quantifiers, validity, sets and subsets, Venn diagrams, power sets, Cartesian products."
+  },
+  {
+    "week": 4,
+    "date": "Sep 7",
+    "title": "Relations and functions",
+    "description": "Partitions, relation properties, equivalence relations, injections, surjections, bijections, and countability."
+  },
+  {
+    "week": 5,
+    "date": "Sep 14",
+    "title": "Proof methods I",
+    "description": "Direct proofs, cases, contraposition, counterexamples, existence proofs, and writing clear proofs."
+  },
+  {
+    "week": 6,
+    "date": "Sep 21",
+    "title": "Proof methods II",
+    "description": "Contradiction, mathematical and strong induction, well-ordering, recursive definitions, and sequences."
+  },
+  {
+    "week": 7,
+    "date": "Sep 28",
+    "title": "Algorithms and complexity",
+    "description": "Algorithm design, growth of functions, asymptotic comparison, and introductory searching and sorting analysis."
+  },
+  {
+    "week": 8,
+    "date": "Oct 5",
+    "title": "Counting I / Midterm",
+    "description": "Addition and multiplication principles, inclusion-exclusion, pigeonhole principle, midterm review and examination."
+  },
+  {
+    "week": 9,
+    "date": "Oct 12",
+    "title": "Counting II",
+    "description": "Permutations, combinations, applications, recurrence relations, and recursive counting."
+  },
+  {
+    "week": 10,
+    "date": "Oct 19",
+    "title": "Graphs I",
+    "description": "Graph definitions, degrees, paths, cycles, connectivity, adjacency and incidence matrices."
+  },
+  {
+    "week": 11,
+    "date": "Oct 26",
+    "title": "Graphs II",
+    "description": "Eulerian and Hamiltonian graphs, weighted graphs, proofs, algorithms and applications."
+  },
+  {
+    "week": 12,
+    "date": "Nov 2",
+    "title": "Trees",
+    "description": "Tree properties, rooted trees, DFS/BFS traversal, spanning trees, and minimum spanning trees."
+  },
+  {
+    "week": 13,
+    "date": "Nov 9",
+    "title": "Matrices and digraphs",
+    "description": "Matrix properties and applications, directed graphs, relations and state transitions."
+  },
+  {
+    "week": 14,
+    "date": "Nov 16",
+    "title": "Finite-state structures",
+    "description": "Finite-state machines, invariants, computational modeling and an integrative assignment."
+  },
+  {
+    "week": 15,
+    "date": "Nov 23",
+    "title": "Thanksgiving period",
+    "description": "No new major content planned; follow the university calendar and Canvas announcements."
+  },
+  {
+    "week": 16,
+    "date": "Nov 30",
+    "title": "Synthesis and review",
+    "description": "Elective topics as time permits, cumulative review, proof and problem-solving clinic."
+  }
+]
