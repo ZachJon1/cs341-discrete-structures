@@ -1,6 +1,5 @@
 # CS 341 — Discrete Structures
 
-**Mississippi Valley State University | Fall 2026**  
 **Instructor:** Dr. Abdul-Rashid Zakaria, Ph.D.  
 **Department:** Mathematics, Computer and Information Sciences
 
