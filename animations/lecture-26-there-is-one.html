@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>There Is One: an animated explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9E6FA; --stage:#FBFAFF; --card:#F0EDFD; --ink:#26215E; --muted:#6B67A3; --line:#D3CEF0;
+  --paper:#FFE7A3; --tink:#26215E; --pop:#E8395F; --mint:#14B983; --sky:#3D7BF5; --sun:#FFC23A; --grape:#7C4DEB;
+  --on-strong:#FFFFFF;
+  --display:"Fredoka","Nunito","Trebuchet MS","Segoe UI",system-ui,"Cambria Math","STIX Two Math",sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,"Cambria Math",sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+    --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+    --on-strong:#1B1846; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+  --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+  --on-strong:#1B1846; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 36px}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:4px 4px 14px}
+.intro h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.6vw,40px);margin:0;letter-spacing:-0.01em}
+.intro p{margin:0;color:var(--muted);font-size:17px;line-height:1.4}
+.player{background:var(--card);border-radius:24px;padding:10px;border:2px solid var(--line)}
+.stage{position:relative;border-radius:16px;overflow:hidden;background:var(--stage);aspect-ratio:16/9;width:100%}
+.stage svg{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+.td{font-family:var(--display)}
+.tb{font-family:var(--body)}
+.poster{position:absolute;inset:0;border:0;padding:0;margin:0;background:transparent;cursor:pointer;color:inherit;font:inherit}
+.poster[hidden]{display:none}
+.poster-btn{position:absolute;left:50%;top:22%;transform:translate(-50%,-50%);width:clamp(56px,10vw,104px);aspect-ratio:1;border-radius:50%;
+  background:var(--ink);color:var(--stage);display:grid;place-items:center;box-shadow:0 0 0 clamp(5px,.9vw,10px) var(--stage);transition:transform .18s ease}
+.poster-btn svg{width:42%;height:42%;margin-left:8%}
+.poster:hover .poster-btn,.poster:focus-visible .poster-btn{transform:translate(-50%,-50%) scale(1.07)}
+.poster:focus-visible{outline:4px solid var(--sky);outline-offset:-4px;border-radius:16px}
+.poster-len{position:absolute;left:14px;top:12px;background:var(--paper);color:var(--tink);font-weight:700;font-size:clamp(12px,1.5vw,15px);padding:5px 12px;border-radius:999px}
+.caption{min-height:3.3em;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 18px 6px;
+  font-size:clamp(16px,1.9vw,22px);line-height:1.38;font-weight:700;color:var(--ink);margin:0;text-wrap:balance}
+.caption:empty::before{content:"Captions appear here once you press play.";color:var(--muted);font-weight:400}
+.caption[hidden]{display:none}
+.controls{display:flex;align-items:center;gap:8px;padding:6px 4px 2px;flex-wrap:wrap}
+.btn{min-width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:var(--stage);color:var(--ink);
+  font:700 15px/1 var(--body);display:inline-grid;place-items:center;cursor:pointer;padding:0 10px}
+.btn svg{width:22px;height:22px}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,.chip:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.btn.play{background:var(--pop);border-color:var(--pop);color:var(--on-strong);min-width:52px}
+.btn[aria-pressed="false"]{color:var(--muted)}
+.scrub{position:relative;flex:1 1 220px;min-width:160px;height:44px;display:flex;align-items:center}
+.ticks{position:absolute;left:11px;right:11px;top:6px;height:6px;pointer-events:none}
+.ticks span{position:absolute;top:0;width:3px;height:7px;border-radius:2px;background:var(--muted);transform:translateX(-50%)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(to right,var(--pop) var(--pct,0%),var(--line) var(--pct,0%))}
+input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:10px;border-radius:6px;background:var(--pop)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--paper);border:3px solid var(--ink)}
+.time{font:700 15px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--muted);min-width:96px;text-align:center}
+.chapters{display:flex;gap:6px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:thin}
+.chip{flex:0 0 auto;border:2px solid var(--line);background:var(--stage);color:var(--ink);border-radius:999px;padding:7px 13px 7px 7px;
+  font:700 14px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--card);font-size:12px}
+.chip[aria-current="true"]{background:var(--ink);color:var(--stage);border-color:var(--ink)}
+.chip[aria-current="true"] b{background:var(--sun);color:var(--tink)}
+.hint{color:var(--muted);font-size:14px;margin:12px 6px 0;line-height:1.45}
+.rotate{display:none}
+@media (max-width:640px) and (orientation:portrait){.rotate{display:block}}
+.player:fullscreen{display:flex;flex-direction:column;justify-content:center;border-radius:0;border:0;padding:12px;background:var(--card)}
+.player:fullscreen .stage{width:min(100%,calc((100vh - 200px) * 16 / 9));margin:0 auto}
+.player:fullscreen .caption,.player:fullscreen .controls,.player:fullscreen .chapters{width:min(100%,calc((100vh - 200px) * 16 / 9));margin-left:auto;margin-right:auto}
+@media (max-width:560px){.time{min-width:0;font-size:13px}.btn{min-width:40px;height:40px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="intro">
+    <h1>Lecture 26, animated</h1>
+    <p>Existence proofs for CS 341: one witness, the hard direction, and a proof that never names its answer.</p>
+  </header>
+  <section class="player" id="player" aria-label="Animated explainer player">
+    <div class="stage">
+      <svg id="svg" viewBox="0 0 1600 900" role="img" aria-label="Animation stage. The captions below describe each scene."></svg>
+      <button class="poster" id="poster" type="button" aria-label="Play the explainer">
+        <span class="poster-len" id="posterLen"></span>
+        <span class="poster-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5v15l13-7.5z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+    <div class="controls">
+      <button class="btn play" id="play" type="button" aria-label="Play"></button>
+      <button class="btn" id="restart" type="button" aria-label="Restart from the beginning"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="scrub"><div class="ticks" id="ticks"></div><input type="range" id="scrub" min="0" max="100" step="0.1" value="0" aria-label="Seek"></div>
+      <span class="time" id="time" aria-live="off">0:00</span>
+      <button class="btn" id="speed" type="button" aria-label="Playback speed">1×</button>
+      <button class="btn" id="cc" type="button" aria-pressed="true" aria-label="Captions">CC</button>
+      <button class="btn" id="fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+  </section>
+  <p class="hint">Space plays or pauses. The left and right arrow keys skip 5 seconds. Tap any chapter to jump there.</p>
+  <p class="hint rotate">Turn your phone sideways for a bigger picture.</p>
+</main>
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('svg');
+const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* ---------- math + easing ---------- */
+const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const lerp=(a,b,k)=>a+(b-a)*k;
+const eio=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+const eout=k=>1-Math.pow(1-k,3);
+const ein=k=>k*k*k;
+const back=k=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2);};
+const P=(t,a,b,fn=eio)=>fn(clamp((t-a)/(b-a)));
+const bump=(t,a,d)=>Math.sin(Math.PI*clamp((t-a)/d));
+const num=k=>k<0?'\u2212'+(-k):String(k);
+
+/* ---------- svg helpers ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);let st='';
+  for(const k in attrs){const v=attrs[k];if(v==null)continue;
+    if(k==='text')e.textContent=v;
+    else if((k==='fill'||k==='stroke')&&typeof v==='string'&&v.startsWith('--'))st+=k+':var('+v+');';
+    else e.setAttribute(k,v);}
+  if(st)e.setAttribute('style',st);
+  if(parent)parent.appendChild(e);return e;
+}
+function place(g,o={}){
+  const X=g._x+(o.dx||0),Y=g._y+(o.dy||0);
+  let tr='translate('+X.toFixed(2)+' '+Y.toFixed(2)+')';
+  if(o.r)tr+=' rotate('+o.r.toFixed(2)+')';
+  if(o.sx!=null||o.sy!=null){const sx=o.sx!=null?o.sx:(o.s!=null?o.s:1),sy=o.sy!=null?o.sy:(o.s!=null?o.s:1);tr+=' scale('+Math.max(sx,.001).toFixed(3)+' '+Math.max(sy,.001).toFixed(3)+')';}
+  else if(o.s!=null&&o.s!==1)tr+=' scale('+Math.max(o.s,.001).toFixed(3)+')';
+  g.setAttribute('transform',tr);
+  const op=o.o==null?1:clamp(o.o);
+  g.setAttribute('opacity',op.toFixed(3));
+  const vis=op<=.002?'hidden':'visible';if(g._vis!==vis){g.style.visibility=vis;g._vis=vis;}
+}
+function G(parent,x=0,y=0){const g=el('g',{},parent);g._x=x;g._y=y;place(g);return g;}
+function show(g,t,a,b=1e9,extra={}){
+  const k=clamp((t-a)/.5),f=1-P(t,b-.45,b,ein);
+  place(g,Object.assign({s:k?back(k):.001,o:Math.min(clamp(k*3),f)},extra));return k;
+}
+function txt(p,x,y,str,o={}){
+  return el('text',{x,y,dy:'.35em','font-size':o.size||40,'font-weight':o.weight||500,'text-anchor':o.anchor||'middle',
+    fill:o.fill||'--ink',class:o.body?'tb':'td',opacity:o.op,text:str},p);
+}
+function gt(p,x,y,str,o={}){const g=G(p,x,y);txt(g,0,0,str,o);return g;}
+function ticketD(w,h){const W=w/2,H=h/2,n=Math.min(14,h*.18),c=Math.min(14,h*.2);
+  return 'M'+(-W+c)+' '+(-H)+'H'+(W-c)+'A'+c+' '+c+' 0 0 1 '+W+' '+(-H+c)+'V'+(-n)+'A'+n+' '+n+' 0 0 0 '+W+' '+n+'V'+(H-c)+'A'+c+' '+c+' 0 0 1 '+(W-c)+' '+H+
+  'H'+(-W+c)+'A'+c+' '+c+' 0 0 1 '+(-W)+' '+(H-c)+'V'+n+'A'+n+' '+n+' 0 0 0 '+(-W)+' '+(-n)+'V'+(-H+c)+'A'+c+' '+c+' 0 0 1 '+(-W+c)+' '+(-H)+'Z';}
+function ticket(p,w,h,fill='--paper'){const g=el('g',{},p);el('path',{d:ticketD(w,h),fill},g);return g;}
+function pill(p,w,h,fill,label,o={}){const g=el('g',{},p);el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:h/2,fill},g);
+  if(label!=null)txt(g,0,0,label,{size:o.size||34,weight:o.weight||600,fill:o.color||'--tink'});return g;}
+function star(p,cx,cy,R,fill){let d='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?R*.45:R;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1);}
+  return el('path',{d:d+'Z',fill},p);}
+function shape(p,type,fill,s){
+  if(type===0)return el('circle',{r:s,fill},p);
+  if(type===1)return el('rect',{x:-s,y:-s,width:2*s,height:2*s,rx:12,fill},p);
+  if(type===2)return el('path',{d:'M0 '+(-s*1.05)+' L'+(s*1.05)+' '+(s*.8)+' L'+(-s*1.05)+' '+(s*.8)+'Z',fill,stroke:fill,'stroke-width':10,'stroke-linejoin':'round'},p);
+  if(type===3)return el('rect',{x:-s*.82,y:-s*.82,width:1.64*s,height:1.64*s,rx:10,fill,transform:'rotate(45)'},p);
+  return star(p,0,0,s*1.2,fill);
+}
+function mascot(p){const g=el('g',{},p);
+  el('path',{d:ticketD(124,84),fill:'--paper',stroke:'--tink','stroke-width':4},g);
+  el('circle',{cx:-34,cy:10,r:7,fill:'--pop',opacity:.45},g);el('circle',{cx:34,cy:10,r:7,fill:'--pop',opacity:.45},g);
+  el('circle',{cx:-17,cy:-8,r:6,fill:'--tink'},g);el('circle',{cx:17,cy:-8,r:6,fill:'--tink'},g);
+  el('path',{d:'M-13 10 Q0 22 13 10',fill:'none',stroke:'--tink','stroke-width':4,'stroke-linecap':'round'},g);return g;}
+function person(p,fill){const g=el('g',{},p);
+  el('rect',{x:-30,y:-4,width:60,height:58,rx:26,fill},g);el('circle',{cx:0,cy:-34,r:25,fill},g);
+  el('circle',{cx:-9,cy:-37,r:3.6,fill:'--tink'},g);el('circle',{cx:9,cy:-37,r:3.6,fill:'--tink'},g);
+  el('path',{d:'M-8 -27 Q0 -21 8 -27',fill:'none',stroke:'--tink','stroke-width':3,'stroke-linecap':'round'},g);return g;}
+function speech(p,w,h,label,o={}){const g=el('g',{},p);
+  el('path',{d:'M'+(-w/2+4)+' -14 L'+(-w/2-30)+' 16 L'+(-w/2+4)+' 14Z',fill:'--grape'},g);
+  el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--grape'},g);
+  txt(g,0,0,label,{size:o.size||36,weight:600,fill:'--on-strong'});return g;}
+function dart(g){el('line',{x1:0,y1:-96,x2:0,y2:-18,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},g);
+  el('path',{d:'M-11 -22 L11 -22 L0 4Z',fill:'--ink'},g);el('path',{d:'M0 -78 L-16 -106 L0 -96 L16 -106Z',fill:'--pop'},g);}
+function qlen(x0,y0,cx,cy,x1,y1){let L=0,px=x0,py=y0;for(let i=1;i<=40;i++){const u=i/40,a=(1-u)*(1-u),b=2*u*(1-u),c=u*u;
+  const x=a*x0+b*cx+c*x1,y=a*y0+b*cy+c*y1;L+=Math.hypot(x-px,y-py);px=x;py=y;}return L;}
+
+/* ---------- extra helpers for algebra rows ---------- */
+const pv=(t,a)=>{const k=clamp((t-a)/.5);return {s:k?back(k):.001,o:clamp(k*3)};};
+let BUILDING=null,FONTV=0;
+function row(p,x,y,pieces,o={}){
+  const g=el('g',{},p);g._x=0;g._y=0;g._pc=[];g._ax=x;g._ay=y;g._anchor=o.anchor||'start';const S=o.size||44;
+  if(o.bg){const h=o.bgH||S*1.9;g._bg=el('rect',{y:y-h/2,height:h,rx:22,fill:o.bg,stroke:o.bgStroke||null,'stroke-width':o.bgStroke?5:null},g);g._padX=o.padX||32;}
+  pieces.forEach(pc=>{const [s,q={}]=Array.isArray(pc)?pc:[pc,{}];const sz=q.size||S;let rect=null;
+    if(q.box)rect=el('rect',{y:y-sz*.68,height:sz*1.36,rx:12,fill:q.box},g);
+    const t=el('text',{x,y,dy:'.35em','font-size':sz,'font-weight':q.weight||o.weight||500,'text-anchor':'start',
+      fill:q.fill||(q.box?'--tink':(o.fill||'--ink')),class:'td',text:s.replace(/ /g,'\u00A0')},g);
+    g._pc.push({t,rect,pad:q.box?12:0});});
+  layoutRow(g);if(BUILDING)BUILDING.rows.push(g);return g;
+}
+let MEAS=null;const MCACHE={};
+function measure(t){
+  if(!MEAS)MEAS=el('text',{x:-5000,y:-5000,class:'td',opacity:0,'aria-hidden':'true'},svg);
+  const sz=t.getAttribute('font-size'),w=t.getAttribute('font-weight'),s=t.textContent,key=FONTV+'|'+sz+'|'+w+'|'+s;
+  if(MCACHE[key]!=null)return MCACHE[key];
+  MEAS.setAttribute('font-size',sz);MEAS.setAttribute('font-weight',w);MEAS.textContent=s;
+  let l=0;try{l=MEAS.getComputedTextLength();}catch(e){}
+  return MCACHE[key]=l;
+}
+function layoutRow(g){
+  const ws=g._pc.map(pc=>measure(pc.t)+pc.pad*2);
+  const tot=ws.reduce((a,b)=>a+b,0);let x=g._anchor==='middle'?g._ax-tot/2:g._ax;g._x0=x;g._w=tot;
+  g._pc.forEach((pc,i)=>{if(pc.rect){pc.rect.setAttribute('x',(x+3).toFixed(1));pc.rect.setAttribute('width',Math.max(ws[i]-6,0).toFixed(1));}
+    pc.t.setAttribute('x',(x+pc.pad).toFixed(1));pc.x=x;pc.w=ws[i];x+=ws[i];});
+  if(g._bg){g._bg.setAttribute('x',(g._x0-g._padX).toFixed(1));g._bg.setAttribute('width',(tot+2*g._padX).toFixed(1));}
+}
+function frac(p,x,y,num,den,o={}){const g=G(p,x,y),s=o.size||48,w=o.w||Math.max(num.length,den.length)*s*.55+24;
+  txt(g,0,-s*.78,num,{size:s,weight:o.weight||500,fill:o.fill});
+  el('line',{x1:-w/2,y1:0,x2:w/2,y2:0,stroke:o.fill||'--ink','stroke-width':5,'stroke-linecap':'round'},g);
+  txt(g,0,s*.78,den,{size:s,weight:o.weight||500,fill:o.fill});return g;}
+function tracker(p,x,y,gap,labels,o={}){
+  const W=o.w||250;
+  const items=labels.map((l,i)=>{const g=G(p,o.horiz?x+gap*i:x,o.horiz?y:y+gap*i);
+    const bg=el('rect',{x:-W/2,y:-30,width:W,height:60,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+    const c=el('circle',{cx:-W/2+32,cy:0,r:20,fill:'--line'},g);
+    const n=txt(g,-W/2+32,0,String(i+1),{size:24,weight:700,fill:'--muted'});
+    const tx=txt(g,-W/2+62,0,l,{size:28,weight:600,anchor:'start',fill:'--muted'});
+    return {g,bg,c,n,tx};});
+  return {items,update(t,times,end,appear){items.forEach((it,i)=>{
+    const on=t>=times[i],done=t>=(i<items.length-1?times[i+1]:end),st=done?2:on?1:0;
+    if(it._st!==st){it._st=st;
+      it.bg.setAttribute('style','fill:var('+(st===1?'--sun':'--card')+');stroke:var('+(st===1?'--sun':st===2?'--mint':'--line')+')');
+      it.c.setAttribute('style','fill:var('+(st===0?'--line':st===1?'--tink':'--mint')+')');
+      it.n.setAttribute('style','fill:var('+(st===0?'--muted':st===1?'--sun':'--tink')+')');it.n.textContent=st===2?'✓':String(i+1);
+      it.tx.setAttribute('style','fill:var('+(st===1?'--tink':st===2?'--ink':'--muted')+')');}
+    const k=P(t,appear+i*.15,appear+.4+i*.15);place(it.g,{o:k,s:1+.08*(on&&!done?bump(t,times[i],.4):0)});});}};
+}
+function check(p,x,y){const c=G(p,x,y);el('circle',{r:24,fill:'--mint'},c);
+  el('path',{d:'M-10 0 L-3 8 L11 -8',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);return c;}
+
+/* =================================================================
+   SCENES  (each: title, dur, caps [local time, text], build, update)
+   ================================================================= */
+const scenes=[];
+function boxCard(p,x,y,w,h,stroke){const g=G(p,x,y);g._r=el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--card',stroke:stroke||'--line','stroke-width':stroke?5:3},g);return g;}
+function slideIn(g,t,a,dx=40){const k=P(t,a,a+.5,eout);place(g,{dx:-(1-k)*dx,o:k});}
+function stampBox(p,x,y,w,label,size){const g=G(p,x,y);el('rect',{x:-w/2,y:-58,width:w,height:116,rx:18,fill:'--stage',stroke:'--pop','stroke-width':9},g);txt(g,0,0,label,{size:size||52,weight:700,fill:'--pop'});return g;}
+function slam(g,t,a,r=-5){const k=clamp((t-a)/.4);place(g,{s:k?lerp(1.8,1,eout(k)):.001,o:clamp(k*4),r});}
+function clen(x0,y0,x1,y1,x2,y2,x3,y3){let L=0,px=x0,py=y0;for(let i=1;i<=48;i++){const u=i/48,v=1-u;
+  const x=v*v*v*x0+3*v*v*u*x1+3*v*u*u*x2+u*u*u*x3,y=v*v*v*y0+3*v*v*u*y1+3*v*u*u*y2+u*u*u*y3;L+=Math.hypot(x-px,y-py);px=x;py=y;}return L;}
+function chk(p,x,y,fill='--mint'){const c=G(p,x,y);el('circle',{r:24,fill},c);el('path',{d:'M-10 0 L-3 8 L11 -8',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);return c;}
+/* math text with superscripts: parts = [str | [str,{sup,fill,weight}]] */
+function mt(p,x,y,parts,o={}){const S=o.size||44;const t=el('text',{x,y,dy:'.35em','font-size':S,'font-weight':o.weight||500,'text-anchor':o.anchor||'middle',fill:o.fill||'--ink',class:'td'},p);
+  let up=false;parts.forEach(pt=>{const [s,q={}]=Array.isArray(pt)?pt:[pt,{}];const a={text:s.replace(/ /g,'\u00A0')};
+    if(q.sup&&!up){a.dy=(-S*.42).toFixed(1);up=true;}else if(!q.sup&&up){a.dy=(S*.42).toFixed(1);up=false;}
+    if(q.sup)a['font-size']=Math.round(S*.62);if(q.fill)a.fill=q.fill;if(q.weight)a['font-weight']=q.weight;el('tspan',a,t);});return t;}
+function face(p,r,fill){const g=el('g',{},p);el('circle',{r,fill},g);el('circle',{cx:-r*.28,cy:-r*.12,r:r*.1,fill:'--tink'},g);el('circle',{cx:r*.28,cy:-r*.12,r:r*.1,fill:'--tink'},g);
+  el('path',{d:`M${-r*.25} ${r*.22} Q0 ${r*.42} ${r*.25} ${r*.22}`,fill:'none',stroke:'--tink','stroke-width':Math.max(2,r*.08),'stroke-linecap':'round'},g);return g;}
+function giftBox(p,open,q){const g=G(p,0,0);el('rect',{x:-60,y:-20,width:120,height:90,rx:10,fill:'--sky'},g);el('rect',{x:-9,y:-20,width:18,height:90,fill:'--sun'},g);
+  if(q)txt(g,0,26,'?',{size:48,weight:700,fill:'--on-strong'});
+  const lid=G(g,-68,-48);el('rect',{x:0,y:0,width:136,height:30,rx:8,fill:'--grape'},lid);el('rect',{x:59,y:0,width:18,height:30,fill:'--sun'},lid);g._lid=lid;return g;}
+
+/* 1. There is one */
+scenes.push((()=>{
+  let crowd=[],beam,wit,tag,title,sub,B,cA,cE,miniA=[],spotE;
+  const CH=9,CX=856,CY=362;
+  return {title:'There is one',dur:14,
+  caps:[[0.3,'Every method so far proved statements about every element.'],[3.2,'Today’s statements say “there exists,” and one witness does the whole job.'],[4.8,'Today: existence proofs.'],[8,'“For every” needs an argument that covers them all. “There exists” needs just one.'],[11.6,'And they hide one of the strangest proofs in the course.']],
+  build(r){
+    beam=el('path',{d:'M0 0',fill:'--sun','fill-opacity':.38},r);
+    for(let rw=0;rw<3;rw++)for(let c=0;c<6;c++){const g=G(r,520+c*112,270+rw*92);face(g,30,'--line');crowd.push(g);}
+    wit=G(r,CX,CY);face(wit,30,'--mint');
+    tag=G(r,800,402);pill(tag,220,54,'--sun','a witness!',{size:30});
+    title=gt(r,800,640,'There Is One',{size:104,weight:600});
+    sub=gt(r,800,736,'Existence proofs',{size:42,weight:400,fill:'--muted'});
+    B=G(r,0,0);
+    cA=boxCard(B,470,450,600,450);txt(cA,0,-118,'∀',{size:150,weight:600,fill:'--pop'});txt(cA,0,18,'for every x',{size:38,weight:700});txt(cA,0,62,'argue about all of them',{size:28,weight:500,fill:'--muted'});
+    for(let i=0;i<7;i++){const g=G(cA,-216+i*72,150);face(g,24,'--mint');miniA.push(g);}
+    cE=boxCard(B,1130,450,600,450);txt(cE,0,-118,'∃',{size:150,weight:600,fill:'--mint'});txt(cE,0,18,'there exists an x',{size:38,weight:700});txt(cE,0,62,'one witness does it',{size:28,weight:500,fill:'--muted'});
+    spotE=G(cE,0,150);el('path',{d:'M-14 -120 L14 -120 L46 30 L-46 30Z',fill:'--sun','fill-opacity':.4},spotE);face(spotE,26,'--mint');
+  },
+  update(t){
+    const lv=P(t,7.4,8,ein),fade=P(t,3.6,4.4);
+    crowd.forEach((g,i)=>{const v=pv(t,.3+i*.05);place(g,{s:v.s,o:v.o*(i===CH?(t<3.2?1:0):1-fade)*(1-lv)});});
+    const mv=P(t,3.4,4.2),sc=lerp(1,1.6,mv);
+    wit._x=lerp(CX,800,mv);wit._y=lerp(CY,520,mv);place(wit,{o:(t>=3.2?1:0)*(1-lv),s:sc*(1+.15*bump(t,3.2,.35))});
+    let tx,ty;if(t<3){const u=P(t,1.6,3,x=>x);tx=688+170*Math.sin(u*Math.PI*2.5);ty=CY;}else{tx=wit._x;ty=wit._y;}
+    const s2=t<3?1:sc,hw=58*s2,by=ty+46*s2;
+    beam.setAttribute('d','M780 -40 L820 -40 L'+(tx+hw).toFixed(1)+' '+by.toFixed(1)+' L'+(tx-hw).toFixed(1)+' '+by.toFixed(1)+'Z');
+    beam.setAttribute('opacity',(P(t,1.4,1.8)*(1-lv)).toFixed(2));
+    show(tag,t,4.4,7.8);
+    place(title,{o:P(t,4.6,5.2)*(1-lv),dy:(1-P(t,4.6,5.2,eout))*30});
+    place(sub,{o:P(t,5.2,5.8)*(1-lv),dy:(1-P(t,5.2,5.8,eout))*20});
+    place(B,{o:P(t,7.8,8.2)});show(cA,t,8.2);miniA.forEach((g,i)=>show(g,t,9+i*.12));show(cE,t,9.8);show(spotE,t,10.6);
+  }};
+})());
+
+/* 2. One witness */
+scenes.push((()=>{
+  let head,def,th1,th2,c1,bars={},vals={},labs={},ring,others,A1,L1a,L1b,c2,pin,A2,L2a,L2b,tW,tC,fin;
+  const BX=n=>450+110*n,AX=560,SC=55;
+  return {title:'One witness',dur:28,
+  caps:[[0.6,'To prove “there exists”, name one specific element, then check that it works.'],[3.6,'Result 3.34: there exists an integer n with 2 − n² > 0.'],[6.6,'Pick a witness: n = 1. Then check: 2 − 1² = 1, which is greater than 0.'],[11.4,'Other witnesses exist too, like n = 0. But one is all you need.'],[15.4,'Result 3.36: there exists a real number x with x² − 8 = 0.'],[19.4,'Witness: x = √8. Check: (√8)² − 8 = 8 − 8 = 0. Done.'],[24.4,'Name it, then check it. That’s an existence proof.']],
+  build(r){
+    head=gt(r,800,95,'One witness proves it',{size:60,weight:600});
+    def=G(r,800,180);ticket(def,1300,88);row(def,0,0,[['To prove ∃x ∈ S, R(x):',{weight:700}],'  name one a ∈ S, then check that R(a) is true.'],{size:32,anchor:'middle',fill:'--tink'});
+    th1=G(r,800,272);row(th1,0,0,[['Result 3.34',{weight:700}],'   There exists an integer n with 2 − n² > 0.'],{size:34,anchor:'middle'});
+    th2=G(r,800,272);row(th2,0,0,[['Result 3.36',{weight:700}],'   There exists a real number x with x² − 8 = 0.'],{size:34,anchor:'middle'});
+    c1=G(r,0,0);el('line',{x1:170,y1:AX,x2:730,y2:AX,stroke:'--ink','stroke-width':5,'stroke-linecap':'round'},c1);
+    txt(c1,450,360,'2 − n²',{size:30,weight:700,fill:'--muted'});txt(c1,150,AX,'0',{size:26,weight:600,fill:'--muted'});
+    for(let n=-2;n<=2;n++){const v=2-n*n;bars[n]=el('rect',{x:BX(n)-38,y:AX,width:76,height:0,rx:12,fill:v>0?'--mint':'--pop'},c1);
+      vals[n]=gt(c1,BX(n),v>0?AX-v*SC-24:AX-v*SC+26,String(v).replace('-','−'),{size:28,weight:700});
+      labs[n]=gt(c1,BX(n),v>0?AX+30:AX-28,'n = '+num(n),{size:24,weight:600,fill:'--muted'});}
+    ring=el('rect',{x:BX(1)-58,y:AX-SC-70,width:116,height:SC+120,rx:22,fill:'none',stroke:'--sun','stroke-width':6,'stroke-dasharray':'12 9'},c1);
+    others=G(c1,450,740);pill(others,470,54,'--card','n = 0 and n = −1 work too',{size:26,color:'--ink'});
+    A1=G(r,0,0);
+    L1a=row(A1,900,440,['Let  ',['n = 1',{box:'--sky',fill:'--on-strong',weight:700}],'.'],{size:42});
+    L1b=row(A1,900,530,['Then  2 − 1² = 1 > 0  ',['✓',{fill:'--mint',weight:700}]],{size:42});
+    c2=G(r,0,0);el('line',{x1:190,y1:AX,x2:710,y2:AX,stroke:'--ink','stroke-width':5,'stroke-linecap':'round'},c2);
+    for(let k=0;k<=4;k++){const g=G(c2,200+125*k,AX);el('line',{x1:0,y1:-12,x2:0,y2:12,stroke:'--ink','stroke-width':4},g);txt(g,0,40,String(k),{size:28,weight:600});}
+    pin=G(c2,200+Math.sqrt(8)*125,AX);el('line',{x1:0,y1:0,x2:0,y2:-80,stroke:'--sky','stroke-width':5},pin);el('circle',{r:12,fill:'--sky'},pin);
+    pill(G(pin,0,-110),200,54,'--sky','√8 ≈ 2.83',{size:28,color:'--on-strong'});
+    A2=G(r,0,0);
+    L2a=row(A2,900,440,['Let  ',['x = √8',{box:'--sky',fill:'--on-strong',weight:700}],'.'],{size:42});
+    L2b=row(A2,900,530,['Then  (√8)² − 8 = 8 − 8 = 0  ',['✓',{fill:'--mint',weight:700}]],{size:40});
+    tW=G(r,815,440);pill(tW,140,46,'--sky','witness',{size:24,color:'--on-strong'});
+    tC=G(r,815,530);pill(tC,140,46,'--mint','check',{size:24});
+    fin=G(r,1150,650);pill(fin,520,70,'--grape','Name it, then check it.',{size:34,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});show(def,t,.6);
+    const out1=1-P(t,15,15.4);
+    place(th1,{o:P(t,3.6,4.1)*out1});place(th2,{o:P(t,15.4,15.9)});
+    place(c1,{o:P(t,4,4.4)*out1});
+    for(let n=-2;n<=2;n++){const v=2-n*n,a=4.4+(n+2)*.15,k=P(t,a,a+.6,eout),h=Math.abs(v)*SC*k;
+      bars[n].setAttribute('y',(v>0?AX-h:AX).toFixed(1));bars[n].setAttribute('height',h.toFixed(1));place(vals[n],{o:P(t,a+.3,a+.6)});place(labs[n],{o:P(t,a,a+.4)});}
+    ring.setAttribute('opacity',P(t,8.4,8.8));show(others,t,11.6);
+    place(A1,{o:out1});slideIn(L1a,t,6.8);slideIn(L1b,t,8.4);
+    place(c2,{o:P(t,15.6,16)});show(pin,t,19.6);
+    place(A2,{});slideIn(L2a,t,19.6);slideIn(L2b,t,21.6);
+    show(tW,t,7.2);show(tC,t,8.8);show(fin,t,24.6);
+  }};
+})());
+
+/* 3. Verify it */
+scenes.push((()=>{
+  let head,pL,pR,full,stamp,bottom;
+  return {title:'Verify it',dur:16,
+  caps:[[0.6,'An existence proof has two halves: the witness, and the check.'],[4.8,'Drop the check, and all you’ve done is announce a guess.'],[6.4,'“Let n = 1” on its own is half a proof.'],[10.4,'Writing the witness without verifying it is the most common way these proofs lose points.']],
+  build(r){
+    head=gt(r,800,95,'Verify, don’t just announce',{size:60,weight:600});
+    pL=G(r,590,400);el('path',{d:'M-210 -64 H210 V-20 A20 20 0 0 1 210 20 V64 H-210 Z',fill:'--sky'},pL);
+    txt(pL,-10,-18,'Let n = 1.',{size:42,weight:700,fill:'--on-strong'});txt(pL,-10,32,'the witness',{size:26,weight:600,fill:'--on-strong',op:.8});
+    pR=G(r,1010,400);el('path',{d:'M-210 -64 H210 V64 H-210 V20 A20 20 0 0 0 -210 -20 Z',fill:'--mint'},pR);
+    txt(pR,12,-18,'Then 2 − 1² = 1 > 0 ✓',{size:34,weight:700,fill:'--tink'});txt(pR,12,32,'the check',{size:26,weight:600,fill:'--tink',op:.8});
+    full=G(r,800,560);pill(full,420,64,'--mint','a complete proof ✓',{size:32});
+    stamp=stampBox(r,590,585,480,'half a proof',50);
+    bottom=G(r,800,780);pill(bottom,1220,80,'--grape','The witness without the check is how existence proofs lose points.',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    show(pL,t,.8,1e9,{r:t>6.8&&t<7.8&&!RM?Math.sin((t-6.8)*25)*3:0});
+    const v=pv(t,1.4),aw=P(t,5,6,ein);place(pR,{s:v.s,o:v.o*(1-aw),dx:aw*520,r:aw*12});
+    show(full,t,2.4,5);slam(stamp,t,6.4,-6);show(bottom,t,10.4);
+  }};
+})());
+
+/* 4. Disproving existence */
+scenes.push((()=>{
+  let head,rule,sub,ex,chart,curve,CL,flr,flab,zlab,dots=[],L=[],concl,bottom;
+  const PX=x=>430+x*165,PY=y=>745-y*52,f=x=>x**4-2*x*x+2;
+  return {title:'Disproving ∃',dur:30,
+  caps:[[0.6,'Now flip it: how do you show a “there exists” statement is false?'],[3.6,'You must show that every element fails. That’s an argument about all of them.'],[7.6,'Example 3.39. Disprove: some real x satisfies x⁴ + 2 = 2x².'],[11,'Testing values never finds a solution, but testing alone proves nothing.'],[15,'Instead, rewrite: x⁴ − 2x² + 2 = (x² − 1)² + 1.'],[20.4,'A square is at least 0, so this is always at least 1. It can never equal 0.'],[25.4,'One example proves “there exists.” Refuting it takes an argument covering the whole domain.']],
+  build(r){
+    head=gt(r,800,95,'Disproving ∃ is the hard direction',{size:56,weight:600});
+    rule=G(r,800,182);row(rule,0,0,['To show  ',['∃x ∈ S, R(x)',{box:'--sky',fill:'--on-strong',weight:700}],'  is false, show  ',['∀x ∈ S, ∼R(x)',{box:'--pop',fill:'--on-strong',weight:700}]],{size:34,anchor:'middle'});
+    sub=gt(r,800,240,'That’s an argument about every element. Testing can’t do it.',{size:28,weight:600,fill:'--muted'});
+    ex=G(r,800,318);ticket(ex,1100,80);row(ex,0,0,[['Example 3.39',{weight:700}],'   Disprove: there is a real x with x⁴ + 2 = 2x².'],{size:32,anchor:'middle',fill:'--tink'});
+    chart=G(r,0,0);
+    el('line',{x1:PX(0),y1:395,x2:PX(0),y2:760,stroke:'--muted','stroke-width':3},chart);
+    el('line',{x1:120,y1:PY(0),x2:745,y2:PY(0),stroke:'--ink','stroke-width':5,'stroke-linecap':'round'},chart);
+    zlab=gt(chart,PX(0)-18,PY(0)+22,'0',{size:24,weight:700,fill:'--muted'});
+    flr=el('line',{x1:120,y1:PY(1),x2:745,y2:PY(1),stroke:'--sun','stroke-width':5,'stroke-dasharray':'14 10'},chart);
+    flab=gt(chart,128,PY(1)+24,'never below 1',{size:22,weight:700,fill:'--muted',anchor:'start'});
+    let d='';for(let i=0;i<=120;i++){const x=-1.8+3.6*i/120;d+=(i?'L':'M')+PX(x).toFixed(1)+' '+PY(f(x)).toFixed(1);}
+    curve=el('path',{d,fill:'none',stroke:'--grape','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'},chart);
+    CL=0;{let px=PX(-1.8),py=PY(f(-1.8));for(let i=1;i<=120;i++){const x=-1.8+3.6*i/120;CL+=Math.hypot(PX(x)-px,PY(f(x))-py);px=PX(x);py=PY(f(x));}}
+    curve.setAttribute('stroke-dasharray',CL.toFixed(1));
+    txt(chart,PX(0)+16,418,'y = x⁴ − 2x² + 2',{size:24,weight:700,fill:'--grape',anchor:'start'});
+    [-1.5,-.5,.7,1.3].forEach(x=>{const g=G(chart,PX(x),PY(f(x)));el('circle',{r:9,fill:'--pop'},g);pill(G(g,0,-34),76,36,'--pop','≠ 0',{size:20,color:'--on-strong'});dots.push(g);});
+    L.push(row(r,800,420,['x⁴ + 2 = 2x²  means  ',['x⁴ − 2x² + 2 = 0',{weight:700}]],{size:30,weight:600}));
+    L.push(row(r,800,500,['x⁴ − 2x² + 2 ','= (x⁴ − 2x² + 1) + 1'],{size:38}));
+    L.push(row(r,0,575,['= (x² − 1)² + 1'],{size:38}));
+    L.push(row(r,0,650,['≥ ',['0 + 1 = 1 > 0',{box:'--sun',weight:600}]],{size:38}));
+    concl=G(r,1140,735);pill(concl,640,64,'--mint','Never 0, so no such real x exists ✓',{size:30});
+    bottom=G(r,800,815);pill(bottom,1180,70,'--grape','One example proves ∃. Refuting ∃ takes the whole domain.',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});place(rule,{o:P(t,1.2,1.7)});place(sub,{o:P(t,3.8,4.3)});show(ex,t,7.8);
+    place(chart,{o:P(t,8.2,8.6)});
+    curve.setAttribute('stroke-dashoffset',(CL*(1-P(t,8.6,10.4))).toFixed(1));
+    flr.setAttribute('opacity',P(t,20.6,21));place(flab,{o:P(t,20.8,21.2)});
+    dots.forEach((g,i)=>show(g,t,11.2+i*.5));
+    const ex1=L[1]._pc[1].x;for(let i=2;i<4;i++)if(Math.abs(L[i]._ax-ex1)>.5){L[i]._ax=ex1;layoutRow(L[i]);}
+    [15.2,16.6,18,20.8].forEach((a,i)=>slideIn(L[i],t,a));
+    show(concl,t,23);show(bottom,t,25.6);
+  }};
+})());
+
+/* 5. Who picks first? */
+scenes.push((()=>{
+  let head,leg1,leg2,th1,th2,ord1,ord2,chal,you,cards=[],res=[],note1,note2,bottom;
+  const SS={x:650,y:480},RS={x:950,y:480},CHP={x:230,y:470},YOU={x:1370,y:470};
+  const CARD=[['s = √2','s',5,10.6],['r = 1','r',6.6,10.6],['s = π','s',11,16.6],['r = 1','r',11.8,16.6],
+              ['r = 1','r',19.4,23],['s = √2','s',20.6,23],['r = 0','r',23.6,1e9],['s = √2','s',24.6,25.8],['s = π','s',25.8,27],['s = e','s',27,1e9]];
+  const RES=[['rs = √2: irrational ✓',1,8,10.6],['rs = π: irrational ✓',1,12.6,16.6],['rs = √2: irrational ✗  you lose',0,21.4,23],
+             ['0 · √2 = 0: rational ✓',1,25.2,26.4],['0 · π = 0: rational ✓',1,26.4,27.6],['0 · e = 0: rational ✓',1,27.6,1e9]];
+  return {title:'Who picks first?',dur:34,chapters:[[0,'Who picks first?'],[17,'Committing first']],
+  caps:[[0.6,'Mixed quantifiers are a game. “For every”: the challenger picks. “There exists”: you pick.'],[4.8,'Result 3.40: for every irrational s, there’s a rational r with rs irrational. The challenger goes first.'],[8,'They pick s = √2. You answer r = 1, and rs = √2 is irrational.'],[11,'They pick π. r = 1 works again.'],[13.6,'Since you pick after s, r could depend on s. Here it happens not to.'],[17.2,'Result 3.41 flips the order: one rational r that works for every irrational s.'],[19.4,'Now you commit first. Try r = 1… the challenger picks √2, and rs is irrational. You lose.'],[23.6,'Try r = 0. Whatever s they pick, rs = 0, which is rational.'],[28.4,'r had to work for every s at once, so only 0 can do it. Choose each witness where its quantifier appears.']],
+  build(r){
+    head=gt(r,800,95,'Who picks first?',{size:60,weight:600});
+    leg1=G(r,560,178);pill(leg1,420,54,'--pop','∀ : the challenger picks',{size:28,color:'--on-strong'});
+    leg2=G(r,1040,178);pill(leg2,320,54,'--mint','∃ : you pick',{size:28});
+    th1=G(r,800,262);ticket(th1,1340,84);row(th1,0,0,[['Result 3.40',{weight:700}],'   For every irrational s, there is a rational r with rs irrational.'],{size:30,anchor:'middle',fill:'--tink'});
+    th2=G(r,800,262);ticket(th2,1340,84);row(th2,0,0,[['Result 3.41',{weight:700}],'   There is a rational r such that for every irrational s, rs is rational.'],{size:30,anchor:'middle',fill:'--tink'});
+    ord1=G(r,800,346);row(ord1,0,0,[['1. challenger picks s',{box:'--pop',fill:'--on-strong',weight:700}],'    →    ',['2. you pick r',{box:'--mint',weight:700}]],{size:28,anchor:'middle'});
+    ord2=G(r,800,346);row(ord2,0,0,[['1. you pick r first',{box:'--mint',weight:700}],'    →    ',['2. challenger picks any s',{box:'--pop',fill:'--on-strong',weight:700}]],{size:28,anchor:'middle'});
+    chal=G(r,CHP.x,CHP.y);el('circle',{r:56,fill:'--pop'},chal);txt(chal,0,0,'∀',{size:56,weight:700,fill:'--on-strong'});txt(chal,0,92,'challenger',{size:26,weight:600,fill:'--muted'});
+    you=G(r,YOU.x,YOU.y);mascot(you);txt(you,0,92,'you',{size:26,weight:600,fill:'--muted'});
+    el('rect',{x:SS.x-110,y:SS.y-50,width:220,height:100,rx:20,fill:'none',stroke:'--line','stroke-width':4,'stroke-dasharray':'10 8'},r);
+    el('rect',{x:RS.x-110,y:RS.y-50,width:220,height:100,rx:20,fill:'none',stroke:'--line','stroke-width':4,'stroke-dasharray':'10 8'},r);
+    CARD.forEach(([l,k])=>{const g=G(r,0,0);ticket(g,200,84,k==='s'?'--pop':'--mint');txt(g,0,0,l,{size:34,weight:700,fill:k==='s'?'--on-strong':'--tink'});g._k=k;cards.push(g);});
+    RES.forEach(([l,ok])=>{const g=G(r,800,612);pill(g,ok?520:620,64,ok?'--mint':'--pop',l,{size:30,color:ok?'--tink':'--on-strong'});res.push(g);});
+    note1=gt(r,800,700,'r comes after s, so it may depend on s. Here r = 1 always works.',{size:30,weight:600,fill:'--muted'});
+    note2=gt(r,800,700,'r had to work for every s at once, so only 0 can do it.',{size:30,weight:600,fill:'--muted'});
+    bottom=G(r,800,792);pill(bottom,1100,70,'--grape','Choose each witness where its quantifier appears (Week 4)',{size:31,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});show(leg1,t,.8);show(leg2,t,1.4);
+    show(th1,t,2.2,16.8);show(th2,t,17.2);place(ord1,{o:P(t,3.4,3.9)*(1-P(t,16.6,17))});place(ord2,{o:P(t,18,18.5)});
+    show(chal,t,2.6);show(you,t,2.9,1e9,{dy:RM?0:-Math.abs(Math.sin(t*3))*5});
+    cards.forEach((g,i)=>{const [,k,a,b]=CARD[i],from=k==='s'?CHP:YOU,to=k==='s'?SS:RS,q=P(t,a,a+.7);
+      g._x=lerp(from.x,to.x,q);g._y=lerp(from.y,to.y,q)-Math.sin(Math.PI*q)*90;
+      place(g,{o:(t>=a?1:0)*(1-P(t,b-.3,b)),s:lerp(.5,1,q),r:(1-q)*(k==='s'?-30:30)});});
+    res.forEach((g,i)=>{const [,,a,b]=RES[i];show(g,t,a,b);});
+    place(note1,{o:P(t,13.6,14.1)*(1-P(t,16.3,16.6))});place(note2,{o:P(t,28.6,29.1)});show(bottom,t,30.6);
+  }};
+})());
+
+/* 6. A strange proof */
+scenes.push((()=>{
+  let head,thm,box,qs=[],lock,neverL,pL,pR,LL,LR,c1,c2,c1l=[],c2l=[],k1,k2,either,which,nonc,rec,trueT;
+  return {title:'A strange proof',dur:42,chapters:[[0,'A strange proof'],[22,'Either way']],
+  caps:[[0.6,'Now for the strange one. Result 3.38: there are irrational numbers a and b with a to the b rational.'],[5.4,'Look at √2 to the power √2. It’s either rational or irrational. We don’t know which.'],[10,'Case 1: it’s rational. Then a = b = √2 works. Done.'],[14.6,'Case 2: it’s irrational. Then take a = √2 to the power √2, and b = √2. Now a to the b is √2 squared, which is 2. Rational!'],[20.6,'Either way, a suitable pair exists.'],[23.6,'But read that again: the proof never says which case holds.'],[27.6,'We proved a pair exists without being able to name it. That’s a non-constructive proof, built from proof by cases.'],[34,'For the record, √2 to the power √2 is irrational, so Case 2 is the true one. But proving that is far beyond this course.']],
+  build(r){
+    head=gt(r,800,95,'A proof that doesn’t tell you the answer',{size:52,weight:600});
+    thm=G(r,800,178);ticket(thm,1200,84);mt(thm,0,0,[['Result 3.38   ',{weight:700}],'There exist irrational numbers a and b with a',['b',{sup:true}],' rational.'],{size:32,fill:'--tink'});
+    pL=el('path',{d:'M800 374 C800 412 430 396 430 432',fill:'none',stroke:'--sky','stroke-width':8,'stroke-linecap':'round'},r);LL=clen(800,374,800,412,430,396,430,432);pL.setAttribute('stroke-dasharray',LL.toFixed(1));
+    pR=el('path',{d:'M800 374 C800 412 1170 396 1170 432',fill:'none',stroke:'--mint','stroke-width':8,'stroke-linecap':'round'},r);LR=clen(800,374,800,412,1170,396,1170,432);pR.setAttribute('stroke-dasharray',LR.toFixed(1));
+    box=G(r,800,318);el('rect',{x:-150,y:-56,width:300,height:112,rx:24,fill:'--card',stroke:'--grape','stroke-width':5},box);mt(box,0,6,['√2',['√2',{sup:true}]],{size:58,weight:700});
+    [[-200,-18],[198,-30],[-182,40],[190,36]].forEach(([x,y],i)=>qs.push(gt(r,800+x,318+y,'?',{size:i%2?46:40,weight:700,fill:'--pop'})));
+    lock=G(box,138,-52);const sh=G(lock,0,-14);el('path',{d:'M-12 0 V-10 A12 12 0 0 1 12 -10 V0',fill:'none',stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},sh);el('rect',{x:-18,y:-16,width:36,height:30,rx:7,fill:'--ink'},lock);
+    neverL=G(r,1080,318);pill(neverL,220,48,'--sun','never opened',{size:26});
+    c1=boxCard(r,430,548,660,232,'--sky');pill(G(c1,0,-84),330,50,'--sky','Case 1: it’s rational',{size:28,color:'--on-strong'});
+    c1l.push(mt(c1,0,-22,['Take  a = √2  and  b = √2'],{size:36,weight:600}));
+    c1l.push(mt(c1,0,32,['Then  a',['b',{sup:true}],' = √2',['√2',{sup:true}],' is rational ✓'],{size:34,weight:600}));
+    c1l.push(mt(c1,0,80,['(that’s what Case 1 assumed)'],{size:24,weight:500,fill:'--muted'}));
+    c2=boxCard(r,1170,548,660,232,'--mint');pill(G(c2,0,-84),360,50,'--mint','Case 2: it’s irrational',{size:28});
+    c2l.push(mt(c2,0,-24,['Take  a = √2',['√2',{sup:true}],'  and  b = √2'],{size:34,weight:600}));
+    c2l.push(mt(c2,0,30,['a',['b',{sup:true}],' = (√2',['√2',{sup:true}],')',['√2',{sup:true}],' = √2',['√2·√2',{sup:true}],' = √2',['2',{sup:true}],' = 2'],{size:31,weight:600}));
+    c2l.push(mt(c2,0,80,['which is rational ✓'],{size:28,weight:700}));
+    k1=chk(c1,300,-100);k2=chk(c2,300,-100);trueT=G(c2,190,-140);pill(trueT,190,44,'--sun','the true one',{size:24});
+    either=G(r,800,730);pill(either,640,70,'--grape','Either way, a suitable pair exists',{size:32,color:'--on-strong'});
+    which=G(r,800,730);pill(which,720,70,'--pop','Which case is it? The proof never says.',{size:32,color:'--on-strong'});
+    nonc=G(r,800,730);pill(nonc,1060,70,'--grape','Non-constructive: proves it exists, without naming it',{size:32,color:'--on-strong'});
+    rec=G(r,800,812);el('rect',{x:-600,y:-30,width:1200,height:60,rx:30,fill:'--sun'},rec);
+    mt(rec,0,0,['For the record: √2',['√2',{sup:true}],' is irrational, so Case 2 holds. Proving that is far beyond this course.'],{size:24,weight:600,fill:'--tink'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});show(thm,t,.5);
+    show(box,t,5.6,1e9,{r:t<9&&t>6&&!RM?Math.sin(t*6)*2:0});
+    qs.forEach((q,i)=>place(q,{o:P(t,6+i*.15,6.4+i*.15)*(1-P(t,23.4,23.8)),dy:RM?0:Math.sin(t*3+i)*6}));
+    pL.setAttribute('stroke-dashoffset',(LL*(1-P(t,8.4,9.2))).toFixed(1));pL.setAttribute('opacity',t>8.4?1:0);
+    pR.setAttribute('stroke-dashoffset',(LR*(1-P(t,8.6,9.4))).toFixed(1));pR.setAttribute('opacity',t>8.6?1:0);
+    show(c1,t,10.2);[11,12.2,12.8].forEach((a,i)=>c1l[i].setAttribute('opacity',P(t,a,a+.4)));show(k1,t,13.2);
+    show(c2,t,14.8);[15.6,17,18.4].forEach((a,i)=>c2l[i].setAttribute('opacity',P(t,a,a+.4)));show(k2,t,19.2);
+    show(either,t,20.8,23.6);show(which,t,23.8,27.6);show(nonc,t,27.8);
+    show(lock,t,23.8);show(neverL,t,24.2);
+    show(rec,t,34.2);show(trueT,t,34.8);
+  }};
+})());
+
+/* 7. Constructive vs non-constructive */
+scenes.push((()=>{
+  let head,cC,cN,giftO,giftC,item,tC=[],tN=[],aC,aN,bottom;
+  return {title:'Constructive?',dur:22,
+  caps:[[0.6,'So there are two kinds of existence proof.'],[2.6,'A constructive proof hands you the object: “let n = 1.”'],[7.4,'A non-constructive proof shows the object must exist, without producing it.'],[12.4,'In computing, a constructive proof is an algorithm: it tells you how to get the thing.'],[14.6,'A non-constructive one is not. That difference is enormous.']],
+  build(r){
+    head=gt(r,800,95,'Constructive vs. non-constructive',{size:56,weight:600});
+    cC=boxCard(r,430,440,640,420,'--mint');txt(cC,0,-160,'Constructive',{size:42,weight:700});
+    item=G(cC,0,-30);pill(item,140,50,'--mint','n = 1',{size:30});
+    giftO=G(cC,0,0);const go=giftBox(giftO,true,false);go._lid.setAttribute('data-open','1');giftO._lid=go._lid;
+    tC.push(txt(cC,0,116,'hands you the object',{size:32,weight:700}));tC.push(txt(cC,0,158,'Example: “Let n = 1.”',{size:28,weight:500,fill:'--muted'}));
+    cN=boxCard(r,1170,440,640,420);txt(cN,0,-160,'Non-constructive',{size:42,weight:700});
+    giftC=G(cN,0,0);giftBox(giftC,false,true);
+    tN.push(txt(cN,0,108,'shows it must exist,',{size:32,weight:700}));tN.push(txt(cN,0,146,'without producing it',{size:32,weight:700}));tN.push(txt(cN,0,184,'Example: Result 3.38',{size:28,weight:500,fill:'--muted'}));
+    aC=G(r,430,712);const ga=el('g',{},aC);pill(ga,560,64,'--mint','constructive proof = an algorithm',{size:30});
+    aN=G(r,1170,712);pill(aN,420,64,'--line','not an algorithm',{size:30,color:'--ink'});
+    bottom=G(r,800,800);pill(bottom,880,72,'--grape','In computing, that difference is enormous.',{size:34,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    show(cC,t,2.6);
+    const op=P(t,3.4,4,eout);place(giftO._lid,{r:-150*op});
+    place(item,{o:P(t,3.8,4.2),dy:-76*P(t,3.8,4.6,eout)});
+    tC.forEach((e,i)=>e.setAttribute('opacity',P(t,4.4+i*.6,4.8+i*.6)));
+    show(cN,t,7.4);place(giftC,{r:t>8&&t<12&&!RM?Math.sin(t*9)*3:0});
+    tN.forEach((e,i)=>e.setAttribute('opacity',P(t,8.2+i*.5,8.6+i*.5)));
+    show(aC,t,12.6);show(aN,t,14.8);show(bottom,t,17.4);
+  }};
+})());
+
+/* 8. Takeaways */
+scenes.push((()=>{
+  let head,tk=[];
+  const L=['Prove ∃: name a witness, then check it.','Disprove ∃: an argument covering every element.','Choose each witness where its quantifier appears.'];
+  const A=[.6,5.6,10.6];
+  return {title:'Takeaways',dur:16,
+  caps:[[0.6,'To prove “there exists”, name a witness and verify it.'],[5.6,'To disprove it, you need an argument that covers every element.'],[10.6,'And with mixed quantifiers, choose each witness at the point its quantifier appears.']],
+  build(r){
+    head=gt(r,800,95,'Three things to remember',{size:60,weight:600});
+    L.forEach((s,i)=>{const g=G(r,800,265+190*i);ticket(g,1180,150);
+      el('line',{x1:-410,y1:-58,x2:-410,y2:58,stroke:'--tink','stroke-width':4,'stroke-dasharray':'6 10','stroke-linecap':'round',opacity:.45},g);
+      const ic=G(g,-500,0);
+      if(i===0){el('path',{d:'M-10 -50 L10 -50 L30 20 L-30 20Z',fill:'--sun','fill-opacity':.6},ic);face(ic,20,'--mint');}
+      else if(i===1){for(let k=0;k<6;k++){const c=G(ic,-30+(k%3)*30,-14+Math.floor(k/3)*30);el('circle',{r:11,fill:'--pop'},c);}}
+      else txt(ic,0,0,'∀ ∃',{size:38,weight:700,fill:'--tink'});
+      txt(g,-372,0,s,{size:37,weight:600,fill:'--tink',anchor:'start'});tk.push(g);});
+  },
+  update(t){place(head,{o:P(t,.4,1)});tk.forEach((g,i)=>{const k=P(t,A[i],A[i]+.6,eout);place(g,{dx:-(1-k)*120,o:k,r:(1-k)*-3});});}
+  };
+})());
+
+/* 9. Exit ticket */
+scenes.push((()=>{
+  let head,cards=[],backs=[],ans=[],timer,arc,cnt,foot;
+  const C=2*Math.PI*40;
+  const Q=[{q:'Q1',lines:[['Prove: there exists an integer',34,600],['n with n² − 5n + 6 = 0.',34,600]],a:[['Let n = 2.',40,700],['Then 4 − 10 + 6 = 0 ✓',34,600],['(n = 3 works too)',26,500]]},
+           {q:'Q2',lines:[['What kind of argument is needed',32,600],['to disprove a statement',32,600],['beginning with ∃?',32,600]],a:[['One that covers every element:',30,700],['show ∀x ∈ S, ∼R(x).',36,700]]}];
+  return {title:'Exit ticket',dur:18,
+  caps:[[0.6,'Exit ticket: try both in your head before the reveal.'],[8,'Check yourself!'],[10.6,'Q1: n = 2 gives 4 − 10 + 6 = 0, and n = 3 works too. Name it, then check it!'],[14.6,'Next up: Section 3.7, proof by contradiction.']],
+  build(r){
+    head=gt(r,800,95,'Exit ticket',{size:60,weight:600});
+    Q.forEach((d,i)=>{const g=G(r,i?1170:430,445);
+      el('rect',{x:-345,y:-235,width:690,height:470,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+      pill(G(g,-275,-185),84,52,'--pop',d.q,{size:28,color:'--on-strong',weight:700});
+      const n=d.lines.length;d.lines.forEach(([s,sz,w],j)=>txt(g,0,(n===3?-140:-115)+(n===3?46:56)*j,s,{size:sz,weight:w}));
+      const b=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--line'},b);txt(b,0,0,'Think first…',{size:34,weight:600,fill:'--muted'});backs.push(b);
+      const a=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--stage',stroke:'--mint','stroke-width':5},a);
+      const k=d.a.length,step=k===3?54:60,y0=-(k-1)*step/2;d.a.forEach(([s,sz,w],j)=>txt(a,0,y0+step*j,s,{size:sz,weight:w,fill:k===3&&j===2?'--muted':'--ink'}));ans.push(a);cards.push(g);});
+    timer=G(r,800,800);el('circle',{r:40,fill:'none',stroke:'--line','stroke-width':10},timer);
+    arc=el('circle',{r:40,fill:'none',stroke:'--sun','stroke-width':10,'stroke-linecap':'round','stroke-dasharray':C.toFixed(1),transform:'rotate(-90)'},timer);
+    cnt=txt(timer,0,0,'5',{size:34,weight:700});
+    foot=gt(r,800,800,'Next up: Section 3.7, Proof by Contradiction',{size:36,weight:500,fill:'--muted'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    cards.forEach((g,i)=>show(g,t,.6+i*.3));
+    [8,8.6].forEach((a,i)=>{const k=P(t,a,a+.6),sy=Math.max(Math.abs(Math.cos(k*Math.PI)),.03);
+      place(backs[i],{sx:1,sy,o:k<.5?1:0});place(ans[i],{sx:1,sy,o:k>=.5?1:0});});
+    const tk=P(t,.9,7.6,x=>x);arc.setAttribute('stroke-dashoffset',(C*tk).toFixed(1));
+    const n=String(Math.max(1,5-Math.floor(tk*5)));if(cnt.textContent!==n)cnt.textContent=n;
+    place(timer,{o:Math.min(P(t,.9,1.3),1-P(t,7.6,8.1))});
+    place(foot,{o:P(t,14.6,15.2)});
+  }};
+})());
+
+/* ---------- assemble timeline ---------- */
+const root=el('g',{},svg);
+const starts=[];let acc=0;
+scenes.forEach(s=>{starts.push(acc);s.g=el('g',{},root);s.rows=[];BUILDING=s;s.build(s.g);BUILDING=null;s._lv=-1;s.g.style.display='none';acc+=s.dur;});
+const TOTAL=acc;
+const chapters=[];scenes.forEach((s,i)=>(s.chapters||[[0,s.title]]).forEach(([o,ti])=>chapters.push({t:starts[i]+o,title:ti})));
+const caps=[];scenes.forEach((s,i)=>s.caps.forEach(([o,c])=>caps.push([starts[i]+o,c])));
+
+/* ticket-wipe transition between scenes, carrying the next chapter's title */
+const wipe=el('g',{},svg);wipe._x=0;wipe._y=0;
+el('path',{d:'M0 0 H2000 L1800 900 H-200Z',fill:'--sun'},wipe);
+el('line',{x1:46,y1:0,x2:-154,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+el('line',{x1:1954,y1:0,x2:1754,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+const wNum=txt(wipe,900,372,'',{size:34,weight:600,fill:'--tink'});
+const wTitle=txt(wipe,900,456,'',{size:92,weight:700,fill:'--tink'});
+function renderWipe(t){
+  let b=null;for(let i=1;i<starts.length;i++)if(Math.abs(t-starts[i])<.6){b=starts[i];break;}
+  if(b===null){place(wipe,{o:0});return;}
+  const u=(t-(b-.6))/1.2;
+  const ci=chapters.findIndex(c=>Math.abs(c.t-b)<.01);
+  if(ci>=0&&wTitle.textContent!==chapters[ci].title){wTitle.textContent=chapters[ci].title;wNum.textContent='Part '+(ci+1)+' of '+chapters.length;}
+  if(RM){place(wipe,{dx:-100,o:clamp((.5-Math.abs(u-.5))*4)});return;}
+  const tx=u<.4?lerp(1800,0,eout(u/.4)):u<.6?lerp(0,-200,(u-.4)/.2):lerp(-200,-2000,ein((u-.6)/.4));
+  place(wipe,{dx:tx,o:1});
+}
+
+/* ---------- player ---------- */
+const $=id=>document.getElementById(id);
+const capEl=$('caption'),playBtn=$('play'),scrub=$('scrub'),timeEl=$('time'),poster=$('poster'),chapNav=$('chapters'),player=$('player');
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+scrub.max=TOTAL;
+$('posterLen').textContent=Math.floor(TOTAL/60)+' min '+Math.round(TOTAL%60)+' s';
+poster.setAttribute('aria-label','Play the explainer ('+Math.floor(TOTAL/60)+' minutes '+Math.round(TOTAL%60)+' seconds)');
+const ICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/><rect x="14" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/></svg>',
+  replay:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+const ticksEl=$('ticks');
+chapters.forEach((c,i)=>{if(i){const s=document.createElement('span');s.style.left=(c.t/TOTAL*100)+'%';ticksEl.appendChild(s);}
+  const b=document.createElement('button');b.type='button';b.className='chip';b.innerHTML='<b>'+(i+1)+'</b>';b.appendChild(document.createTextNode(c.title));
+  b.addEventListener('click',()=>{seek(c.t+.01);setPlaying(true);});c.btn=b;chapNav.appendChild(b);});
+
+let T=0,playing=false,started=false,speed=1,last=null,dirty=true,lastScene=-1,lastCap=null,lastChap=-1;
+const sceneAt=t=>{let i=0;for(let k=0;k<starts.length;k++)if(t>=starts[k])i=k;return i;};
+function render(){
+  const t=started?T:5.9;
+  const i=sceneAt(Math.min(t,TOTAL-1e-6));
+  if(i!==lastScene){scenes.forEach((s,k)=>s.g.style.display=k===i?'':'none');lastScene=i;}
+  if(scenes[i]._lv!==FONTV){scenes[i].rows.forEach(layoutRow);scenes[i]._lv=FONTV;}
+  scenes[i].update(t-starts[i]);
+  renderWipe(t);
+  let c='';if(started){for(const [ct,s] of caps){if(ct<=T)c=s;else break;}}
+  if(c!==lastCap){capEl.textContent=c;lastCap=c;}
+  scrub.value=T;scrub.style.setProperty('--pct',(T/TOTAL*100).toFixed(2)+'%');
+  timeEl.textContent=fmt(T)+' / '+fmt(TOTAL);
+  let ch=0;chapters.forEach((cc,k)=>{if(T>=cc.t-.001)ch=k;});
+  if(ch!==lastChap){chapters.forEach((cc,k)=>cc.btn.setAttribute('aria-current',k===ch?'true':'false'));
+    if(started){const b=chapters[ch].btn;chapNav.scrollTo({left:b.offsetLeft-chapNav.clientWidth/2+b.offsetWidth/2,behavior:RM?'auto':'smooth'});}lastChap=ch;}
+}
+function setPlaying(p){
+  if(p&&T>=TOTAL-.01)T=0;
+  playing=p;last=null;
+  if(p){started=true;poster.hidden=true;}
+  const ended=!p&&T>=TOTAL-.01;
+  playBtn.innerHTML=p?ICON.pause:(ended?ICON.replay:ICON.play);
+  playBtn.setAttribute('aria-label',p?'Pause':(ended?'Replay':'Play'));
+  dirty=true;
+}
+function seek(t){started=true;poster.hidden=true;T=clamp(t,0,TOTAL);dirty=true;}
+function loop(now){
+  if(playing){if(last!==null)T+=Math.min((now-last)/1000,.1)*speed;last=now;if(T>=TOTAL){T=TOTAL;setPlaying(false);}dirty=true;}
+  if(dirty){render();dirty=false;}
+  requestAnimationFrame(loop);
+}
+playBtn.addEventListener('click',()=>setPlaying(!playing));
+poster.addEventListener('click',()=>{T=0;setPlaying(true);playBtn.focus({preventScroll:true});});
+$('restart').addEventListener('click',()=>{seek(0);setPlaying(true);});
+scrub.addEventListener('input',()=>seek(parseFloat(scrub.value)));
+const speeds=[1,1.25,1.5,.75];
+$('speed').addEventListener('click',e=>{speed=speeds[(speeds.indexOf(speed)+1)%speeds.length];e.currentTarget.textContent=speed+'×';e.currentTarget.setAttribute('aria-label','Playback speed '+speed+' times');});
+$('cc').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);capEl.hidden=!on;});
+const fsBtn=$('fs');
+if(!(document.fullscreenEnabled&&player.requestFullscreen))fsBtn.hidden=true;
+fsBtn.addEventListener('click',()=>{try{if(document.fullscreenElement)document.exitFullscreen();else player.requestFullscreen().catch(()=>{});}catch(e){}});
+document.addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(e.altKey||e.ctrlKey||e.metaKey)return;
+  if(e.key===' '||e.key==='k'){if(tag==='button'&&e.key===' ')return;if(tag==='input'&&e.key===' '){e.preventDefault();setPlaying(!playing);return;}
+    if(tag!=='input'){e.preventDefault();setPlaying(!playing);}}
+  else if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&tag!=='input'){e.preventDefault();seek(T+(e.key==='ArrowRight'?5:-5));}
+});
+setPlaying(false);
+if(document.fonts){if(document.fonts.ready)document.fonts.ready.then(()=>{FONTV++;dirty=true;});document.fonts.addEventListener&&document.fonts.addEventListener('loadingdone',()=>{FONTV++;dirty=true;});}
+window.__seek=t=>{seek(t);render();};
+window.__total=TOTAL;
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

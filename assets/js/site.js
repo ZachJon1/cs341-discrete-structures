@@ -24,15 +24,16 @@
     if (!response.ok) throw new Error(`Could not load ${path}`);
     return await response.json();
   };
-  const isAvailable = l => Boolean(cleanHref(l.notes) || cleanHref(l.notes_filled) || cleanHref(l.slides) || cleanHref(l.video));
+  const isAvailable = l => Boolean(cleanHref(l.notes) || cleanHref(l.notes_filled) || cleanHref(l.animation) || cleanHref(l.slides) || cleanHref(l.video));
   const resourceLinks = l => {
-    const fields = [['notes','Student notes ↗'],['notes_filled','Filled notes / key ↗'],['slides','Slides ↗'],['video','Watch video ↗']];
+    const fields = [['notes','Student notes ↗'],['notes_filled','Filled notes / key ↗'],['animation','View animation ↗'],['slides','Slides ↗'],['video','Watch video ↗']];
     const links = fields.filter(([key]) => cleanHref(l[key])).map(([key,label]) => {
       const href = cleanHref(l[key]);
       const external = /^https:\/\//i.test(href);
-      return `<a href="${esc(href)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${label}</a>`;
+      const newTab = external || key === 'animation';
+      return `<a href="${esc(href)}"${newTab ? ' target="_blank" rel="noopener noreferrer"' : ''}>${label}</a>`;
     });
-    return links.length ? links.join('') : '<span class="lecture-unavailable">Notes and links will be added here.</span>';
+    return links.length ? links.join('') : '<span class="lecture-unavailable">Notes, animations, and links will be added here.</span>';
   };
   const setupLectures = async () => {
     const list = document.getElementById('lecture-list');
@@ -78,7 +79,7 @@
       const availableCount = published.length;
       const quick = document.getElementById('quick-materials');
       if (quick) quick.textContent = availableCount ? `${availableCount} lecture${availableCount === 1 ? '' : 's'} with resources` : 'Lecture links added regularly';
-      spotlight.innerHTML = item ? `<div class="spotlight-top"><span class="spotlight-tag">${published.length ? 'LATEST AVAILABLE MATERIAL' : 'LECTURE PREVIEW'}</span><span class="spotlight-number">${String(item.number).padStart(2,'0')}</span></div><h3>${esc(item.title)}</h3><p>${esc(item.summary || '')}</p><div class="spotlight-footer"><span class="${isAvailable(item) ? '' : 'planned'}">${isAvailable(item) ? 'Notes or recordings available' : 'MATERIALS COMING SOON'}</span><a href="lectures.html">View lectures →</a></div>` : '<h3>Lecture index</h3><p>Lecture materials will appear here as they are added.</p><a class="text-link" href="lectures.html">Open lectures →</a>';
+      spotlight.innerHTML = item ? `<div class="spotlight-top"><span class="spotlight-tag">${published.length ? 'LATEST AVAILABLE MATERIAL' : 'LECTURE PREVIEW'}</span><span class="spotlight-number">${String(item.number).padStart(2,'0')}</span></div><h3>${esc(item.title)}</h3><p>${esc(item.summary || '')}</p><div class="spotlight-footer"><span class="${isAvailable(item) ? '' : 'planned'}">${isAvailable(item) ? 'Course materials available' : 'MATERIALS COMING SOON'}</span><a href="lectures.html">View lectures →</a></div>` : '<h3>Lecture index</h3><p>Lecture materials will appear here as they are added.</p><a class="text-link" href="lectures.html">Open lectures →</a>';
     }
   };
   const setupRoadmap = async () => {

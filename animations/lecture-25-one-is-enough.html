@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>One Is Enough: an animated explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9E6FA; --stage:#FBFAFF; --card:#F0EDFD; --ink:#26215E; --muted:#6B67A3; --line:#D3CEF0;
+  --paper:#FFE7A3; --tink:#26215E; --pop:#E8395F; --mint:#14B983; --sky:#3D7BF5; --sun:#FFC23A; --grape:#7C4DEB;
+  --on-strong:#FFFFFF;
+  --display:"Fredoka","Nunito","Trebuchet MS","Segoe UI",system-ui,"Cambria Math","STIX Two Math",sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,"Cambria Math",sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+    --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+    --on-strong:#1B1846; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+  --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+  --on-strong:#1B1846; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 36px}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:4px 4px 14px}
+.intro h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.6vw,40px);margin:0;letter-spacing:-0.01em}
+.intro p{margin:0;color:var(--muted);font-size:17px;line-height:1.4}
+.player{background:var(--card);border-radius:24px;padding:10px;border:2px solid var(--line)}
+.stage{position:relative;border-radius:16px;overflow:hidden;background:var(--stage);aspect-ratio:16/9;width:100%}
+.stage svg{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+.td{font-family:var(--display)}
+.tb{font-family:var(--body)}
+.poster{position:absolute;inset:0;border:0;padding:0;margin:0;background:transparent;cursor:pointer;color:inherit;font:inherit}
+.poster[hidden]{display:none}
+.poster-btn{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);width:clamp(56px,10vw,104px);aspect-ratio:1;border-radius:50%;
+  background:var(--ink);color:var(--stage);display:grid;place-items:center;box-shadow:0 0 0 clamp(5px,.9vw,10px) var(--stage);transition:transform .18s ease}
+.poster-btn svg{width:42%;height:42%;margin-left:8%}
+.poster:hover .poster-btn,.poster:focus-visible .poster-btn{transform:translate(-50%,-50%) scale(1.07)}
+.poster:focus-visible{outline:4px solid var(--sky);outline-offset:-4px;border-radius:16px}
+.poster-len{position:absolute;left:14px;top:12px;background:var(--paper);color:var(--tink);font-weight:700;font-size:clamp(12px,1.5vw,15px);padding:5px 12px;border-radius:999px}
+.caption{min-height:3.3em;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 18px 6px;
+  font-size:clamp(16px,1.9vw,22px);line-height:1.38;font-weight:700;color:var(--ink);margin:0;text-wrap:balance}
+.caption:empty::before{content:"Captions appear here once you press play.";color:var(--muted);font-weight:400}
+.caption[hidden]{display:none}
+.controls{display:flex;align-items:center;gap:8px;padding:6px 4px 2px;flex-wrap:wrap}
+.btn{min-width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:var(--stage);color:var(--ink);
+  font:700 15px/1 var(--body);display:inline-grid;place-items:center;cursor:pointer;padding:0 10px}
+.btn svg{width:22px;height:22px}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,.chip:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.btn.play{background:var(--pop);border-color:var(--pop);color:var(--on-strong);min-width:52px}
+.btn[aria-pressed="false"]{color:var(--muted)}
+.scrub{position:relative;flex:1 1 220px;min-width:160px;height:44px;display:flex;align-items:center}
+.ticks{position:absolute;left:11px;right:11px;top:6px;height:6px;pointer-events:none}
+.ticks span{position:absolute;top:0;width:3px;height:7px;border-radius:2px;background:var(--muted);transform:translateX(-50%)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(to right,var(--pop) var(--pct,0%),var(--line) var(--pct,0%))}
+input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:10px;border-radius:6px;background:var(--pop)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--paper);border:3px solid var(--ink)}
+.time{font:700 15px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--muted);min-width:96px;text-align:center}
+.chapters{display:flex;gap:6px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:thin}
+.chip{flex:0 0 auto;border:2px solid var(--line);background:var(--stage);color:var(--ink);border-radius:999px;padding:7px 13px 7px 7px;
+  font:700 14px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--card);font-size:12px}
+.chip[aria-current="true"]{background:var(--ink);color:var(--stage);border-color:var(--ink)}
+.chip[aria-current="true"] b{background:var(--sun);color:var(--tink)}
+.hint{color:var(--muted);font-size:14px;margin:12px 6px 0;line-height:1.45}
+.rotate{display:none}
+@media (max-width:640px) and (orientation:portrait){.rotate{display:block}}
+.player:fullscreen{display:flex;flex-direction:column;justify-content:center;border-radius:0;border:0;padding:12px;background:var(--card)}
+.player:fullscreen .stage{width:min(100%,calc((100vh - 200px) * 16 / 9));margin:0 auto}
+.player:fullscreen .caption,.player:fullscreen .controls,.player:fullscreen .chapters{width:min(100%,calc((100vh - 200px) * 16 / 9));margin-left:auto;margin-right:auto}
+@media (max-width:560px){.time{min-width:0;font-size:13px}.btn{min-width:40px;height:40px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="intro">
+    <h1>Lecture 25, animated</h1>
+    <p>Counterexamples for CS 341: what one has to do, where to find it, and when it proves nothing.</p>
+  </header>
+  <section class="player" id="player" aria-label="Animated explainer player">
+    <div class="stage">
+      <svg id="svg" viewBox="0 0 1600 900" role="img" aria-label="Animation stage. The captions below describe each scene."></svg>
+      <button class="poster" id="poster" type="button" aria-label="Play the explainer">
+        <span class="poster-len" id="posterLen"></span>
+        <span class="poster-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5v15l13-7.5z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+    <div class="controls">
+      <button class="btn play" id="play" type="button" aria-label="Play"></button>
+      <button class="btn" id="restart" type="button" aria-label="Restart from the beginning"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="scrub"><div class="ticks" id="ticks"></div><input type="range" id="scrub" min="0" max="100" step="0.1" value="0" aria-label="Seek"></div>
+      <span class="time" id="time" aria-live="off">0:00</span>
+      <button class="btn" id="speed" type="button" aria-label="Playback speed">1×</button>
+      <button class="btn" id="cc" type="button" aria-pressed="true" aria-label="Captions">CC</button>
+      <button class="btn" id="fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+  </section>
+  <p class="hint">Space plays or pauses. The left and right arrow keys skip 5 seconds. Tap any chapter to jump there.</p>
+  <p class="hint rotate">Turn your phone sideways for a bigger picture.</p>
+</main>
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('svg');
+const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* ---------- math + easing ---------- */
+const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const lerp=(a,b,k)=>a+(b-a)*k;
+const eio=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+const eout=k=>1-Math.pow(1-k,3);
+const ein=k=>k*k*k;
+const back=k=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2);};
+const P=(t,a,b,fn=eio)=>fn(clamp((t-a)/(b-a)));
+const bump=(t,a,d)=>Math.sin(Math.PI*clamp((t-a)/d));
+const num=k=>k<0?'\u2212'+(-k):String(k);
+
+/* ---------- svg helpers ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);let st='';
+  for(const k in attrs){const v=attrs[k];if(v==null)continue;
+    if(k==='text')e.textContent=v;
+    else if((k==='fill'||k==='stroke')&&typeof v==='string'&&v.startsWith('--'))st+=k+':var('+v+');';
+    else e.setAttribute(k,v);}
+  if(st)e.setAttribute('style',st);
+  if(parent)parent.appendChild(e);return e;
+}
+function place(g,o={}){
+  const X=g._x+(o.dx||0),Y=g._y+(o.dy||0);
+  let tr='translate('+X.toFixed(2)+' '+Y.toFixed(2)+')';
+  if(o.r)tr+=' rotate('+o.r.toFixed(2)+')';
+  if(o.sx!=null||o.sy!=null){const sx=o.sx!=null?o.sx:(o.s!=null?o.s:1),sy=o.sy!=null?o.sy:(o.s!=null?o.s:1);tr+=' scale('+Math.max(sx,.001).toFixed(3)+' '+Math.max(sy,.001).toFixed(3)+')';}
+  else if(o.s!=null&&o.s!==1)tr+=' scale('+Math.max(o.s,.001).toFixed(3)+')';
+  g.setAttribute('transform',tr);
+  const op=o.o==null?1:clamp(o.o);
+  g.setAttribute('opacity',op.toFixed(3));
+  const vis=op<=.002?'hidden':'visible';if(g._vis!==vis){g.style.visibility=vis;g._vis=vis;}
+}
+function G(parent,x=0,y=0){const g=el('g',{},parent);g._x=x;g._y=y;place(g);return g;}
+function show(g,t,a,b=1e9,extra={}){
+  const k=clamp((t-a)/.5),f=1-P(t,b-.45,b,ein);
+  place(g,Object.assign({s:k?back(k):.001,o:Math.min(clamp(k*3),f)},extra));return k;
+}
+function txt(p,x,y,str,o={}){
+  return el('text',{x,y,dy:'.35em','font-size':o.size||40,'font-weight':o.weight||500,'text-anchor':o.anchor||'middle',
+    fill:o.fill||'--ink',class:o.body?'tb':'td',opacity:o.op,text:str},p);
+}
+function gt(p,x,y,str,o={}){const g=G(p,x,y);txt(g,0,0,str,o);return g;}
+function ticketD(w,h){const W=w/2,H=h/2,n=Math.min(14,h*.18),c=Math.min(14,h*.2);
+  return 'M'+(-W+c)+' '+(-H)+'H'+(W-c)+'A'+c+' '+c+' 0 0 1 '+W+' '+(-H+c)+'V'+(-n)+'A'+n+' '+n+' 0 0 0 '+W+' '+n+'V'+(H-c)+'A'+c+' '+c+' 0 0 1 '+(W-c)+' '+H+
+  'H'+(-W+c)+'A'+c+' '+c+' 0 0 1 '+(-W)+' '+(H-c)+'V'+n+'A'+n+' '+n+' 0 0 0 '+(-W)+' '+(-n)+'V'+(-H+c)+'A'+c+' '+c+' 0 0 1 '+(-W+c)+' '+(-H)+'Z';}
+function ticket(p,w,h,fill='--paper'){const g=el('g',{},p);el('path',{d:ticketD(w,h),fill},g);return g;}
+function pill(p,w,h,fill,label,o={}){const g=el('g',{},p);el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:h/2,fill},g);
+  if(label!=null)txt(g,0,0,label,{size:o.size||34,weight:o.weight||600,fill:o.color||'--tink'});return g;}
+function star(p,cx,cy,R,fill){let d='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?R*.45:R;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1);}
+  return el('path',{d:d+'Z',fill},p);}
+function shape(p,type,fill,s){
+  if(type===0)return el('circle',{r:s,fill},p);
+  if(type===1)return el('rect',{x:-s,y:-s,width:2*s,height:2*s,rx:12,fill},p);
+  if(type===2)return el('path',{d:'M0 '+(-s*1.05)+' L'+(s*1.05)+' '+(s*.8)+' L'+(-s*1.05)+' '+(s*.8)+'Z',fill,stroke:fill,'stroke-width':10,'stroke-linejoin':'round'},p);
+  if(type===3)return el('rect',{x:-s*.82,y:-s*.82,width:1.64*s,height:1.64*s,rx:10,fill,transform:'rotate(45)'},p);
+  return star(p,0,0,s*1.2,fill);
+}
+function mascot(p){const g=el('g',{},p);
+  el('path',{d:ticketD(124,84),fill:'--paper',stroke:'--tink','stroke-width':4},g);
+  el('circle',{cx:-34,cy:10,r:7,fill:'--pop',opacity:.45},g);el('circle',{cx:34,cy:10,r:7,fill:'--pop',opacity:.45},g);
+  el('circle',{cx:-17,cy:-8,r:6,fill:'--tink'},g);el('circle',{cx:17,cy:-8,r:6,fill:'--tink'},g);
+  el('path',{d:'M-13 10 Q0 22 13 10',fill:'none',stroke:'--tink','stroke-width':4,'stroke-linecap':'round'},g);return g;}
+function person(p,fill){const g=el('g',{},p);
+  el('rect',{x:-30,y:-4,width:60,height:58,rx:26,fill},g);el('circle',{cx:0,cy:-34,r:25,fill},g);
+  el('circle',{cx:-9,cy:-37,r:3.6,fill:'--tink'},g);el('circle',{cx:9,cy:-37,r:3.6,fill:'--tink'},g);
+  el('path',{d:'M-8 -27 Q0 -21 8 -27',fill:'none',stroke:'--tink','stroke-width':3,'stroke-linecap':'round'},g);return g;}
+function speech(p,w,h,label,o={}){const g=el('g',{},p);
+  el('path',{d:'M'+(-w/2+4)+' -14 L'+(-w/2-30)+' 16 L'+(-w/2+4)+' 14Z',fill:'--grape'},g);
+  el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--grape'},g);
+  txt(g,0,0,label,{size:o.size||36,weight:600,fill:'--on-strong'});return g;}
+function dart(g){el('line',{x1:0,y1:-96,x2:0,y2:-18,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},g);
+  el('path',{d:'M-11 -22 L11 -22 L0 4Z',fill:'--ink'},g);el('path',{d:'M0 -78 L-16 -106 L0 -96 L16 -106Z',fill:'--pop'},g);}
+function qlen(x0,y0,cx,cy,x1,y1){let L=0,px=x0,py=y0;for(let i=1;i<=40;i++){const u=i/40,a=(1-u)*(1-u),b=2*u*(1-u),c=u*u;
+  const x=a*x0+b*cx+c*x1,y=a*y0+b*cy+c*y1;L+=Math.hypot(x-px,y-py);px=x;py=y;}return L;}
+
+/* ---------- extra helpers for algebra rows ---------- */
+const pv=(t,a)=>{const k=clamp((t-a)/.5);return {s:k?back(k):.001,o:clamp(k*3)};};
+let BUILDING=null,FONTV=0;
+function row(p,x,y,pieces,o={}){
+  const g=el('g',{},p);g._x=0;g._y=0;g._pc=[];g._ax=x;g._ay=y;g._anchor=o.anchor||'start';const S=o.size||44;
+  if(o.bg){const h=o.bgH||S*1.9;g._bg=el('rect',{y:y-h/2,height:h,rx:22,fill:o.bg,stroke:o.bgStroke||null,'stroke-width':o.bgStroke?5:null},g);g._padX=o.padX||32;}
+  pieces.forEach(pc=>{const [s,q={}]=Array.isArray(pc)?pc:[pc,{}];const sz=q.size||S;let rect=null;
+    if(q.box)rect=el('rect',{y:y-sz*.68,height:sz*1.36,rx:12,fill:q.box},g);
+    const t=el('text',{x,y,dy:'.35em','font-size':sz,'font-weight':q.weight||o.weight||500,'text-anchor':'start',
+      fill:q.fill||(q.box?'--tink':(o.fill||'--ink')),class:'td',text:s.replace(/ /g,'\u00A0')},g);
+    g._pc.push({t,rect,pad:q.box?12:0});});
+  layoutRow(g);if(BUILDING)BUILDING.rows.push(g);return g;
+}
+let MEAS=null;const MCACHE={};
+function measure(t){
+  if(!MEAS)MEAS=el('text',{x:-5000,y:-5000,class:'td',opacity:0,'aria-hidden':'true'},svg);
+  const sz=t.getAttribute('font-size'),w=t.getAttribute('font-weight'),s=t.textContent,key=FONTV+'|'+sz+'|'+w+'|'+s;
+  if(MCACHE[key]!=null)return MCACHE[key];
+  MEAS.setAttribute('font-size',sz);MEAS.setAttribute('font-weight',w);MEAS.textContent=s;
+  let l=0;try{l=MEAS.getComputedTextLength();}catch(e){}
+  return MCACHE[key]=l;
+}
+function layoutRow(g){
+  const ws=g._pc.map(pc=>measure(pc.t)+pc.pad*2);
+  const tot=ws.reduce((a,b)=>a+b,0);let x=g._anchor==='middle'?g._ax-tot/2:g._ax;g._x0=x;g._w=tot;
+  g._pc.forEach((pc,i)=>{if(pc.rect){pc.rect.setAttribute('x',(x+3).toFixed(1));pc.rect.setAttribute('width',Math.max(ws[i]-6,0).toFixed(1));}
+    pc.t.setAttribute('x',(x+pc.pad).toFixed(1));pc.x=x;pc.w=ws[i];x+=ws[i];});
+  if(g._bg){g._bg.setAttribute('x',(g._x0-g._padX).toFixed(1));g._bg.setAttribute('width',(tot+2*g._padX).toFixed(1));}
+}
+function frac(p,x,y,num,den,o={}){const g=G(p,x,y),s=o.size||48,w=o.w||Math.max(num.length,den.length)*s*.55+24;
+  txt(g,0,-s*.78,num,{size:s,weight:o.weight||500,fill:o.fill});
+  el('line',{x1:-w/2,y1:0,x2:w/2,y2:0,stroke:o.fill||'--ink','stroke-width':5,'stroke-linecap':'round'},g);
+  txt(g,0,s*.78,den,{size:s,weight:o.weight||500,fill:o.fill});return g;}
+function tracker(p,x,y,gap,labels,o={}){
+  const W=o.w||250;
+  const items=labels.map((l,i)=>{const g=G(p,o.horiz?x+gap*i:x,o.horiz?y:y+gap*i);
+    const bg=el('rect',{x:-W/2,y:-30,width:W,height:60,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+    const c=el('circle',{cx:-W/2+32,cy:0,r:20,fill:'--line'},g);
+    const n=txt(g,-W/2+32,0,String(i+1),{size:24,weight:700,fill:'--muted'});
+    const tx=txt(g,-W/2+62,0,l,{size:28,weight:600,anchor:'start',fill:'--muted'});
+    return {g,bg,c,n,tx};});
+  return {items,update(t,times,end,appear){items.forEach((it,i)=>{
+    const on=t>=times[i],done=t>=(i<items.length-1?times[i+1]:end),st=done?2:on?1:0;
+    if(it._st!==st){it._st=st;
+      it.bg.setAttribute('style','fill:var('+(st===1?'--sun':'--card')+');stroke:var('+(st===1?'--sun':st===2?'--mint':'--line')+')');
+      it.c.setAttribute('style','fill:var('+(st===0?'--line':st===1?'--tink':'--mint')+')');
+      it.n.setAttribute('style','fill:var('+(st===0?'--muted':st===1?'--sun':'--tink')+')');it.n.textContent=st===2?'✓':String(i+1);
+      it.tx.setAttribute('style','fill:var('+(st===1?'--tink':st===2?'--ink':'--muted')+')');}
+    const k=P(t,appear+i*.15,appear+.4+i*.15);place(it.g,{o:k,s:1+.08*(on&&!done?bump(t,times[i],.4):0)});});}};
+}
+function check(p,x,y){const c=G(p,x,y);el('circle',{r:24,fill:'--mint'},c);
+  el('path',{d:'M-10 0 L-3 8 L11 -8',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);return c;}
+
+/* =================================================================
+   SCENES  (each: title, dur, caps [local time, text], build, update)
+   ================================================================= */
+const scenes=[];
+function boxCard(p,x,y,w,h,stroke){const g=G(p,x,y);g._r=el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--card',stroke:stroke||'--line','stroke-width':stroke?5:3},g);return g;}
+function slideIn(g,t,a,dx=40){const k=P(t,a,a+.5,eout);place(g,{dx:-(1-k)*dx,o:k});}
+function stampBox(p,x,y,w,label,size){const g=G(p,x,y);el('rect',{x:-w/2,y:-58,width:w,height:116,rx:18,fill:'--stage',stroke:'--pop','stroke-width':9},g);txt(g,0,0,label,{size:size||52,weight:700,fill:'--pop'});return g;}
+function slam(g,t,a,r=-5,b=1e9){const k=clamp((t-a)/.4);place(g,{s:k?lerp(1.8,1,eout(k)):.001,o:clamp(k*4)*(1-P(t,b-.4,b)),r});}
+function arrowHead(p,x,y,ang){const g=G(p,x,y);el('path',{d:'M6 0 L-24 -16 L-24 16Z',fill:'--ink',transform:'rotate('+ang.toFixed(1)+')'},g);return g;}
+function tile(p,x,y,s,bad){const g=G(p,x,y);el('rect',{x:-s/2,y:-s/2,width:s,height:s,rx:s*.2,fill:bad?'--pop':'--mint'},g);const k=s/80;
+  if(bad)el('path',{d:`M${-15*k} ${-15*k} L${15*k} ${15*k} M${15*k} ${-15*k} L${-15*k} ${15*k}`,stroke:'--on-strong','stroke-width':8*k,'stroke-linecap':'round'},g);
+  else el('path',{d:`M${-15*k} 0 L${-4*k} ${12*k} L${17*k} ${-12*k}`,fill:'none',stroke:'--tink','stroke-width':7*k,'stroke-linecap':'round','stroke-linejoin':'round'},g);return g;}
+/* the two-scanner checkpoint, reused in several scenes */
+function machine(p,y,xs,labels){const g=G(p,0,0);
+  el('rect',{x:110,y:y+50,width:1380,height:22,rx:11,fill:'--line'},g);
+  g._dash=el('line',{x1:124,y1:y+61,x2:1476,y2:y+61,stroke:'--stage','stroke-width':4,'stroke-dasharray':'14 18'},g);
+  g._sc=xs.map((x,i)=>{const a=G(g,x,y);
+    el('path',{d:'M-80 50 V-80 Q-80 -110 -50 -110 H50 Q80 -110 80 -80 V50',fill:'none',stroke:'--ink','stroke-width':10,'stroke-linecap':'round','stroke-linejoin':'round'},a);
+    const light=el('circle',{cx:0,cy:-136,r:16,fill:'--line',stroke:'--ink','stroke-width':4},a);
+    const lab=G(a,0,-192);pill(lab,330,52,'--paper',labels[i],{size:26,color:'--tink'});return {a,light,lab};});
+  return g;}
+function setLight(m,i,st){const L=m._sc[i].light,f=st===1?'--mint':st===-1?'--pop':'--line';if(L._f!==f){L._f=f;L.setAttribute('style','fill:var('+f+');stroke:var(--ink)');}}
+function beltRun(m,t){m._dash.setAttribute('stroke-dashoffset',RM?0:(-t*90).toFixed(1));}
+function token(p,label,fill='--grape',size=36){const g=G(p,0,0);el('circle',{r:46,fill},g);g._t=txt(g,0,0,label,{size,weight:700,fill:fill==='--grape'||fill==='--pop'||fill==='--sky'?'--on-strong':'--tink'});return g;}
+function track(t,segs,x0){let x=x0;for(const [a,b,f,to] of segs){if(t>=a)x=lerp(f,to,P(t,a,b));}return x;}
+
+/* 1. One is enough */
+scenes.push((()=>{
+  let sign,tiles=[],red,title,sub,B,lp,rp,mini=[],big,cap2;
+  const rnd=i=>{const x=Math.sin(i*12.9898+4.1)*43758.5453;return x-Math.floor(x);};
+  return {title:'One is enough',dur:14,
+  caps:[[0.3,'You can check a claim again and again, and it keeps passing…'],[3,'…but one counterexample brings the whole thing down.'],[5,'Today: counterexamples.'],[8,'For four weeks we’ve proved things true. Proving something false is usually far less work…'],[11.4,'…as long as you know exactly what a counterexample has to do.']],
+  build(r){
+    sign=G(r,800,215);ticket(sign,700,110);txt(sign,0,0,'∀x ∈ S,  P(x) ⇒ Q(x)',{size:48,weight:600,fill:'--tink'});
+    for(let rw=0;rw<3;rw++)for(let c=0;c<7;c++){const g=tile(r,800+(c-3)*96,345+rw*92,80);g._i=rw*7+c;tiles.push(g);}
+    red=tile(r,800,437,88,true);
+    title=gt(r,800,640,'One Is Enough',{size:104,weight:600});
+    sub=gt(r,800,736,'Counterexamples',{size:42,weight:400,fill:'--muted'});
+    B=G(r,0,0);
+    lp=boxCard(B,470,450,600,470);txt(lp,0,-180,'Proving it true',{size:40,weight:700});txt(lp,0,-136,'an argument that covers every x',{size:27,weight:500,fill:'--muted'});
+    for(let i=0;i<30;i++)mini.push(tile(lp,-150+(i%6)*60,-60+Math.floor(i/6)*56,44));
+    rp=boxCard(B,1130,450,600,470);txt(rp,0,-180,'Proving it false',{size:40,weight:700});txt(rp,0,-136,'one element that breaks it',{size:27,weight:500,fill:'--muted'});
+    big=tile(rp,0,40,130,true);
+    cap2=G(B,800,780);pill(cap2,1000,76,'--grape','Far less work… if you know what a counterexample must do',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    const lv=P(t,7.4,8,ein),f=P(t,3.8,4.8,ein),sv=pv(t,.3);
+    place(sign,{s:sv.s,o:sv.o*(1-f)*(1-lv),dy:f*520,r:f*28});
+    const sc=P(t,3.7,4.9,ein);
+    tiles.forEach(g=>{const i=g._i,v=pv(t,.7+i*.07);if(i===10){place(g,{s:v.s,o:v.o*(t<3.6?1:0)});return;}
+      place(g,{s:v.s,o:v.o*(1-sc),dx:(rnd(i)-.5)*700*sc,dy:sc*(420+rnd(i+7)*260),r:(rnd(i+3)-.5)*260*sc});});
+    const d=P(t,3,3.6,ein);red._y=437-(1-d)*560;place(red,{o:(t>=3?1:0)*(1-lv),s:1+.18*bump(t,3.6,.35)});
+    place(title,{o:P(t,5,5.6)*(1-lv),dy:(1-P(t,5,5.6,eout))*30});
+    place(sub,{o:P(t,5.6,6.2)*(1-lv),dy:(1-P(t,5.6,6.2,eout))*20});
+    place(B,{o:P(t,7.8,8.2)});
+    show(lp,t,8.2);mini.forEach((g,i)=>show(g,t,8.6+i*.05));
+    show(rp,t,10.2);show(big,t,10.8);show(cap2,t,11.6);
+  }};
+})());
+
+/* 2. The negation */
+scenes.push((()=>{
+  let head,claim,negLbl,neg,eqv,res,rr,chE,chP,plain,cx;
+  return {title:'The negation',dur:22,
+  caps:[[0.6,'When is a claim like “for every x, if P(x), then Q(x)” false?'],[3,'Negate it.'],[4.4,'The “for every” flips to “there exists.” That’s Week 4.'],[9,'And “not (P ⇒ Q)” becomes “P and not Q.” That’s Theorem 1.50 from Week 2.'],[14.2,'So the claim is false exactly when some x makes P true and Q false.'],[18,'That x has a name: a counterexample.']],
+  build(r){
+    head=gt(r,800,95,'What makes a claim false?',{size:60,weight:600});
+    claim=G(r,800,205);row(claim,0,0,['Claim:  ',['∀x ∈ S,  P(x) ⇒ Q(x)',{weight:700}]],{size:46,anchor:'middle'});
+    negLbl=gt(r,800,292,'negate it',{size:30,weight:600,fill:'--muted'});
+    neg=G(r,800,358);row(neg,0,0,[['∼',{fill:'--pop',weight:700}],'(  ∀x ∈ S,  P(x) ⇒ Q(x)  )'],{size:50,anchor:'middle',weight:600});
+    eqv=gt(r,800,446,'≡',{size:64,weight:700,fill:'--muted'});
+    res=G(r,800,538);rr=row(res,0,0,[['∃x ∈ S',{fill:'--sky',weight:700}],',  ',['P(x) ∧ ∼Q(x)',{fill:'--pop',weight:700}]],{size:62,anchor:'middle'});
+    chE=G(r,0,630);pill(chE,340,56,'--sky','∀ flips to ∃  (Week 4)',{size:28,color:'--on-strong'});
+    chP=G(r,0,694);pill(chP,460,56,'--pop','∼(P ⇒ Q) ≡ P ∧ ∼Q  (Theorem 1.50)',{size:26,color:'--on-strong'});
+    plain=G(r,800,798);pill(plain,880,80,'--grape','Some x makes P true and Q false.',{size:36,color:'--on-strong'});
+    cx=G(r,800,798);pill(cx,620,80,'--sun','That x is a counterexample!',{size:36});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});place(claim,{o:P(t,.8,1.3)});
+    place(negLbl,{o:P(t,3,3.4)});place(neg,{o:P(t,3.2,3.7),dy:(1-P(t,3.2,3.7,eout))*20});
+    place(eqv,{o:P(t,4.4,4.8)});place(res,{});
+    const p0=rr._pc[0],p2=rr._pc[2];
+    p0.t.setAttribute('opacity',P(t,4.8,5.3));rr._pc[1].t.setAttribute('opacity',P(t,4.8,5.3));p2.t.setAttribute('opacity',P(t,9.2,9.7));
+    chE._x=800+p0.x+p0.w/2;chP._x=800+p2.x+p2.w/2;
+    show(chE,t,5.4);show(chP,t,9.8);
+    show(plain,t,14.4,18);show(cx,t,18.2);
+  }};
+})());
+
+/* 3. The checkpoint */
+scenes.push((()=>{
+  let def,m,ta,tb,a1,a2,b1,exitP,expl,rule;
+  const Y=500,X1=600,X2=1000;
+  return {title:'The checkpoint',dur:26,
+  caps:[[0.6,'A counterexample is an element a where P(a) is true and Q(a) is false.'],[4.8,'Think of a two-step checkpoint. First: is P(a) true?'],[8.6,'Second: is Q(a) false? Pass both, and you’ve got a counterexample.'],[12.4,'Now try an element where P is false.'],[14.8,'It fails the first check. When P(b) is false, P(b) ⇒ Q(b) is automatically true, so b supports the claim.'],[20.4,'So check the hypothesis first, then the conclusion. That order catches most errors.']],
+  build(r){
+    def=G(r,800,165);ticket(def,1300,100);row(def,0,0,[['Counterexample:',{weight:700}],'  an element a ∈ S with P(a) true and Q(a) false'],{size:34,anchor:'middle',fill:'--tink'});
+    m=machine(r,Y,[X1,X2],['1. Is P(a) true?','2. Is Q(a) false?']);
+    ta=token(r,'a');tb=token(r,'b','--sky');
+    a1=G(r,0,Y+118);pill(a1,230,48,'--mint','P(a) true ✓',{size:26});
+    a2=G(r,0,Y+170);pill(a2,230,48,'--mint','Q(a) false ✓',{size:26});
+    b1=G(r,0,Y+118);pill(b1,230,48,'--pop','P(b) false ✗',{size:26,color:'--on-strong'});
+    exitP=G(r,1340,Y-120);pill(exitP,300,62,'--pop','counterexample!',{size:32,color:'--on-strong'});
+    expl=boxCard(r,1060,Y+150,620,120);txt(expl,0,-22,'P(b) false makes P(b) ⇒ Q(b) true,',{size:28,weight:600});txt(expl,0,22,'so b supports the claim.',{size:28,weight:600});
+    rule=G(r,800,790);pill(rule,1100,80,'--grape','Check the hypothesis first, then the conclusion.',{size:36,color:'--on-strong'});
+  },
+  update(t){
+    show(def,t,.5);place(m,{o:P(t,2,2.6)});beltRun(m,t);
+    const xa=track(t,[[5.2,6.6,170,X1],[7.4,8.6,X1,X2],[9.4,10.4,X2,1340]],170);
+    ta._x=xa;ta._y=Y;let v=pv(t,5);place(ta,{s:v.s,o:v.o*(1-P(t,11.8,12.2))});
+    a1._x=xa;a2._x=xa;show(a1,t,7.2,12.2);show(a2,t,9.2,12.2);show(exitP,t,10.4,12.2);
+    setLight(m,0,t>=7&&t<12.2?1:t>=14.4&&t<20?-1:0);setLight(m,1,t>=9&&t<12.2?1:0);
+    const xb=track(t,[[12.6,14,170,X1],[15,16,X1,-120]],170);
+    tb._x=xb;tb._y=Y;v=pv(t,12.4);place(tb,{s:v.s,o:v.o*(1-P(t,15.4,16))});
+    b1._x=Math.min(xb,X1);show(b1,t,14.6,16);
+    show(expl,t,15.6,20.2);show(rule,t,20.4);
+  }};
+})());
+
+/* 4. Example 3.30 */
+scenes.push((()=>{
+  let claim,m,tn,c1,c2,exitP,nl=[],every;
+  const Y=420,X1=600,X2=1000;
+  return {title:'Example 3.30',dur:24,
+  caps:[[0.6,'Example 3.30. Disprove: if 4n + 5 is odd, then n is even.'],[2.6,'Try n = 1. Hypothesis first: 4(1) + 5 = 9. Odd, so the hypothesis holds.'],[7.4,'Now the conclusion: is 1 even? No. The conclusion fails.'],[11.4,'Hypothesis true, conclusion false: n = 1 is a counterexample.'],[14.4,'In fact, every odd n works, since 4n + 5 is always odd.'],[19.4,'One is enough, but it’s nice to know where they all live.']],
+  build(r){
+    claim=G(r,800,140);ticket(claim,1240,90);row(claim,0,0,[['Example 3.30',{weight:700}],'   Disprove: let n ∈ ℤ. If 4n + 5 is odd, then n is even.'],{size:32,anchor:'middle',fill:'--tink'});
+    m=machine(r,Y,[X1,X2],['Is 4n + 5 odd?','Is “n is even” false?']);
+    tn=token(r,'n = 1','--grape',30);
+    c1=G(r,0,Y+118);pill(c1,300,48,'--mint','4(1) + 5 = 9, odd ✓',{size:26});
+    c2=G(r,0,Y+170);pill(c2,300,48,'--mint','1 is not even ✓',{size:26});
+    exitP=G(r,1340,Y-120);pill(exitP,300,62,'--pop','counterexample!',{size:32,color:'--on-strong'});
+    for(let k=-5;k<=7;k++){const g=G(r,800+105*(k-1),715);g._c=el('circle',{r:34,fill:'--card',stroke:'--line','stroke-width':3},g);g._tx=txt(g,0,0,num(k),{size:28,weight:700});g._odd=Math.abs(k)%2===1;g._k=k;nl.push(g);}
+    every=G(r,800,808);pill(every,620,64,'--pop','every odd n is a counterexample',{size:30,color:'--on-strong'});
+  },
+  update(t){
+    show(claim,t,.5);place(m,{o:P(t,1,1.5)});beltRun(m,t);
+    const x=track(t,[[2.6,3.8,170,X1],[7,8.2,X1,X2],[9.8,10.8,X2,1340]],170);
+    tn._x=x;tn._y=Y;show(tn,t,2.4);
+    c1._x=x;c2._x=x;show(c1,t,4.6);show(c2,t,8.9);
+    setLight(m,0,t>=4.2?1:0);setLight(m,1,t>=8.6?1:0);
+    show(exitP,t,11);
+    nl.forEach((g,i)=>{show(g,t,14.6+i*.05);const on=g._odd&&t>=16+Math.abs(g._k)*.12;
+      const st=on?'pop':'card';if(g._st!==st){g._st=st;g._c.setAttribute('style','fill:var(--'+(on?'pop':'card')+');stroke:var(--'+(on?'pop':'line')+')');g._tx.setAttribute('style','fill:var(--'+(on?'on-strong':'ink')+')');}});
+    show(every,t,17.4);
+  }};
+})());
+
+/* 5. Look at the negatives */
+scenes.push((()=>{
+  let claim,chart,bars={},vals={},labs={},marks={},thr,thrL,call,bottom,ring;
+  const BX=n=>800+120*n,BASE=700,SC=20;
+  return {title:'Look at negatives',dur:28,
+  caps:[[0.6,'A fresh one. Disprove: if n² > 4, then n > 2.'],[3,'Positive numbers first. Whenever n² is above 4, n really is bigger than 2.'],[8,'Now the negatives. n = −3 gives n² = 9, which is above 4…'],[11.8,'…but −3 is not bigger than 2. Counterexample!'],[16,'Positive-number intuition hides this one. The counterexamples all live among the negatives.']],
+  build(r){
+    claim=G(r,800,140);ticket(claim,1000,90);row(claim,0,0,[['Disprove',{weight:700}],'   Let n ∈ ℤ. If n² > 4, then n > 2.'],{size:34,anchor:'middle',fill:'--tink'});
+    chart=G(r,0,0);
+    el('line',{x1:250,y1:BASE,x2:1350,y2:BASE,stroke:'--ink','stroke-width':5,'stroke-linecap':'round'},chart);
+    for(let n=-4;n<=4;n++){bars[n]=el('rect',{x:BX(n)-42,y:BASE,width:84,height:0,rx:14,fill:'--line'},chart);
+      vals[n]=gt(chart,BX(n),BASE-n*n*SC-28,String(n*n),{size:28,weight:700});
+      labs[n]=gt(chart,BX(n),BASE+38,'n = '+num(n),{size:26,weight:600,fill:'--muted'});
+      if(Math.abs(n)>=3){const mk=G(chart,BX(n),BASE-n*n*SC-80);el('circle',{r:24,fill:n>0?'--mint':'--pop'},mk);
+        if(n>0)el('path',{d:'M-10 0 L-3 8 L11 -8',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},mk);
+        else el('path',{d:'M-8 -8 L8 8 M8 -8 L-8 8',stroke:'--on-strong','stroke-width':5,'stroke-linecap':'round'},mk);marks[n]=mk;}}
+    thr=el('line',{x1:250,y1:BASE-4*SC,x2:1350,y2:BASE-4*SC,stroke:'--sun','stroke-width':5,'stroke-dasharray':'14 10'},chart);
+    thrL=gt(chart,1420,BASE-4*SC,'n² = 4',{size:28,weight:700,fill:'--muted'});
+    ring=el('rect',{x:BX(-4)-62,y:BASE-16*SC-110,width:BX(-3)-BX(-4)+124,height:16*SC+170,rx:30,fill:'none',stroke:'--pop','stroke-width':5,'stroke-dasharray':'12 10'},chart);
+    call=G(r,1010,232);pill(call,700,62,'--pop','n = −3:  n² = 9 > 4, but −3 > 2 is false',{size:28,color:'--on-strong'});
+    bottom=G(r,800,815);pill(bottom,940,70,'--grape','The counterexamples all live among the negatives',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    show(claim,t,.5);place(chart,{o:P(t,1,1.5)});
+    thr.setAttribute('opacity',P(t,1.6,2));place(thrL,{o:P(t,1.6,2)});
+    for(let n=-4;n<=4;n++){const a=n>=0?3.2+n*.15:8.2+(-n-1)*.15,k=P(t,a,a+.6,eout),h=n*n*SC*k;
+      bars[n].setAttribute('y',(BASE-h).toFixed(1));bars[n].setAttribute('height',h.toFixed(1));
+      place(vals[n],{o:P(t,a+.3,a+.6),dy:(1-k)*n*n*SC});place(labs[n],{o:P(t,a,a+.4)});
+      let f='--line';if(n>=3&&t>=5.4)f='--mint';if(n<=-3&&t>=11.8)f='--pop';
+      if(bars[n]._f!==f){bars[n]._f=f;bars[n].setAttribute('style','fill:var('+f+')');}
+      if(marks[n])show(marks[n],t,n>0?5.6:12);}
+    show(call,t,12.6);ring.setAttribute('opacity',P(t,16.2,16.6));show(bottom,t,16.4);
+  }};
+})());
+
+/* 6. Check the edges */
+scenes.push((()=>{
+  let head,map,blob,masc,beam,pins=[],bottom;
+  const PX=800,PY=500,PINS=[['zero',520,262],['negatives',318,470],['fractions',860,702],['the empty set ∅',1282,470]];
+  const HIT=[6.6,7.8,9,10.2];
+  return {title:'Check the edges',dur:18,
+  caps:[[0.6,'Where should you look for counterexamples?'],[3.4,'Not in the comfy middle, where intuition lives.'],[6.4,'Check the edges first: zero, negatives, fractions, the empty set.'],[13.4,'That’s where plausible claims break.']],
+  build(r){
+    head=gt(r,800,95,'Where to look',{size:60,weight:600});
+    map=G(r,0,0);el('rect',{x:300,y:240,width:1000,height:460,rx:40,fill:'--card',stroke:'--ink','stroke-width':5,'stroke-dasharray':'18 12'},map);
+    blob=G(r,800,410);el('ellipse',{rx:250,ry:110,fill:'--sky','fill-opacity':.22,stroke:'--sky','stroke-width':4},blob);
+    txt(blob,0,-22,'positive whole numbers',{size:32,weight:700});txt(blob,0,20,'where intuition lives',{size:26,weight:500,fill:'--muted'});
+    beam=el('path',{d:'M0 0',fill:'--sun','fill-opacity':.42},r);
+    masc=G(r,PX,PY+20);el('g',{transform:'scale(.75)'},masc).appendChild(mascot(el('g',{},masc)));
+    PINS.forEach(([s,x,y],i)=>{const g=G(r,x,y);g._c=el('circle',{r:16,fill:'--muted'},g);
+      const out=i===0?[0,-44]:i===1?[-6,-46]:i===2?[0,48]:[6,-46];
+      const lp=G(g,out[0],out[1]);g._p=lp;g._bg=el('rect',{x:-110,y:-24,width:220,height:48,rx:24,fill:'--paper'},lp);g._tx=txt(lp,0,0,s,{size:26,weight:700,fill:'--tink'});
+      g._bug=G(g,i===3?-40:40,i===2?-8:8);el('circle',{r:18,fill:'--pop'},g._bug);el('path',{d:'M-6 -6 L6 6 M6 -6 L-6 6',stroke:'--on-strong','stroke-width':4,'stroke-linecap':'round'},g._bug);
+      g._a=Math.atan2(y-PY,x-PX);g._L=Math.hypot(x-PX,y-PY)+10;pins.push(g);});
+    bottom=G(r,800,790);pill(bottom,880,76,'--grape','Check the edges of the domain first',{size:34,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});place(map,{o:P(t,.6,1.1)});show(blob,t,1.2);
+    place(masc,{o:P(t,3.4,3.8)});
+    pins.forEach((g,i)=>{show(g,t,4.6+i*.2);const hit=t>=HIT[i];
+      if(g._h!==hit){g._h=hit;g._c.setAttribute('style','fill:var('+(hit?'--pop':'--muted')+')');g._bg.setAttribute('style','fill:var('+(hit?'--pop':'--paper')+')');g._tx.setAttribute('style','fill:var('+(hit?'--on-strong':'--tink')+')');}
+      show(g._bug,t,HIT[i]+.1);});
+    let ang=pins[0]._a,L=pins[0]._L;
+    for(let i=1;i<4;i++){if(t>=HIT[i]-1){const k=eio(P(t,HIT[i]-1,HIT[i]-.2,x=>x));let a0=pins[i-1]._a,a1=pins[i]._a;if(a1-a0>Math.PI)a1-=2*Math.PI;if(a0-a1>Math.PI)a1+=2*Math.PI;ang=lerp(a0,a1,k);L=lerp(pins[i-1]._L,pins[i]._L,k);}}
+    const w=.16,bo=P(t,5.8,6.3)*(1-P(t,12.6,13.2)*.0);
+    if(bo>0){const x1=PX+Math.cos(ang-w)*L,y1=PY+Math.sin(ang-w)*L,x2=PX+Math.cos(ang+w)*L,y2=PY+Math.sin(ang+w)*L;
+      beam.setAttribute('d','M'+PX+' '+PY+' L'+x1.toFixed(1)+' '+y1.toFixed(1)+' L'+x2.toFixed(1)+' '+y2.toFixed(1)+'Z');}
+    beam.setAttribute('opacity',bo.toFixed(2));
+    show(bottom,t,13.6);
+  }};
+})());
+
+/* 7. Biconditionals */
+scenes.push((()=>{
+  let claim,A,nL,nR,aT,aB,LT,LB,hT,hB,tT,vT,tB,vB,brk,sink,B,head2,thin,full,mThin,mFull;
+  return {title:'Biconditionals',dur:32,chapters:[[0,'Biconditionals'],[18,'Name the direction']],
+  caps:[[0.6,'Example 3.31. Disprove: 3m + 7n is even if and only if m and n are both even.'],[4,'A biconditional is two implications. Check each direction.'],[6.4,'Both even ⇒ 3m + 7n even? True: it’s 2(3a + 7b).'],[10.6,'3m + 7n even ⇒ both even? Try m = n = 1: 3 + 7 = 10 is even, but 1 is odd. False!'],[15,'One failing direction is enough to sink the whole biconditional.'],[18.4,'When you write it up, say which direction fails.'],[22.4,'“m = n = 1 is a counterexample” is correct, but thin.'],[26.2,'Name the failing direction and show the numbers. That’s complete.']],
+  build(r){
+    claim=G(r,800,140);ticket(claim,1360,90);row(claim,0,0,[['Example 3.31',{weight:700}],'   Disprove: 3m + 7n is even if and only if m and n are both even.'],{size:31,anchor:'middle',fill:'--tink'});
+    A=G(r,0,0);
+    nL=G(A,330,470);pill(nL,340,100,'--sky','m, n both even',{size:38,color:'--on-strong'});
+    nR=G(A,1270,470);pill(nR,340,100,'--mint','3m + 7n even',{size:38});
+    aT=el('path',{d:'M510 420 Q800 290 1090 420',fill:'none',stroke:'--ink','stroke-width':8,'stroke-linecap':'round'},A);LT=qlen(510,420,800,290,1090,420);aT.setAttribute('stroke-dasharray',LT.toFixed(1));
+    aB=el('path',{d:'M1090 520 Q800 650 510 520',fill:'none',stroke:'--ink','stroke-width':8,'stroke-linecap':'round'},A);LB=qlen(1090,520,800,650,510,520);aB.setAttribute('stroke-dasharray',LB.toFixed(1));
+    const ang=Math.atan2(130,290)*180/Math.PI;hT=arrowHead(A,1094,422,ang);hB=arrowHead(A,506,522,180-ang);
+    tT=gt(A,800,236,'both even ⇒ 3m + 7n even',{size:30,weight:600,fill:'--muted'});
+    vT=G(A,800,306);pill(vT,520,54,'--mint','true:  3(2a) + 7(2b) = 2(3a + 7b)',{size:26});
+    brk=G(A,800,585);el('circle',{r:28,fill:'--pop'},brk);el('path',{d:'M-9 -9 L9 9 M9 -9 L-9 9',stroke:'--on-strong','stroke-width':6,'stroke-linecap':'round'},brk);
+    vB=G(A,800,648);pill(vB,600,54,'--pop','false:  m = n = 1 gives 10, but 1 is odd',{size:26,color:'--on-strong'});
+    tB=gt(A,800,712,'3m + 7n even ⇒ both even',{size:30,weight:600,fill:'--muted'});
+    sink=G(A,800,800);pill(sink,900,70,'--grape','One false direction sinks the whole biconditional',{size:32,color:'--on-strong'});
+    B=G(r,0,0);
+    head2=gt(B,800,250,'Say which direction fails',{size:48,weight:700});
+    thin=boxCard(B,430,470,640,280,'--sun');txt(thin,0,-56,'“m = n = 1 is a',{size:38,weight:600});txt(thin,0,-6,'counterexample.”',{size:38,weight:600});
+    pill(G(thin,0,84),300,54,'--sun','correct, but thin',{size:28});
+    full=boxCard(B,1170,470,640,280,'--mint');
+    ['“The direction 3m + 7n even ⇒ both','even fails at m = n = 1: 3m + 7n = 10','is even, while m and n are odd.”'].forEach((s,i)=>txt(full,0,-74+40*i,s,{size:26,weight:600}));
+    pill(G(full,0,84),240,54,'--mint','complete ✓',{size:28});
+    const meter=(x,f)=>{const g=G(B,x,680);txt(g,-250,-30,'completeness',{size:24,weight:600,fill:'--muted',anchor:'start'});el('rect',{x:-250,y:-11,width:500,height:22,rx:11,fill:'--line'},g);
+      g._f=el('rect',{x:-250,y:-11,width:0,height:22,rx:11,fill:f},g);return g;};
+    mThin=meter(430,'--sun');mFull=meter(1170,'--mint');
+  },
+  update(t){
+    show(claim,t,.5);
+    place(A,{o:1-P(t,17.8,18.3)});
+    show(nL,t,1.2);show(nR,t,1.5);
+    aT.setAttribute('stroke-dashoffset',(LT*(1-P(t,4.4,5.4))).toFixed(1));aT.setAttribute('opacity',t>4.4?1:0);show(hT,t,5.2);
+    place(tT,{o:P(t,4.6,5.1)});show(vT,t,6.6);
+    aB.setAttribute('stroke-dashoffset',(LB*(1-P(t,8.8,9.8))).toFixed(1));aB.setAttribute('opacity',t>8.8?1-.55*P(t,12,12.4):0);{const v=pv(t,9.6);place(hB,{s:v.s,o:v.o*(1-.55*P(t,12,12.4))});}
+    place(tB,{o:P(t,9,9.5)});slam(brk,t,12,0);show(vB,t,11.2);
+    show(sink,t,15.2);
+    place(B,{o:P(t,18.3,18.8)});place(head2,{o:P(t,18.4,18.9)});
+    show(thin,t,22.4);show(full,t,26.2);
+    place(mThin,{o:P(t,23,23.4)});mThin._f.setAttribute('width',(225*P(t,23.4,24.4,eout)).toFixed(1));
+    place(mFull,{o:P(t,26.8,27.2)});mFull._f.setAttribute('width',(500*P(t,27.2,28.4,eout)).toFixed(1));
+  }};
+})());
+
+/* 8. Counterexamples that prove nothing */
+scenes.push((()=>{
+  let c=[],m,toks={},offs={},bad={},good={},notes=[],cards,elOnly;
+  const Y=470,X1=620,X2=1020;
+  const CL=['If n is divisible by 4, then n is even.','If n² is odd, then n > 0.','Every prime is odd.'];
+  return {title:'Proves nothing',dur:36,
+  caps:[[0.6,'Each of these “counterexamples” is wrong. Watch the checkpoint.'],[1.6,'Claim: if n is divisible by 4, then n is even. Offered: n = 3.'],[3.8,'3 isn’t divisible by 4, so it fails the hypothesis. And the claim is actually true!'],[11,'Claim: if n² is odd, then n > 0. Offered: n = 2.'],[13.8,'n² = 4 is even, so the hypothesis fails again. Try n = −1 instead.'],[17.6,'n² = 1 is odd, and −1 > 0 is false. That’s a real counterexample.'],[23,'Claim: every prime is odd. Offered: “most primes are odd.”'],[25.4,'That’s not an element at all! A counterexample has to be one specific thing.'],[28.4,'Name one: 2. It’s prime, and it’s not odd.']],
+  build(r){
+    CL.forEach((s,i)=>{const g=G(r,800,170);ticket(g,1000,90);row(g,0,0,[['Claim',{weight:700}],'   '+s],{size:36,anchor:'middle',fill:'--tink'});c.push(g);});
+    m=machine(r,Y,[X1,X2],['1. Is P(a) true?','2. Is Q(a) false?']);
+    const T=(k,l,f)=>{toks[k]=token(r,l,f||'--grape',l.length>2?30:36);};
+    T('3','3','--sky');T('2a','2','--sky');T('m1','−1');T('p2','2');
+    const O=(k,l)=>{offs[k]=G(r,170,Y-100);pill(offs[k],230,48,'--card',l,{size:26,color:'--ink'});};
+    O('3','offered: n = 3');O('2a','offered: n = 2');O('m1','try: n = −1');O('p2','try: 2');
+    const BD=(k,l,ok)=>{const g=G(r,0,Y+118);pill(g,330,48,ok?'--mint':'--pop',l,{size:25,color:ok?'--tink':'--on-strong'});return g;};
+    bad['3']=BD('3','3 isn’t divisible by 4 ✗',0);bad['2a']=BD('2a','n² = 4, not odd ✗',0);
+    good.m1a=BD('m1','n² = 1, odd ✓',1);good.m1b=BD('m1','−1 > 0 is false ✓',1);good.m1b._y=Y+170;
+    good.p2a=BD('p2','2 is prime ✓',1);good.p2b=BD('p2','2 is not odd ✓',1);good.p2b._y=Y+170;
+    good.ex1=G(r,1340,Y-120);pill(good.ex1,300,62,'--pop','counterexample!',{size:32,color:'--on-strong'});
+    good.ex2=G(r,1340,Y-120);pill(good.ex2,300,62,'--pop','counterexample!',{size:32,color:'--on-strong'});
+    cards=G(r,230,Y);el('rect',{x:-200,y:-42,width:400,height:84,rx:20,fill:'--card',stroke:'--ink','stroke-width':4},cards);txt(cards,0,0,'“most primes are odd”',{size:30,weight:600});
+    elOnly=G(r,X1,Y-20);pill(elOnly,250,50,'--pop','elements only!',{size:26,color:'--on-strong'});
+    [['n = 3 fails the hypothesis. (The claim is actually true.)','--sky','--on-strong',1000],['Hypothesis fails again. Use n = −1 instead.','--sky','--on-strong',820],['Not an element at all. Name one: 2.','--sky','--on-strong',700]].forEach(([s,f,col,w])=>{const g=G(r,800,800);pill(g,w,66,f,s,{size:30,color:col});notes.push(g);});
+  },
+  update(t){
+    show(c[0],t,.5,11);show(c[1],t,11.1,23);show(c[2],t,23.1);
+    place(m,{o:P(t,.8,1.3)});beltRun(m,t);
+    const run=(k,app,segs,kick,end)=>{const g=toks[k];let x=track(t,segs,170);let dy=0,rot=0,o=1;
+      if(kick&&t>=kick){const q=P(t,kick,kick+.8,ein);x=lerp(X1,X1-60,q);dy=q*260;rot=-q*90;o=1-q;}
+      g._x=x;g._y=Y+dy;const v=pv(t,app);place(g,{s:v.s,o:v.o*o*(end?1-P(t,end-.4,end):1),r:rot});show(offs[k],t,app,app+.8);return x;};
+    const x3=run('3',1.4,[[1.6,2.8,170,X1]],3.6,11);bad['3']._x=Math.min(x3,X1);show(bad['3'],t,3.3,4.6);
+    const x2=run('2a',11.6,[[11.8,13,170,X1]],13.8,23);bad['2a']._x=Math.min(x2,X1);show(bad['2a'],t,13.3,14.6);
+    const xm=run('m1',16.2,[[16.4,17.6,170,X1],[18.4,19.4,X1,X2],[20.2,21,X2,1340]],0,22.8);
+    good.m1a._x=xm;good.m1b._x=xm;show(good.m1a,t,18,22.8);show(good.m1b,t,19.9,22.8);show(good.ex1,t,21,22.8);
+    const xp=run('p2',28.4,[[28.6,29.8,170,X1],[30.6,31.6,X1,X2],[32.4,33.2,X2,1340]],0);
+    good.p2a._x=xp;good.p2b._x=xp;show(good.p2a,t,30.2);show(good.p2b,t,32);show(good.ex2,t,33.2);
+    const cg=P(t,23.8,24.8,ein),cb=P(t,24.8,25.5,eout);const cx=t<24.8?lerp(230,355,cg):lerp(355,230,cb);
+    cards._x=cx;place(cards,{s:pv(t,23.6).s,o:pv(t,23.6).o*(1-P(t,27.6,28.2)),r:t>24.8&&t<25.6&&!RM?Math.sin((t-24.8)*30)*3:0});
+    show(elOnly,t,24.9,28);
+    let L1=0,L2=0;if(t>=3.4&&t<11)L1=-1;if(t>=13.4&&t<16)L1=-1;if(t>=18&&t<22.8)L1=1;if(t>=19.8&&t<22.8)L2=1;if(t>=24.9&&t<27.6)L1=-1;if(t>=30.2)L1=1;if(t>=32)L2=1;
+    setLight(m,0,L1);setLight(m,1,L2);
+    show(notes[0],t,4.8,10.8);show(notes[1],t,14.8,22.8);show(notes[2],t,26.4);
+  }};
+})());
+
+/* 9. Prove or disprove */
+scenes.push((()=>{
+  let head,steps=[],claim,hdr,rowsG=[],looks,rowBox,stamp,bottom;
+  const RY=[375,440,505,570],DATA=[[8,1,1],[16,1,1],[24,1,1],[4,1,0]],RT=[4.6,5.4,6.2,11.4];
+  const S=[['Test several values,','including edge cases.'],['Hypothesis true, conclusion false?','Counterexample. Stop.'],['Everything passes? That’s evidence,','not proof. Now try to prove it.']];
+  return {title:'Prove or disprove',dur:26,
+  caps:[[0.6,'Some problems say “prove or disprove.” Deciding which is part of the work.'],[2,'Step 1: test several values, including edge cases.'],[4.4,'Try it: if n is divisible by 4, is n divisible by 8? Testing 8, 16, 24… all pass.'],[8.4,'But passing tests is evidence, not proof. And those were all multiples of 8 anyway.'],[11.4,'Try n = 4. Divisible by 4? Yes. Divisible by 8? No.'],[13.6,'Hypothesis true, conclusion false. That’s a counterexample. Stop: the claim is false.'],[19.2,'One failure settles it. If everything passes, then you try to prove it.']],
+  build(r){
+    head=gt(r,800,95,'Prove or disprove?',{size:60,weight:600});
+    S.forEach((ls,i)=>{const g=boxCard(r,420,270+140*i,660,116);const b=G(g,-280,0);el('circle',{r:26,fill:'--ink'},b);txt(b,0,0,String(i+1),{size:28,weight:700,fill:'--stage'});
+      ls.forEach((s,j)=>txt(g,-236,-18+38*j,s,{size:28,weight:j?500:700,anchor:'start'}));steps.push(g);});
+    claim=G(r,1150,200);ticket(claim,640,104);txt(claim,0,-20,'If n is divisible by 4,',{size:32,weight:600,fill:'--tink'});txt(claim,0,20,'then n is divisible by 8.',{size:32,weight:600,fill:'--tink'});
+    hdr=G(r,0,0);[['n',920],['divisible by 4?',1110],['divisible by 8?',1340]].forEach(([s,x])=>txt(hdr,x,310,s,{size:26,weight:700,fill:'--muted'}));
+    rowBox=el('rect',{x:860,y:RY[3]-30,width:600,height:60,rx:18,fill:'none',stroke:'--pop','stroke-width':5},r);
+    DATA.forEach(([n,a,b],i)=>{const g=G(r,0,0);txt(g,920,RY[i],String(n),{size:34,weight:700});
+      [[1110,a],[1340,b]].forEach(([x,ok])=>{const c=G(g,x,RY[i]);el('circle',{r:22,fill:ok?'--mint':'--pop'},c);
+        if(ok)el('path',{d:'M-9 0 L-3 7 L10 -7',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);
+        else el('path',{d:'M-7 -7 L7 7 M7 -7 L-7 7',stroke:'--on-strong','stroke-width':5,'stroke-linecap':'round'},c);});rowsG.push(g);});
+    looks=G(r,1150,650);pill(looks,440,60,'--sun','all pass… looks true?',{size:30});
+    stamp=stampBox(r,1150,665,460,'False! n = 4',50);
+    bottom=G(r,800,800);pill(bottom,1000,72,'--grape','One failure settles it. All pass? Then try to prove it.',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    steps.forEach((g,i)=>{show(g,t,[1.8,2.4,3][i]);const hl=i===0?(t>=2&&t<4.4):i===2?(t>=8.4&&t<11.2):(t>=13.6&&t<19);
+      const st=hl?(i===1?'--pop':'--sun'):'--line';if(g._st!==st){g._st=st;g._r.setAttribute('style','fill:var(--card);stroke:var('+st+');stroke-width:'+(hl?6:3));}});
+    show(claim,t,4.2);place(hdr,{o:P(t,4.4,4.8)});
+    rowsG.forEach((g,i)=>slideIn(g,t,RT[i],30));
+    show(looks,t,7.2,11.2);rowBox.setAttribute('opacity',P(t,12.4,12.8));
+    slam(stamp,t,13.8,-4);show(bottom,t,19.2);
+  }};
+})());
+
+/* 10. Takeaways */
+scenes.push((()=>{
+  let head,tk=[];
+  const L=['A counterexample: P(a) true and Q(a) false.','Check the hypothesis first. Name the failing direction.','Hunt at the edges: zero, negatives, fractions, ∅.'];
+  const A=[.6,5.6,10.6];
+  return {title:'Takeaways',dur:16,
+  caps:[[0.6,'A counterexample is one element where the hypothesis is true and the conclusion is false.'],[5.6,'Check the hypothesis first. For a biconditional, say which direction fails.'],[10.6,'And look at the edges: zero, negatives, fractions, the empty set.']],
+  build(r){
+    head=gt(r,800,95,'Three things to remember',{size:60,weight:600});
+    L.forEach((s,i)=>{const g=G(r,800,265+190*i);ticket(g,1180,150);
+      el('line',{x1:-410,y1:-58,x2:-410,y2:58,stroke:'--tink','stroke-width':4,'stroke-dasharray':'6 10','stroke-linecap':'round',opacity:.45},g);
+      const ic=G(g,-500,0);
+      if(i===0)tile(ic,0,0,70,true);
+      else if(i===1){el('path',{d:'M-34 34 V-18 Q-34 -38 -14 -38 H14 Q34 -38 34 -18 V34',fill:'none',stroke:'--tink','stroke-width':7,'stroke-linecap':'round'},ic);el('circle',{cx:0,cy:-52,r:9,fill:'--mint'},ic);}
+      else{el('path',{d:'M-30 0 L34 -26 L34 26Z',fill:'--sun'},ic);el('circle',{cx:-30,cy:0,r:12,fill:'--tink'},ic);}
+      txt(g,-372,0,s,{size:i===1?34:37,weight:600,fill:'--tink',anchor:'start'});tk.push(g);});
+  },
+  update(t){place(head,{o:P(t,.4,1)});tk.forEach((g,i)=>{const k=P(t,A[i],A[i]+.6,eout);place(g,{dx:-(1-k)*120,o:k,r:(1-k)*-3});});}
+  };
+})());
+
+/* 11. Exit ticket */
+scenes.push((()=>{
+  let head,cards=[],backs=[],ans=[],timer,arc,cnt,foot;
+  const C=2*Math.PI*40;
+  const Q=[{q:'Q1',lines:[['What two conditions must a',34,600],['counterexample to',34,600],['P(x) ⇒ Q(x) satisfy?',34,600]],a:[['P(a) is true,',42,700],['and Q(a) is false.',42,700]]},
+           {q:'Q2',lines:[['Disprove: if x is a real',38,600],['number, then x² > x.',38,600]],a:[['Try x = 1/2: x² = 1/4,',34,700],['and 1/4 > 1/2 is false.',34,700],['(x = 0 or x = 1 also work)',26,500]]}];
+  return {title:'Exit ticket',dur:18,
+  caps:[[0.6,'Exit ticket: try both in your head before the reveal.'],[8,'Check yourself!'],[10.6,'Q2: x = 1/2 works, since 1/4 is not bigger than 1/2. So do x = 0 and x = 1. Edges again!'],[14.6,'Next up: Section 3.6, existence proofs.']],
+  build(r){
+    head=gt(r,800,95,'Exit ticket',{size:60,weight:600});
+    Q.forEach((d,i)=>{const g=G(r,i?1170:430,445);
+      el('rect',{x:-345,y:-235,width:690,height:470,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+      pill(G(g,-275,-185),84,52,'--pop',d.q,{size:28,color:'--on-strong',weight:700});
+      const n=d.lines.length;d.lines.forEach(([s,sz,w],j)=>txt(g,0,(n===3?-140:-115)+(n===3?46:56)*j,s,{size:sz,weight:w}));
+      const b=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--line'},b);txt(b,0,0,'Think first…',{size:34,weight:600,fill:'--muted'});backs.push(b);
+      const a=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--stage',stroke:'--mint','stroke-width':5},a);
+      const k=d.a.length,step=k===3?52:60,y0=-(k-1)*step/2;d.a.forEach(([s,sz,w],j)=>txt(a,0,y0+step*j,s,{size:sz,weight:w,fill:j===2?'--muted':'--ink'}));ans.push(a);cards.push(g);});
+    timer=G(r,800,800);el('circle',{r:40,fill:'none',stroke:'--line','stroke-width':10},timer);
+    arc=el('circle',{r:40,fill:'none',stroke:'--sun','stroke-width':10,'stroke-linecap':'round','stroke-dasharray':C.toFixed(1),transform:'rotate(-90)'},timer);
+    cnt=txt(timer,0,0,'5',{size:34,weight:700});
+    foot=gt(r,800,800,'Next up: Section 3.6, Existence Proofs',{size:36,weight:500,fill:'--muted'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    cards.forEach((g,i)=>show(g,t,.6+i*.3));
+    [8,8.6].forEach((a,i)=>{const k=P(t,a,a+.6),sy=Math.max(Math.abs(Math.cos(k*Math.PI)),.03);
+      place(backs[i],{sx:1,sy,o:k<.5?1:0});place(ans[i],{sx:1,sy,o:k>=.5?1:0});});
+    const tk=P(t,.9,7.6,x=>x);arc.setAttribute('stroke-dashoffset',(C*tk).toFixed(1));
+    const n=String(Math.max(1,5-Math.floor(tk*5)));if(cnt.textContent!==n)cnt.textContent=n;
+    place(timer,{o:Math.min(P(t,.9,1.3),1-P(t,7.6,8.1))});
+    place(foot,{o:P(t,14.6,15.2)});
+  }};
+})());
+
+/* ---------- assemble timeline ---------- */
+const root=el('g',{},svg);
+const starts=[];let acc=0;
+scenes.forEach(s=>{starts.push(acc);s.g=el('g',{},root);s.rows=[];BUILDING=s;s.build(s.g);BUILDING=null;s._lv=-1;s.g.style.display='none';acc+=s.dur;});
+const TOTAL=acc;
+const chapters=[];scenes.forEach((s,i)=>(s.chapters||[[0,s.title]]).forEach(([o,ti])=>chapters.push({t:starts[i]+o,title:ti})));
+const caps=[];scenes.forEach((s,i)=>s.caps.forEach(([o,c])=>caps.push([starts[i]+o,c])));
+
+/* ticket-wipe transition between scenes, carrying the next chapter's title */
+const wipe=el('g',{},svg);wipe._x=0;wipe._y=0;
+el('path',{d:'M0 0 H2000 L1800 900 H-200Z',fill:'--sun'},wipe);
+el('line',{x1:46,y1:0,x2:-154,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+el('line',{x1:1954,y1:0,x2:1754,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+const wNum=txt(wipe,900,372,'',{size:34,weight:600,fill:'--tink'});
+const wTitle=txt(wipe,900,456,'',{size:92,weight:700,fill:'--tink'});
+function renderWipe(t){
+  let b=null;for(let i=1;i<starts.length;i++)if(Math.abs(t-starts[i])<.6){b=starts[i];break;}
+  if(b===null){place(wipe,{o:0});return;}
+  const u=(t-(b-.6))/1.2;
+  const ci=chapters.findIndex(c=>Math.abs(c.t-b)<.01);
+  if(ci>=0&&wTitle.textContent!==chapters[ci].title){wTitle.textContent=chapters[ci].title;wNum.textContent='Part '+(ci+1)+' of '+chapters.length;}
+  if(RM){place(wipe,{dx:-100,o:clamp((.5-Math.abs(u-.5))*4)});return;}
+  const tx=u<.4?lerp(1800,0,eout(u/.4)):u<.6?lerp(0,-200,(u-.4)/.2):lerp(-200,-2000,ein((u-.6)/.4));
+  place(wipe,{dx:tx,o:1});
+}
+
+/* ---------- player ---------- */
+const $=id=>document.getElementById(id);
+const capEl=$('caption'),playBtn=$('play'),scrub=$('scrub'),timeEl=$('time'),poster=$('poster'),chapNav=$('chapters'),player=$('player');
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+scrub.max=TOTAL;
+$('posterLen').textContent=Math.floor(TOTAL/60)+' min '+Math.round(TOTAL%60)+' s';
+poster.setAttribute('aria-label','Play the explainer ('+Math.floor(TOTAL/60)+' minutes '+Math.round(TOTAL%60)+' seconds)');
+const ICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/><rect x="14" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/></svg>',
+  replay:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+const ticksEl=$('ticks');
+chapters.forEach((c,i)=>{if(i){const s=document.createElement('span');s.style.left=(c.t/TOTAL*100)+'%';ticksEl.appendChild(s);}
+  const b=document.createElement('button');b.type='button';b.className='chip';b.innerHTML='<b>'+(i+1)+'</b>';b.appendChild(document.createTextNode(c.title));
+  b.addEventListener('click',()=>{seek(c.t+.01);setPlaying(true);});c.btn=b;chapNav.appendChild(b);});
+
+let T=0,playing=false,started=false,speed=1,last=null,dirty=true,lastScene=-1,lastCap=null,lastChap=-1;
+const sceneAt=t=>{let i=0;for(let k=0;k<starts.length;k++)if(t>=starts[k])i=k;return i;};
+function render(){
+  const t=started?T:6.4;
+  const i=sceneAt(Math.min(t,TOTAL-1e-6));
+  if(i!==lastScene){scenes.forEach((s,k)=>s.g.style.display=k===i?'':'none');lastScene=i;}
+  if(scenes[i]._lv!==FONTV){scenes[i].rows.forEach(layoutRow);scenes[i]._lv=FONTV;}
+  scenes[i].update(t-starts[i]);
+  renderWipe(t);
+  let c='';if(started){for(const [ct,s] of caps){if(ct<=T)c=s;else break;}}
+  if(c!==lastCap){capEl.textContent=c;lastCap=c;}
+  scrub.value=T;scrub.style.setProperty('--pct',(T/TOTAL*100).toFixed(2)+'%');
+  timeEl.textContent=fmt(T)+' / '+fmt(TOTAL);
+  let ch=0;chapters.forEach((cc,k)=>{if(T>=cc.t-.001)ch=k;});
+  if(ch!==lastChap){chapters.forEach((cc,k)=>cc.btn.setAttribute('aria-current',k===ch?'true':'false'));
+    if(started){const b=chapters[ch].btn;chapNav.scrollTo({left:b.offsetLeft-chapNav.clientWidth/2+b.offsetWidth/2,behavior:RM?'auto':'smooth'});}lastChap=ch;}
+}
+function setPlaying(p){
+  if(p&&T>=TOTAL-.01)T=0;
+  playing=p;last=null;
+  if(p){started=true;poster.hidden=true;}
+  const ended=!p&&T>=TOTAL-.01;
+  playBtn.innerHTML=p?ICON.pause:(ended?ICON.replay:ICON.play);
+  playBtn.setAttribute('aria-label',p?'Pause':(ended?'Replay':'Play'));
+  dirty=true;
+}
+function seek(t){started=true;poster.hidden=true;T=clamp(t,0,TOTAL);dirty=true;}
+function loop(now){
+  if(playing){if(last!==null)T+=Math.min((now-last)/1000,.1)*speed;last=now;if(T>=TOTAL){T=TOTAL;setPlaying(false);}dirty=true;}
+  if(dirty){render();dirty=false;}
+  requestAnimationFrame(loop);
+}
+playBtn.addEventListener('click',()=>setPlaying(!playing));
+poster.addEventListener('click',()=>{T=0;setPlaying(true);playBtn.focus({preventScroll:true});});
+$('restart').addEventListener('click',()=>{seek(0);setPlaying(true);});
+scrub.addEventListener('input',()=>seek(parseFloat(scrub.value)));
+const speeds=[1,1.25,1.5,.75];
+$('speed').addEventListener('click',e=>{speed=speeds[(speeds.indexOf(speed)+1)%speeds.length];e.currentTarget.textContent=speed+'×';e.currentTarget.setAttribute('aria-label','Playback speed '+speed+' times');});
+$('cc').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);capEl.hidden=!on;});
+const fsBtn=$('fs');
+if(!(document.fullscreenEnabled&&player.requestFullscreen))fsBtn.hidden=true;
+fsBtn.addEventListener('click',()=>{try{if(document.fullscreenElement)document.exitFullscreen();else player.requestFullscreen().catch(()=>{});}catch(e){}});
+document.addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(e.altKey||e.ctrlKey||e.metaKey)return;
+  if(e.key===' '||e.key==='k'){if(tag==='button'&&e.key===' ')return;if(tag==='input'&&e.key===' '){e.preventDefault();setPlaying(!playing);return;}
+    if(tag!=='input'){e.preventDefault();setPlaying(!playing);}}
+  else if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&tag!=='input'){e.preventDefault();seek(T+(e.key==='ArrowRight'?5:-5));}
+});
+setPlaying(false);
+if(document.fonts){if(document.fonts.ready)document.fonts.ready.then(()=>{FONTV++;dirty=true;});document.fonts.addEventListener&&document.fonts.addEventListener('loadingdone',()=>{FONTV++;dirty=true;});}
+window.__seek=t=>{seek(t);render();};
+window.__total=TOTAL;
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

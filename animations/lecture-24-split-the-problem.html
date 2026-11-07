@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Split the Problem: an animated explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9E6FA; --stage:#FBFAFF; --card:#F0EDFD; --ink:#26215E; --muted:#6B67A3; --line:#D3CEF0;
+  --paper:#FFE7A3; --tink:#26215E; --pop:#E8395F; --mint:#14B983; --sky:#3D7BF5; --sun:#FFC23A; --grape:#7C4DEB;
+  --on-strong:#FFFFFF;
+  --display:"Fredoka","Nunito","Trebuchet MS","Segoe UI",system-ui,"Cambria Math","STIX Two Math",sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,"Cambria Math",sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+    --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+    --on-strong:#1B1846; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+  --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+  --on-strong:#1B1846; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 36px}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:4px 4px 14px}
+.intro h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.6vw,40px);margin:0;letter-spacing:-0.01em}
+.intro p{margin:0;color:var(--muted);font-size:17px;line-height:1.4}
+.player{background:var(--card);border-radius:24px;padding:10px;border:2px solid var(--line)}
+.stage{position:relative;border-radius:16px;overflow:hidden;background:var(--stage);aspect-ratio:16/9;width:100%}
+.stage svg{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+.td{font-family:var(--display)}
+.tb{font-family:var(--body)}
+.poster{position:absolute;inset:0;border:0;padding:0;margin:0;background:transparent;cursor:pointer;color:inherit;font:inherit}
+.poster[hidden]{display:none}
+.poster-btn{position:absolute;left:50%;top:36.7%;transform:translate(-50%,-50%);width:clamp(56px,10vw,104px);aspect-ratio:1;border-radius:50%;
+  background:var(--ink);color:var(--stage);display:grid;place-items:center;box-shadow:0 0 0 clamp(5px,.9vw,10px) var(--stage);transition:transform .18s ease}
+.poster-btn svg{width:42%;height:42%;margin-left:8%}
+.poster:hover .poster-btn,.poster:focus-visible .poster-btn{transform:translate(-50%,-50%) scale(1.07)}
+.poster:focus-visible{outline:4px solid var(--sky);outline-offset:-4px;border-radius:16px}
+.poster-len{position:absolute;left:14px;top:12px;background:var(--paper);color:var(--tink);font-weight:700;font-size:clamp(12px,1.5vw,15px);padding:5px 12px;border-radius:999px}
+.caption{min-height:3.3em;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 18px 6px;
+  font-size:clamp(16px,1.9vw,22px);line-height:1.38;font-weight:700;color:var(--ink);margin:0;text-wrap:balance}
+.caption:empty::before{content:"Captions appear here once you press play.";color:var(--muted);font-weight:400}
+.caption[hidden]{display:none}
+.controls{display:flex;align-items:center;gap:8px;padding:6px 4px 2px;flex-wrap:wrap}
+.btn{min-width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:var(--stage);color:var(--ink);
+  font:700 15px/1 var(--body);display:inline-grid;place-items:center;cursor:pointer;padding:0 10px}
+.btn svg{width:22px;height:22px}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,.chip:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.btn.play{background:var(--pop);border-color:var(--pop);color:var(--on-strong);min-width:52px}
+.btn[aria-pressed="false"]{color:var(--muted)}
+.scrub{position:relative;flex:1 1 220px;min-width:160px;height:44px;display:flex;align-items:center}
+.ticks{position:absolute;left:11px;right:11px;top:6px;height:6px;pointer-events:none}
+.ticks span{position:absolute;top:0;width:3px;height:7px;border-radius:2px;background:var(--muted);transform:translateX(-50%)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(to right,var(--pop) var(--pct,0%),var(--line) var(--pct,0%))}
+input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:10px;border-radius:6px;background:var(--pop)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--paper);border:3px solid var(--ink)}
+.time{font:700 15px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--muted);min-width:96px;text-align:center}
+.chapters{display:flex;gap:6px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:thin}
+.chip{flex:0 0 auto;border:2px solid var(--line);background:var(--stage);color:var(--ink);border-radius:999px;padding:7px 13px 7px 7px;
+  font:700 14px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--card);font-size:12px}
+.chip[aria-current="true"]{background:var(--ink);color:var(--stage);border-color:var(--ink)}
+.chip[aria-current="true"] b{background:var(--sun);color:var(--tink)}
+.hint{color:var(--muted);font-size:14px;margin:12px 6px 0;line-height:1.45}
+.rotate{display:none}
+@media (max-width:640px) and (orientation:portrait){.rotate{display:block}}
+.player:fullscreen{display:flex;flex-direction:column;justify-content:center;border-radius:0;border:0;padding:12px;background:var(--card)}
+.player:fullscreen .stage{width:min(100%,calc((100vh - 200px) * 16 / 9));margin:0 auto}
+.player:fullscreen .caption,.player:fullscreen .controls,.player:fullscreen .chapters{width:min(100%,calc((100vh - 200px) * 16 / 9));margin-left:auto;margin-right:auto}
+@media (max-width:560px){.time{min-width:0;font-size:13px}.btn{min-width:40px;height:40px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="intro">
+    <h1>Lecture 24, animated</h1>
+    <p>Proof by cases for CS 341: split the problem, cover everything, and use WLOG wisely.</p>
+  </header>
+  <section class="player" id="player" aria-label="Animated explainer player">
+    <div class="stage">
+      <svg id="svg" viewBox="0 0 1600 900" role="img" aria-label="Animation stage. The captions below describe each scene."></svg>
+      <button class="poster" id="poster" type="button" aria-label="Play the explainer">
+        <span class="poster-len" id="posterLen"></span>
+        <span class="poster-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5v15l13-7.5z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+    <div class="controls">
+      <button class="btn play" id="play" type="button" aria-label="Play"></button>
+      <button class="btn" id="restart" type="button" aria-label="Restart from the beginning"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="scrub"><div class="ticks" id="ticks"></div><input type="range" id="scrub" min="0" max="100" step="0.1" value="0" aria-label="Seek"></div>
+      <span class="time" id="time" aria-live="off">0:00</span>
+      <button class="btn" id="speed" type="button" aria-label="Playback speed">1×</button>
+      <button class="btn" id="cc" type="button" aria-pressed="true" aria-label="Captions">CC</button>
+      <button class="btn" id="fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+  </section>
+  <p class="hint">Space plays or pauses. The left and right arrow keys skip 5 seconds. Tap any chapter to jump there.</p>
+  <p class="hint rotate">Turn your phone sideways for a bigger picture.</p>
+</main>
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('svg');
+const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* ---------- math + easing ---------- */
+const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const lerp=(a,b,k)=>a+(b-a)*k;
+const eio=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+const eout=k=>1-Math.pow(1-k,3);
+const ein=k=>k*k*k;
+const back=k=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2);};
+const P=(t,a,b,fn=eio)=>fn(clamp((t-a)/(b-a)));
+const bump=(t,a,d)=>Math.sin(Math.PI*clamp((t-a)/d));
+const num=k=>k<0?'\u2212'+(-k):String(k);
+
+/* ---------- svg helpers ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);let st='';
+  for(const k in attrs){const v=attrs[k];if(v==null)continue;
+    if(k==='text')e.textContent=v;
+    else if((k==='fill'||k==='stroke')&&typeof v==='string'&&v.startsWith('--'))st+=k+':var('+v+');';
+    else e.setAttribute(k,v);}
+  if(st)e.setAttribute('style',st);
+  if(parent)parent.appendChild(e);return e;
+}
+function place(g,o={}){
+  const X=g._x+(o.dx||0),Y=g._y+(o.dy||0);
+  let tr='translate('+X.toFixed(2)+' '+Y.toFixed(2)+')';
+  if(o.r)tr+=' rotate('+o.r.toFixed(2)+')';
+  if(o.sx!=null||o.sy!=null){const sx=o.sx!=null?o.sx:(o.s!=null?o.s:1),sy=o.sy!=null?o.sy:(o.s!=null?o.s:1);tr+=' scale('+Math.max(sx,.001).toFixed(3)+' '+Math.max(sy,.001).toFixed(3)+')';}
+  else if(o.s!=null&&o.s!==1)tr+=' scale('+Math.max(o.s,.001).toFixed(3)+')';
+  g.setAttribute('transform',tr);
+  const op=o.o==null?1:clamp(o.o);
+  g.setAttribute('opacity',op.toFixed(3));
+  const vis=op<=.002?'hidden':'visible';if(g._vis!==vis){g.style.visibility=vis;g._vis=vis;}
+}
+function G(parent,x=0,y=0){const g=el('g',{},parent);g._x=x;g._y=y;place(g);return g;}
+function show(g,t,a,b=1e9,extra={}){
+  const k=clamp((t-a)/.5),f=1-P(t,b-.45,b,ein);
+  place(g,Object.assign({s:k?back(k):.001,o:Math.min(clamp(k*3),f)},extra));return k;
+}
+function txt(p,x,y,str,o={}){
+  return el('text',{x,y,dy:'.35em','font-size':o.size||40,'font-weight':o.weight||500,'text-anchor':o.anchor||'middle',
+    fill:o.fill||'--ink',class:o.body?'tb':'td',opacity:o.op,text:str},p);
+}
+function gt(p,x,y,str,o={}){const g=G(p,x,y);txt(g,0,0,str,o);return g;}
+function ticketD(w,h){const W=w/2,H=h/2,n=Math.min(14,h*.18),c=Math.min(14,h*.2);
+  return 'M'+(-W+c)+' '+(-H)+'H'+(W-c)+'A'+c+' '+c+' 0 0 1 '+W+' '+(-H+c)+'V'+(-n)+'A'+n+' '+n+' 0 0 0 '+W+' '+n+'V'+(H-c)+'A'+c+' '+c+' 0 0 1 '+(W-c)+' '+H+
+  'H'+(-W+c)+'A'+c+' '+c+' 0 0 1 '+(-W)+' '+(H-c)+'V'+n+'A'+n+' '+n+' 0 0 0 '+(-W)+' '+(-n)+'V'+(-H+c)+'A'+c+' '+c+' 0 0 1 '+(-W+c)+' '+(-H)+'Z';}
+function ticket(p,w,h,fill='--paper'){const g=el('g',{},p);el('path',{d:ticketD(w,h),fill},g);return g;}
+function pill(p,w,h,fill,label,o={}){const g=el('g',{},p);el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:h/2,fill},g);
+  if(label!=null)txt(g,0,0,label,{size:o.size||34,weight:o.weight||600,fill:o.color||'--tink'});return g;}
+function star(p,cx,cy,R,fill){let d='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?R*.45:R;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1);}
+  return el('path',{d:d+'Z',fill},p);}
+function shape(p,type,fill,s){
+  if(type===0)return el('circle',{r:s,fill},p);
+  if(type===1)return el('rect',{x:-s,y:-s,width:2*s,height:2*s,rx:12,fill},p);
+  if(type===2)return el('path',{d:'M0 '+(-s*1.05)+' L'+(s*1.05)+' '+(s*.8)+' L'+(-s*1.05)+' '+(s*.8)+'Z',fill,stroke:fill,'stroke-width':10,'stroke-linejoin':'round'},p);
+  if(type===3)return el('rect',{x:-s*.82,y:-s*.82,width:1.64*s,height:1.64*s,rx:10,fill,transform:'rotate(45)'},p);
+  return star(p,0,0,s*1.2,fill);
+}
+function mascot(p){const g=el('g',{},p);
+  el('path',{d:ticketD(124,84),fill:'--paper',stroke:'--tink','stroke-width':4},g);
+  el('circle',{cx:-34,cy:10,r:7,fill:'--pop',opacity:.45},g);el('circle',{cx:34,cy:10,r:7,fill:'--pop',opacity:.45},g);
+  el('circle',{cx:-17,cy:-8,r:6,fill:'--tink'},g);el('circle',{cx:17,cy:-8,r:6,fill:'--tink'},g);
+  el('path',{d:'M-13 10 Q0 22 13 10',fill:'none',stroke:'--tink','stroke-width':4,'stroke-linecap':'round'},g);return g;}
+function person(p,fill){const g=el('g',{},p);
+  el('rect',{x:-30,y:-4,width:60,height:58,rx:26,fill},g);el('circle',{cx:0,cy:-34,r:25,fill},g);
+  el('circle',{cx:-9,cy:-37,r:3.6,fill:'--tink'},g);el('circle',{cx:9,cy:-37,r:3.6,fill:'--tink'},g);
+  el('path',{d:'M-8 -27 Q0 -21 8 -27',fill:'none',stroke:'--tink','stroke-width':3,'stroke-linecap':'round'},g);return g;}
+function speech(p,w,h,label,o={}){const g=el('g',{},p);
+  el('path',{d:'M'+(-w/2+4)+' -14 L'+(-w/2-30)+' 16 L'+(-w/2+4)+' 14Z',fill:'--grape'},g);
+  el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--grape'},g);
+  txt(g,0,0,label,{size:o.size||36,weight:600,fill:'--on-strong'});return g;}
+function dart(g){el('line',{x1:0,y1:-96,x2:0,y2:-18,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},g);
+  el('path',{d:'M-11 -22 L11 -22 L0 4Z',fill:'--ink'},g);el('path',{d:'M0 -78 L-16 -106 L0 -96 L16 -106Z',fill:'--pop'},g);}
+function qlen(x0,y0,cx,cy,x1,y1){let L=0,px=x0,py=y0;for(let i=1;i<=40;i++){const u=i/40,a=(1-u)*(1-u),b=2*u*(1-u),c=u*u;
+  const x=a*x0+b*cx+c*x1,y=a*y0+b*cy+c*y1;L+=Math.hypot(x-px,y-py);px=x;py=y;}return L;}
+
+/* ---------- extra helpers for algebra rows ---------- */
+const pv=(t,a)=>{const k=clamp((t-a)/.5);return {s:k?back(k):.001,o:clamp(k*3)};};
+let BUILDING=null,FONTV=0;
+function row(p,x,y,pieces,o={}){
+  const g=el('g',{},p);g._x=0;g._y=0;g._pc=[];g._ax=x;g._ay=y;g._anchor=o.anchor||'start';const S=o.size||44;
+  if(o.bg){const h=o.bgH||S*1.9;g._bg=el('rect',{y:y-h/2,height:h,rx:22,fill:o.bg,stroke:o.bgStroke||null,'stroke-width':o.bgStroke?5:null},g);g._padX=o.padX||32;}
+  pieces.forEach(pc=>{const [s,q={}]=Array.isArray(pc)?pc:[pc,{}];const sz=q.size||S;let rect=null;
+    if(q.box)rect=el('rect',{y:y-sz*.68,height:sz*1.36,rx:12,fill:q.box},g);
+    const t=el('text',{x,y,dy:'.35em','font-size':sz,'font-weight':q.weight||o.weight||500,'text-anchor':'start',
+      fill:q.fill||(q.box?'--tink':(o.fill||'--ink')),class:'td',text:s.replace(/ /g,'\u00A0')},g);
+    g._pc.push({t,rect,pad:q.box?12:0});});
+  layoutRow(g);if(BUILDING)BUILDING.rows.push(g);return g;
+}
+let MEAS=null;const MCACHE={};
+function measure(t){
+  if(!MEAS)MEAS=el('text',{x:-5000,y:-5000,class:'td',opacity:0,'aria-hidden':'true'},svg);
+  const sz=t.getAttribute('font-size'),w=t.getAttribute('font-weight'),s=t.textContent,key=FONTV+'|'+sz+'|'+w+'|'+s;
+  if(MCACHE[key]!=null)return MCACHE[key];
+  MEAS.setAttribute('font-size',sz);MEAS.setAttribute('font-weight',w);MEAS.textContent=s;
+  let l=0;try{l=MEAS.getComputedTextLength();}catch(e){}
+  return MCACHE[key]=l;
+}
+function layoutRow(g){
+  const ws=g._pc.map(pc=>measure(pc.t)+pc.pad*2);
+  const tot=ws.reduce((a,b)=>a+b,0);let x=g._anchor==='middle'?g._ax-tot/2:g._ax;g._x0=x;g._w=tot;
+  g._pc.forEach((pc,i)=>{if(pc.rect){pc.rect.setAttribute('x',(x+3).toFixed(1));pc.rect.setAttribute('width',Math.max(ws[i]-6,0).toFixed(1));}
+    pc.t.setAttribute('x',(x+pc.pad).toFixed(1));pc.x=x;pc.w=ws[i];x+=ws[i];});
+  if(g._bg){g._bg.setAttribute('x',(g._x0-g._padX).toFixed(1));g._bg.setAttribute('width',(tot+2*g._padX).toFixed(1));}
+}
+function frac(p,x,y,num,den,o={}){const g=G(p,x,y),s=o.size||48,w=o.w||Math.max(num.length,den.length)*s*.55+24;
+  txt(g,0,-s*.78,num,{size:s,weight:o.weight||500,fill:o.fill});
+  el('line',{x1:-w/2,y1:0,x2:w/2,y2:0,stroke:o.fill||'--ink','stroke-width':5,'stroke-linecap':'round'},g);
+  txt(g,0,s*.78,den,{size:s,weight:o.weight||500,fill:o.fill});return g;}
+function tracker(p,x,y,gap,labels,o={}){
+  const W=o.w||250;
+  const items=labels.map((l,i)=>{const g=G(p,o.horiz?x+gap*i:x,o.horiz?y:y+gap*i);
+    const bg=el('rect',{x:-W/2,y:-30,width:W,height:60,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+    const c=el('circle',{cx:-W/2+32,cy:0,r:20,fill:'--line'},g);
+    const n=txt(g,-W/2+32,0,String(i+1),{size:24,weight:700,fill:'--muted'});
+    const tx=txt(g,-W/2+62,0,l,{size:28,weight:600,anchor:'start',fill:'--muted'});
+    return {g,bg,c,n,tx};});
+  return {items,update(t,times,end,appear){items.forEach((it,i)=>{
+    const on=t>=times[i],done=t>=(i<items.length-1?times[i+1]:end),st=done?2:on?1:0;
+    if(it._st!==st){it._st=st;
+      it.bg.setAttribute('style','fill:var('+(st===1?'--sun':'--card')+');stroke:var('+(st===1?'--sun':st===2?'--mint':'--line')+')');
+      it.c.setAttribute('style','fill:var('+(st===0?'--line':st===1?'--tink':'--mint')+')');
+      it.n.setAttribute('style','fill:var('+(st===0?'--muted':st===1?'--sun':'--tink')+')');it.n.textContent=st===2?'✓':String(i+1);
+      it.tx.setAttribute('style','fill:var('+(st===1?'--tink':st===2?'--ink':'--muted')+')');}
+    const k=P(t,appear+i*.15,appear+.4+i*.15);place(it.g,{o:k,s:1+.08*(on&&!done?bump(t,times[i],.4):0)});});}};
+}
+function check(p,x,y){const c=G(p,x,y);el('circle',{r:24,fill:'--mint'},c);
+  el('path',{d:'M-10 0 L-3 8 L11 -8',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);return c;}
+
+/* =================================================================
+   SCENES  (each: title, dur, caps [local time, text], build, update)
+   ================================================================= */
+const scenes=[];
+function wedgeD(cx,cy,r,a0,a1){const p=a=>[cx+r*Math.cos(a*Math.PI/180),cy+r*Math.sin(a*Math.PI/180)];const [x0,y0]=p(a0),[x1,y1]=p(a1);
+  return 'M'+cx+' '+cy+' L'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+r+' '+r+' 0 '+((a1-a0)>180?1:0)+' 1 '+x1.toFixed(1)+' '+y1.toFixed(1)+' Z';}
+function clen(x0,y0,x1,y1,x2,y2,x3,y3){let L=0,px=x0,py=y0;for(let i=1;i<=48;i++){const u=i/48,v=1-u;
+  const x=v*v*v*x0+3*v*v*u*x1+3*v*u*u*x2+u*u*u*x3,y=v*v*v*y0+3*v*v*u*y1+3*v*u*u*y2+u*u*u*y3;L+=Math.hypot(x-px,y-py);px=x;py=y;}return L;}
+function checkW(p,x,y){const c=G(p,x,y);el('circle',{r:27,fill:'--stage'},c);
+  el('path',{d:'M-11 0 L-3 9 L12 -9',fill:'none',stroke:'--mint','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'},c);return c;}
+function binBox(g,label,c){el('path',{d:'M-250 -85 V65 Q-250 85 -230 85 H230 Q250 85 250 65 V-85',fill:'--card',stroke:c,'stroke-width':7,'stroke-linejoin':'round','stroke-linecap':'round'},g);
+  txt(g,0,58,label,{size:30,weight:700,fill:'--muted'});}
+function boxCard(p,x,y,w,h,stroke){const g=G(p,x,y);g._r=el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--card',stroke:stroke||'--line','stroke-width':stroke?5:3},g);return g;}
+function slideIn(g,t,a,dx=40){const k=P(t,a,a+.5,eout);place(g,{dx:-(1-k)*dx,o:k});}
+
+/* 1. Split it */
+scenes.push((()=>{
+  let rock,Lg,Rg,colL,colR,crack,lab,labE,labO,ckE,ckO,masc,title,sub,h2,tools=[];
+  const LD='M800 160 C700 150 580 200 570 320 C560 430 650 500 805 500 L795 460 L820 400 L790 340 L815 280 L780 220 Z';
+  const RD='M800 160 C900 150 1020 200 1030 320 C1040 430 950 500 805 500 L795 460 L820 400 L790 340 L815 280 L780 220 Z';
+  const CRK='M800 160 L780 220 L815 280 L790 340 L820 400 L795 460 L805 500';
+  return {title:'Split it',dur:14,
+  caps:[[0.3,'Some statements are too big to lift in one go.'],[2.6,'So split them into pieces small enough to handle.'],[4.2,'Today: proof by cases.'],[7.8,'Direct proof works when the hypothesis hands you an equation. Contrapositive works when “not Q” does.'],[10.8,'Proof by cases is for when neither one does.']],
+  build(r){
+    rock=G(r,0,0);
+    Lg=G(rock,680,330);const li=el('g',{transform:'translate(-680 -330)'},Lg);
+    el('path',{d:LD,fill:'--muted'},li);colL=el('path',{d:LD,fill:'--sky'},li);
+    labE=G(li,680,330);txt(labE,0,0,'n even',{size:52,weight:700,fill:'--on-strong'});ckE=checkW(li,680,412);
+    Rg=G(rock,920,330);const ri=el('g',{transform:'translate(-920 -330)'},Rg);
+    el('path',{d:RD,fill:'--muted'},ri);colR=el('path',{d:RD,fill:'--mint'},ri);
+    labO=G(ri,920,330);txt(labO,0,0,'n odd',{size:52,weight:700,fill:'--tink'});ckO=checkW(ri,920,412);
+    crack=el('path',{d:CRK,fill:'none',stroke:'--stage','stroke-width':8,'stroke-linecap':'round','stroke-linejoin':'round','stroke-dasharray':372},rock);
+    lab=gt(r,800,330,'∀n ∈ ℤ',{size:84,weight:600,fill:'--stage'});
+    masc=G(r,505,430);mascot(masc);
+    title=gt(r,800,642,'Split the Problem',{size:100,weight:600});
+    sub=gt(r,800,738,'Proof by cases',{size:42,weight:400,fill:'--muted'});
+    h2=gt(r,800,200,'Your proof toolbox',{size:56,weight:600});
+    [['Direct',['the hypothesis hands','you an equation'],'Lecture 22','--paper','--tink'],['Contrapositive',['“not Q” hands you','the equation'],'Lecture 23','--paper','--tink'],['Cases',['neither does,','so split it up'],'Today','--grape','--on-strong']].forEach(([a,ls,tg,f,c],i)=>{
+      const g=G(r,330+470*i,460);ticket(g,420,240,f);txt(g,0,-70,a,{size:44,weight:700,fill:c});
+      ls.forEach((s,j)=>txt(g,0,-6+38*j,s,{size:29,weight:500,fill:c}));txt(g,0,86,tg,{size:26,weight:700,fill:c,op:.7});tools.push(g);});
+  },
+  update(t){
+    const lv=P(t,7.2,7.8,ein),sp=P(t,3,3.8,eout),c=P(t,3,3.8);
+    place(rock,{o:P(t,.1,.5)*(1-lv)});
+    place(Lg,{dx:-110*sp,r:-4*sp});place(Rg,{dx:110*sp,r:4*sp});
+    colL.setAttribute('opacity',c);colR.setAttribute('opacity',c);
+    crack.setAttribute('stroke-dashoffset',(372*(1-P(t,2.3,3))).toFixed(1));crack.setAttribute('opacity',(t>2.3?1:0)*(1-c));
+    place(lab,{o:P(t,.3,.8)*(1-P(t,2.4,3))});
+    place(labE,{o:P(t,3.6,4.1)});place(labO,{o:P(t,3.6,4.1)});show(ckE,t,4.2);show(ckO,t,4.4);
+    const push=t>.8&&t<2.6&&!RM?Math.sin(t*30)*3:0;
+    let mx=505,my=430,mr=-12;
+    if(t>3){const k=P(t,3,3.6);mx=lerp(505,380,k);mr=lerp(-12,0,k);my=430-Math.sin(Math.PI*k)*80;}
+    if(t>3.6&&!RM)my=430-Math.abs(Math.sin((t-3.6)*5))*14*Math.exp(-(t-3.6)*.8);
+    masc._x=mx+push;masc._y=my;place(masc,{o:P(t,.4,.8)*(1-lv),r:mr});
+    place(title,{o:P(t,4,4.6)*(1-lv),dy:(1-P(t,4,4.6,eout))*30});
+    place(sub,{o:P(t,4.6,5.2)*(1-lv),dy:(1-P(t,4.6,5.2,eout))*20});
+    place(h2,{o:P(t,7.8,8.3)});tools.forEach((g,i)=>show(g,t,[8.2,9.2,10.8][i]));
+  }};
+})());
+
+/* 2. The idea */
+scenes.push((()=>{
+  let head,form,A,sLab,halfL,halfR,cut,c1,c2,k1,k2,steps=[],note,B,wedges=[],gap,gapQ,missed,bt1,bt2,bt3,C,cHead,toks=[],binE,binO,part;
+  const CX=500,CY=500,RR=230;
+  return {title:'The idea',dur:28,
+  caps:[[0.6,'To prove something for every x in a set S…'],[2.6,'…split S into pieces, and make sure the pieces cover all of S.'],[6.4,'Then prove the statement in each piece separately.'],[8.6,'Knowing which piece x is in gives you extra information. That’s what makes each case doable.'],[12.4,'But the pieces must cover everything. Miss even one element…'],[16,'…and you’ve proved nothing about it. The proof is incomplete.'],[20.4,'For integers, the standard split is even or odd.'],[24,'Every integer lands in exactly one of the two. That’s a partition, from Lecture 14.']],
+  build(r){
+    head=gt(r,800,95,'The idea',{size:60,weight:600});
+    form=G(r,800,190);row(form,0,0,['To prove  ',['∀x ∈ S, R(x)',{weight:700}]],{size:44,anchor:'middle'});
+    A=G(r,0,0);
+    el('circle',{cx:CX,cy:CY,r:RR,fill:'--card',stroke:'--ink','stroke-width':5},A);
+    sLab=gt(A,CX,CY,'S',{size:110,weight:600,fill:'--muted'});
+    halfL=el('path',{d:wedgeD(CX,CY,RR,90,270),fill:'--sky'},A);halfR=el('path',{d:wedgeD(CX,CY,RR,-90,90),fill:'--mint'},A);
+    cut=el('line',{x1:CX,y1:CY-RR-30,x2:CX,y2:CY-RR-30,stroke:'--pop','stroke-width':7,'stroke-linecap':'round','stroke-dasharray':'2 16'},A);
+    c1=gt(A,CX-112,CY-24,'Case 1',{size:40,weight:700,fill:'--on-strong'});c2=gt(A,CX+112,CY-24,'Case 2',{size:40,weight:700,fill:'--tink'});
+    k1=checkW(A,CX-112,CY+48);k2=checkW(A,CX+112,CY+48);
+    [['1.','Split S into pieces'],['2.','Make sure they cover all of S'],['3.','Prove R(x) in each piece']].forEach(([n,s],i)=>{const g=G(A,860,380+80*i);
+      txt(g,0,0,n,{size:36,weight:700,fill:'--pop',anchor:'start'});txt(g,46,0,s,{size:36,weight:600,anchor:'start'});steps.push(g);});
+    note=G(A,1150,650);txt(note,0,-20,'Knowing which piece x is in',{size:28,weight:500,fill:'--muted'});txt(note,0,20,'is what makes each case doable.',{size:28,weight:500,fill:'--muted'});
+    B=G(r,0,0);
+    el('circle',{cx:CX,cy:CY,r:RR,fill:'none',stroke:'--ink','stroke-width':5},B);
+    [[-90,60,'--sky'],[60,200,'--mint'],[230,270,'--sun']].forEach(([a0,a1,f])=>wedges.push(el('path',{d:wedgeD(CX,CY,RR,a0,a1),fill:f,stroke:'--stage','stroke-width':4},B)));
+    gap=el('path',{d:wedgeD(CX,CY,RR,200,230),fill:'--stage',stroke:'--pop','stroke-width':5,'stroke-dasharray':'10 8'},B);
+    gapQ=gt(B,CX+170*Math.cos(215*Math.PI/180),CY+170*Math.sin(215*Math.PI/180),'?',{size:44,weight:700,fill:'--pop'});
+    missed=G(B,232,296);pill(missed,200,56,'--pop','missed!',{size:30,color:'--on-strong'});
+    bt1=gt(B,1150,400,'Miss even one element…',{size:44,weight:700});
+    bt2=gt(B,1150,470,'…and you’ve proved nothing about it.',{size:34,weight:500});
+    bt3=G(B,1150,575);pill(bt3,360,66,'--pop','proof incomplete',{size:32,color:'--on-strong'});
+    C=G(r,0,0);
+    cHead=gt(C,800,200,'For integers: even or odd',{size:44,weight:600});
+    binE=G(C,520,640);binBox(binE,'even','--sky');binO=G(C,1080,640);binBox(binO,'odd','--mint');
+    for(let k=-4;k<=5;k++){const ev=k%2===0,g=G(C,800+130*(k-.5),350);el('circle',{r:40,fill:ev?'--sky':'--mint'},g);
+      txt(g,0,0,num(k),{size:34,weight:700,fill:ev?'--on-strong':'--tink'});g._ev=ev;g._x0=g._x;toks.push(g);}
+    part=G(C,800,805);pill(part,1040,76,'--grape','Exactly one bin each: a partition (Lecture 14)',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});place(form,{o:P(t,.6,1.1)*(1-P(t,19.8,20.3))});
+    place(A,{o:P(t,.8,1.2)*(1-P(t,11.8,12.3))});
+    const sp=P(t,3.4,4);halfL.setAttribute('opacity',sp);halfR.setAttribute('opacity',sp);place(sLab,{o:1-sp});
+    const ck=P(t,2.6,3.4);cut.setAttribute('y2',(CY-RR-30+ck*(2*RR+60)).toFixed(1));cut.setAttribute('opacity',(ck>0?1:0)*(1-P(t,4.2,4.6)));
+    place(c1,{o:P(t,4,4.4)});place(c2,{o:P(t,4,4.4)});show(k1,t,6.4);show(k2,t,7.2);
+    steps.forEach((g,i)=>slideIn(g,t,[2.6,4.6,6.4][i],30));
+    place(note,{o:P(t,8.6,9.1)});
+    place(B,{o:Math.min(P(t,12.3,12.8),1-P(t,19.8,20.3))});
+    wedges.forEach((w,i)=>w.setAttribute('opacity',P(t,12.4+i*.3,12.8+i*.3)));
+    gap.setAttribute('opacity',P(t,13.6,14)*(RM?1:(.65+.35*Math.sin(t*6))));
+    place(gapQ,{o:P(t,14,14.4)});show(missed,t,14.4);
+    place(bt1,{o:P(t,12.6,13.1)});place(bt2,{o:P(t,16,16.5)});show(bt3,t,16.8);
+    place(C,{o:P(t,20.3,20.8)});place(cHead,{o:P(t,20.4,20.9)});
+    show(binE,t,21);show(binO,t,21.3);
+    let ei=0,oi=0;
+    toks.forEach((g,i)=>{const slot=g._ev?ei++:oi++,bx=(g._ev?520:1080)+(slot-2)*90,a=22.6+i*.22,d=P(t,a,a+.6),v=pv(t,20.6+i*.06);
+      g._x=lerp(g._x0,bx,d);g._y=lerp(350,625,d)-Math.sin(Math.PI*d)*80;place(g,{s:v.s*lerp(1,.9,d),o:v.o});});
+    show(part,t,25);
+  }};
+})());
+
+/* 3. No equation */
+scenes.push((()=>{
+  let thm,tryL,L1,noEq,masc,node,brT,brB,LT,LB,cE,cO;
+  return {title:'No equation',dur:18,
+  caps:[[0.6,'Result 3.26: if n is an integer, then n² − n is even.'],[3,'Try direct. “n is an integer” gives us… no equation at all.'],[7.6,'The hypothesis is too weak on its own. It doesn’t pin n down.'],[10.4,'But split by parity, and each branch hands you an equation.'],[14.4,'Two cases: n is even, or n is odd.']],
+  build(r){
+    thm=G(r,800,150);ticket(thm,1120,96);row(thm,0,0,[['Result 3.26',{weight:700}],'   If n is an integer, then n² − n is even.'],{size:38,anchor:'middle',fill:'--tink'});
+    tryL=G(r,218,262);pill(tryL,176,54,'--sky','Try direct',{size:28,color:'--on-strong'});
+    L1=row(r,130,345,['n is an integer, so  n = ',['  ???  ',{box:'--pop',fill:'--on-strong',weight:700}]],{size:44});
+    noEq=G(r,1160,345);pill(noEq,430,62,'--pop','no equation to substitute',{size:30,color:'--on-strong'});
+    masc=G(r,1470,345);mascot(masc);
+    node=G(r,320,630);el('rect',{x:-170,y:-45,width:340,height:90,rx:45,fill:'--card',stroke:'--line','stroke-width':4},node);txt(node,0,0,'n is an integer',{size:38,weight:600});
+    brT=el('path',{d:'M490 630 C680 630 700 520 860 520',fill:'none',stroke:'--sky','stroke-width':10,'stroke-linecap':'round'},r);LT=clen(490,630,680,630,700,520,860,520);brT.setAttribute('stroke-dasharray',LT.toFixed(1));
+    brB=el('path',{d:'M490 630 C680 630 700 740 860 740',fill:'none',stroke:'--mint','stroke-width':10,'stroke-linecap':'round'},r);LB=clen(490,630,680,630,700,740,860,740);brB.setAttribute('stroke-dasharray',LB.toFixed(1));
+    cE=G(r,1110,520);pill(cE,500,90,'--sky','n is even:  n = 2a',{size:38,color:'--on-strong'});
+    cO=G(r,1110,740);pill(cO,500,90,'--mint','n is odd:  n = 2b + 1',{size:38});
+  },
+  update(t){
+    show(thm,t,.5);show(tryL,t,3);
+    slideIn(L1,t,3.4);
+    show(noEq,t,5.2,1e9,{dx:t>5.2&&t<6.2&&!RM?Math.sin((t-5.2)*30)*6*(1-(t-5.2)):0});
+    show(masc,t,7.6,1e9,{r:RM?0:Math.sin(t*3)*6});
+    show(node,t,10.4);
+    brT.setAttribute('stroke-dashoffset',(LT*(1-P(t,11,12.2))).toFixed(1));brT.setAttribute('opacity',t>11?1:0);
+    brB.setAttribute('stroke-dashoffset',(LB*(1-P(t,11.4,12.6))).toFixed(1));brB.setAttribute('opacity',t>11.4?1:0);
+    const pl=bump(t,14.6,.5);
+    let v=pv(t,12.2);place(cE,{s:v.s*(1+.06*pl),o:v.o});v=pv(t,12.6);place(cO,{s:v.s*(1+.06*pl),o:v.o});
+  }};
+})());
+
+/* 4. Two cases */
+scenes.push((()=>{
+  let thm,pL,pR,hL,hR,L=[],R=[],ckL,ckR,fin;
+  const LT=[2.4,5,8],RT=[14,16.6,19.6,21.6];
+  return {title:'Two cases',dur:36,
+  caps:[[0.6,'Case 1: n is even, so n = 2a for some integer a.'],[5,'Then n² − n = 4a² − 2a…'],[8,'…which is 2(2a² − a). That’s even.'],[12.6,'Case 2: n is odd, so n = 2b + 1 for some integer b.'],[16.6,'Then n² − n = (4b² + 4b + 1) − (2b + 1) = 4b² + 2b…'],[21.6,'…which is 2(2b² + b). Even again.'],[28.4,'Every integer is even or odd, so the cases cover everything. Done!']],
+  build(r){
+    thm=G(r,800,140);ticket(thm,1000,84);row(thm,0,0,[['Result 3.26',{weight:700}],'   n² − n is even for every integer n'],{size:34,anchor:'middle',fill:'--tink'});
+    pL=el('rect',{x:90,y:215,width:700,height:500,rx:28,fill:'--card',stroke:'--line','stroke-width':4},r);
+    pR=el('rect',{x:810,y:215,width:700,height:500,rx:28,fill:'--card',stroke:'--line','stroke-width':4},r);
+    hL=G(r,440,264);pill(hL,340,60,'--sky','Case 1: n is even',{size:30,color:'--on-strong'});
+    hR=G(r,1160,264);pill(hR,340,60,'--mint','Case 2: n is odd',{size:30});
+    L.push(row(r,130,348,['n = 2a   ',['for some integer a',{box:'--sun',size:26,weight:600}]],{size:38}));
+    L.push(row(r,130,428,['n² − n ','= 4a² − 2a'],{size:38}));
+    L.push(row(r,0,508,['= ',['2',{fill:'--pop',weight:700}],['(2a² − a)',{box:'--sun',weight:600}]],{size:38}));
+    R.push(row(r,850,348,['n = 2b + 1   ',['for some integer b',{box:'--sun',size:26,weight:600}]],{size:38}));
+    R.push(row(r,850,428,['n² − n ','= (4b² + 4b + 1) − (2b + 1)'],{size:34}));
+    R.push(row(r,0,505,['= 4b² + 2b'],{size:38}));
+    R.push(row(r,0,580,['= ',['2',{fill:'--pop',weight:700}],['(2b² + b)',{box:'--sun',weight:600}]],{size:38}));
+    ckL=G(r,440,660);pill(ckL,580,58,'--mint','2a² − a is an integer, so even ✓',{size:28});
+    ckR=G(r,1160,660);pill(ckR,580,58,'--mint','2b² + b is an integer, so even ✓',{size:28});
+    fin=G(r,800,792);pill(fin,1120,84,'--grape','Every integer is even or odd, so it holds for all n.  ∎',{size:34,color:'--on-strong'});
+  },
+  update(t){
+    show(thm,t,.4);
+    pL.setAttribute('style','fill:var(--card);stroke:var('+(t>.8&&t<12.4?'--sky':'--line')+')');
+    pR.setAttribute('style','fill:var(--card);stroke:var('+(t>12.6&&t<28.2?'--mint':'--line')+')');
+    show(hL,t,.8);show(hR,t,12.6);
+    const ex=L[1]._pc[1].x;if(Math.abs(L[2]._ax-ex)>.5){L[2]._ax=ex;layoutRow(L[2]);}
+    const rx=R[1]._pc[1].x;for(let i=2;i<4;i++)if(Math.abs(R[i]._ax-rx)>.5){R[i]._ax=rx;layoutRow(R[i]);}
+    L.forEach((g,i)=>slideIn(g,t,LT[i]));R.forEach((g,i)=>slideIn(g,t,RT[i]));
+    show(ckL,t,10.4);show(ckR,t,24.4);show(fin,t,28.4);
+  }};
+})());
+
+/* 5. A shortcut */
+scenes.push((()=>{
+  let head,eq,toks=[],win,spark,lbl,so,cF,cC;
+  const TX=k=>200+150*(k-1);
+  return {title:'A shortcut',dur:20,
+  caps:[[0.6,'For comparison, here’s a shortcut: n² − n factors as n(n − 1).'],[3.6,'That’s two consecutive integers, and of any two consecutive integers, one is even.'],[9.2,'So the product is even. One line!'],[12,'Both proofs are correct. Spotting a factorization is often faster…'],[16,'…but cases always work. That reliability is why the technique is worth having.']],
+  build(r){
+    head=gt(r,800,95,'A shorter route',{size:60,weight:600});
+    eq=G(r,800,205);row(eq,0,0,['n² − n = ',['n(n − 1)',{box:'--sun',weight:700}]],{size:58,anchor:'middle'});
+    win=G(r,TX(1)+75,400);el('rect',{x:-140,y:-62,width:280,height:124,rx:62,fill:'none',stroke:'--pop','stroke-width':6},win);
+    for(let k=1;k<=9;k++){const ev=k%2===0,g=G(r,TX(k),400);el('circle',{r:44,fill:ev?'--sky':'--mint'},g);txt(g,0,0,String(k),{size:38,weight:700,fill:ev?'--on-strong':'--tink'});toks.push(g);}
+    spark=G(r,TX(2),322);star(spark,0,0,22,'--sun');
+    lbl=G(r,800,535);pill(lbl,860,66,'--pop','of two consecutive integers, one is always even',{size:30,color:'--on-strong'});
+    so=G(r,800,535);pill(so,620,66,'--grape','so n(n − 1) is even. One line!',{size:32,color:'--on-strong'});
+    const card=(x,title,s,icon)=>{const g=boxCard(r,x,700,620,160);const ic=G(g,-238,0);icon(ic);
+      txt(g,-180,-26,title,{size:38,weight:700,anchor:'start'});txt(g,-180,28,s,{size:28,weight:500,fill:'--muted',anchor:'start'});return g;};
+    cF=card(470,'Factor trick','short, but you have to spot it',ic=>el('path',{d:'M8 -42 L-20 6 H2 L-8 42 L22 -8 H0 Z',fill:'--sun',stroke:'--ink','stroke-width':3,'stroke-linejoin':'round'},ic));
+    cC=card(1130,'Proof by cases','longer, but it always works',ic=>{el('path',{d:'M0 -42 L32 -30 V0 C32 24 16 36 0 42 C-16 36 -32 24 -32 0 V-30 Z',fill:'--mint'},ic);
+      el('path',{d:'M-12 0 L-3 10 L13 -9',fill:'none',stroke:'--tink','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'},ic);});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});show(eq,t,.6);
+    toks.forEach((g,i)=>show(g,t,2.2+i*.08));
+    const f=clamp((t-3.8)/.7,0,7),i0=Math.floor(f),fr=eio(f-i0),pos=Math.min(i0+fr,7);
+    win._x=TX(1)+75+150*pos;place(win,{o:P(t,3.6,4)});
+    const pair=Math.round(pos)+1,evK=pair%2===0?pair:pair+1;spark._x=TX(evK);place(spark,{o:P(t,3.8,4.2),r:RM?0:t*60});
+    show(lbl,t,4.4,9.2);show(so,t,9.2);
+    show(cF,t,12.2);show(cC,t,16.2);
+  }};
+})());
+
+/* 6. Same or opposite parity */
+scenes.push((()=>{
+  let head,hdr=[],cells=[],dS,dO,b1,b2;
+  const CXs=[600,900],CYs=[400,560];
+  return {title:'Same parity',dur:22,
+  caps:[[0.6,'New idea: two integers have the same parity if both are even or both are odd.'],[6,'Otherwise, they have opposite parity.'],[10.6,'Every pair of integers lands in exactly one of these boxes.'],[15.4,'So the negation of “same parity” is “opposite parity.” Remember that.']],
+  build(r){
+    head=gt(r,800,95,'Same or opposite parity',{size:60,weight:600});
+    hdr.push(gt(r,600,290,'n even',{size:34,weight:700}),gt(r,900,290,'n odd',{size:34,weight:700}),gt(r,370,400,'m even',{size:34,weight:700}),gt(r,370,560,'m odd',{size:34,weight:700}));
+    [[0,0,1],[1,1,1],[0,1,0],[1,0,0]].forEach(([i,j,same])=>{const g=G(r,CXs[j],CYs[i]);
+      el('rect',{x:-135,y:-68,width:270,height:136,rx:24,fill:'--card',stroke:same?'--mint':'--pop','stroke-width':5},g);
+      [[-40,i],[40,j]].forEach(([x,o],q)=>{const c=G(g,x,-20);el('circle',{r:28,fill:o?'--mint':'--sky'},c);txt(c,0,0,q?'n':'m',{size:30,weight:700,fill:o?'--tink':'--on-strong'});});
+      const tg=G(g,0,38);pill(tg,170,42,same?'--mint':'--pop',same?'same':'opposite',{size:26,color:same?'--tink':'--on-strong'});cells.push(g);});
+    dS=G(r,1290,420);el('rect',{x:-200,y:-62,width:400,height:124,rx:24,fill:'--card',stroke:'--mint','stroke-width':5},dS);txt(dS,0,-20,'Same parity',{size:36,weight:700});txt(dS,0,24,'both even or both odd',{size:28,weight:500,fill:'--muted'});
+    dO=G(r,1290,580);el('rect',{x:-200,y:-62,width:400,height:124,rx:24,fill:'--card',stroke:'--pop','stroke-width':5},dO);txt(dO,0,-20,'Opposite parity',{size:36,weight:700});txt(dO,0,24,'one even, one odd',{size:28,weight:500,fill:'--muted'});
+    b1=G(r,800,750);pill(b1,860,76,'--sun','Every pair is one or the other, never both',{size:32});
+    b2=G(r,800,750);pill(b2,980,76,'--grape','So “not same parity” means “opposite parity”',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});hdr.forEach(h=>place(h,{o:P(t,1,1.5)}));
+    cells.forEach((g,i)=>show(g,t,[1.6,3.4,6.2,7.2][i],1e9,{s:undefined}));
+    cells.forEach((g,i)=>{const v=pv(t,[1.6,3.4,6.2,7.2][i]);place(g,{s:v.s*(1+.05*bump(t,10.8+i*.25,.4)),o:v.o});});
+    show(dS,t,2.2);show(dO,t,6.6);show(b1,t,11,15.4);show(b2,t,15.6);
+  }};
+})());
+
+/* 7. Four arguments */
+scenes.push((()=>{
+  let thm,cnt,hdr=[],cells=[],d1,d2,frame;
+  const CXs=[620,1020],CYs=[400,580];
+  const DATA=[[0,0,'m = 2a,  n = 2b','= 2(3a + 5b)','even',1],[1,1,'m = 2a + 1,  n = 2b + 1','= 2(3a + 5b + 4)','even',1],[0,1,'m = 2a,  n = 2b + 1','= 2(3a + 5b + 2) + 1','odd',0],[1,0,'m = 2a + 1,  n = 2b','= 2(3a + 5b + 1) + 1','odd',0]];
+  const TIMES=[4,7.4,13,16.4];
+  return {title:'Four arguments',dur:30,
+  caps:[[0.6,'Result 3.27: 3m + 5n is even if and only if m and n have the same parity.'],[3.8,'Direction 1: same parity ⇒ even. Case both even: 2(3a + 5b).'],[7.4,'Case both odd: 2(3a + 5b + 4). Even both times.'],[12.6,'Direction 2, by contrapositive: opposite parity ⇒ odd. Case m even, n odd…'],[16.4,'…and case m odd, n even. Odd both times.'],[22.6,'Four arguments, and together they cover every pair of integers.']],
+  build(r){
+    thm=G(r,800,140);ticket(thm,1320,90);row(thm,0,0,[['Result 3.27',{weight:700}],'   3m + 5n is even if and only if m and n have the same parity.'],{size:33,anchor:'middle',fill:'--tink'});
+    cnt=gt(r,800,222,'2 directions × 2 cases = 4 arguments',{size:34,weight:600,fill:'--muted'});
+    hdr.push(gt(r,620,284,'n even',{size:32,weight:700}),gt(r,1020,284,'n odd',{size:32,weight:700}),gt(r,330,400,'m even',{size:32,weight:700}),gt(r,330,580,'m odd',{size:32,weight:700}));
+    frame=el('rect',{x:412,y:307,width:816,height:366,rx:34,fill:'none',stroke:'--grape','stroke-width':6,'stroke-dasharray':'16 12'},r);
+    DATA.forEach(([i,j,setup,expr,tag,same])=>{const g=G(r,CXs[j],CYs[i]);
+      el('rect',{x:-190,y:-80,width:380,height:160,rx:24,fill:'--card',stroke:same?'--mint':'--pop','stroke-width':5},g);
+      txt(g,0,-46,setup,{size:26,weight:600,fill:'--muted'});txt(g,0,2,expr,{size:32,weight:600});
+      pill(G(g,0,50),110,38,same?'--mint':'--pop',tag,{size:24,color:same?'--tink':'--on-strong'});cells.push(g);});
+    d1=G(r,470,770);pill(d1,560,62,'--mint','Direction 1: same parity ⇒ even',{size:27});
+    d2=G(r,1130,770);pill(d2,620,62,'--pop','Direction 2 (contrapositive): opposite ⇒ odd',{size:27,color:'--on-strong'});
+  },
+  update(t){
+    show(thm,t,.5);place(cnt,{o:P(t,1.6,2.1)});hdr.forEach(h=>place(h,{o:P(t,2.2,2.7)}));
+    cells.forEach((g,i)=>show(g,t,TIMES[i]));
+    show(d1,t,9.6);show(d2,t,19);
+    frame.setAttribute('opacity',P(t,22.8,23.3));
+  }};
+})());
+
+/* 8. Fresh letters */
+scenes.push((()=>{
+  let head,sub,bad,badTag,badEx,good,goodTag,goodEx,note;
+  return {title:'Fresh letters',dur:18,
+  caps:[[0.6,'Careful with letters. In the case “both even”, don’t write m = 2a and n = 2a.'],[5,'That says m = n, which the claim never said. Try m = 4 and n = 10: a can’t be both 2 and 5.'],[9.6,'Use different letters: m = 2a and n = 2b.'],[13.4,'Reusing a letter in a different case is fine. The cases are independent.']],
+  build(r){
+    head=gt(r,800,95,'Fresh letters for different things',{size:56,weight:600});
+    sub=gt(r,800,190,'In the case “m and n are both even”:',{size:36,weight:600,fill:'--muted'});
+    bad=boxCard(r,430,440,660,330,'--pop');txt(bad,0,-80,'m = 2a,   n = 2a',{size:56,weight:600});
+    badTag=G(bad,0,10);pill(badTag,340,62,'--pop','That says m = n!',{size:32,color:'--on-strong'});
+    badEx=G(bad,0,94);txt(badEx,0,-18,'m = 4 needs a = 2, n = 10 needs a = 5.',{size:27,weight:500,fill:'--muted'});txt(badEx,0,20,'One letter can’t be both.',{size:27,weight:700,fill:'--muted'});
+    good=boxCard(r,1170,440,660,330,'--mint');txt(good,0,-80,'m = 2a,   n = 2b',{size:56,weight:600});
+    goodTag=G(good,0,10);pill(goodTag,380,62,'--mint','independent letters ✓',{size:32});
+    goodEx=G(good,0,94);txt(goodEx,0,0,'a and b can be any integers.',{size:27,weight:500,fill:'--muted'});
+    note=G(r,800,740);pill(note,1260,80,'--sun','Reusing a letter in a different case is fine: the cases are independent.',{size:30});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});place(sub,{o:P(t,.6,1.1)});
+    show(bad,t,1);show(badTag,t,4.8,1e9,{dx:t>5.3&&t<6&&!RM?Math.sin((t-5.3)*30)*6:0});place(badEx,{o:P(t,6.2,6.7)});
+    show(good,t,9.6);show(goodTag,t,10.6);place(goodEx,{o:P(t,11.2,11.7)});
+    show(note,t,13.6);
+  }};
+})());
+
+/* 9. Without loss of generality */
+scenes.push((()=>{
+  let thm,A,l1,l2,l3,cL,cR,mirror,swapL,same,wlog,B,head2,ctx,toks={},neq,np,rule,habit;
+  return {title:'WLOG',dur:32,chapters:[[0,'Without loss of generality'],[20,'When WLOG fails']],
+  caps:[[0.6,'Result 3.28: mn is odd if and only if m and n are both odd.'],[3.4,'To show mn odd ⇒ both odd, prove the contrapositive: if not both odd, then mn is even.'],[7.6,'By De Morgan, “not both odd” means at least one is even. Case m even, or case n even.'],[10.6,'Look: the two cases are mirror images. Swap the names and one becomes the other.'],[13,'So prove one, and say “without loss of generality, m is even.” Then mn = 2(an).'],[20.4,'But WLOG only works when the cases are truly symmetric.'],[23.4,'In 3m + 5n, swapping m and n gives 3n + 5m. That’s a different expression, so you write both cases.'],[28,'Using WLOG to skip a case you haven’t checked is a costly habit.']],
+  build(r){
+    thm=G(r,800,140);ticket(thm,1200,90);row(thm,0,0,[['Result 3.28',{weight:700}],'   mn is odd if and only if m and n are both odd.'],{size:36,anchor:'middle',fill:'--tink'});
+    A=G(r,0,0);
+    l1=G(A,800,232);row(l1,0,0,['To show  ',['mn odd ⇒ both odd',{weight:700,fill:'--ink'}],', prove the contrapositive:'],{size:30,anchor:'middle',fill:'--muted',weight:600});
+    l2=G(A,800,292);row(l2,0,0,['not both odd  ⇒  mn is even'],{size:42,anchor:'middle',weight:700});
+    l3=G(A,800,364);row(l3,0,0,['De Morgan:  ',['not both odd = at least one is even',{box:'--sun',weight:600,size:32}]],{size:32,anchor:'middle',weight:600});
+    const cc=(x,title,lines)=>{const g=boxCard(A,x,565,560,250);pill(G(g,0,-90),300,52,'--sky',title,{size:28,color:'--on-strong'});
+      lines.forEach((s,i)=>txt(g,0,-20+50*i,s,{size:34,weight:i===2?700:500}));return g;};
+    cL=cc(480,'Case: m is even',['m = 2a','mn = (2a)n = 2(an)','even ✓']);
+    cR=cc(1120,'Case: n is even',['n = 2a','mn = m(2a) = 2(am)','even ✓']);
+    mirror=el('line',{x1:800,y1:450,x2:800,y2:700,stroke:'--muted','stroke-width':5,'stroke-dasharray':'8 12','stroke-linecap':'round'},A);
+    swapL=G(A,800,428);pill(swapL,220,50,'--sun','swap m ↔ n',{size:28});
+    same=G(A,480,410);pill(same,280,54,'--mint','same argument!',{size:30});
+    wlog=G(A,800,778);pill(wlog,1160,84,'--grape','“Without loss of generality, m is even.” Prove one case.',{size:32,color:'--on-strong'});
+    B=G(r,0,0);
+    head2=gt(B,800,95,'When WLOG doesn’t apply',{size:60,weight:600});
+    ctx=gt(B,800,215,'Result 3.27 has cases “m even, n odd” and “m odd, n even”.',{size:30,weight:600,fill:'--muted'});
+    [['3',590],['m',652],['+',734],['5',806],['n',864]].forEach(([s,x])=>{toks[s]=gt(B,x,340,s,{size:78,weight:600,fill:s==='m'||s==='n'?'--grape':'--ink'});});
+    neq=G(B,1170,340);txt(neq,0,0,'≠  3m + 5n',{size:62,weight:700,fill:'--pop'});
+    np=G(B,800,470);pill(np,1040,70,'--pop','Swapping names changes the claim, so write both cases',{size:30,color:'--on-strong'});
+    rule=G(B,800,635);ticket(rule,1260,160);txt(rule,0,-30,'WLOG is legit only when swapping the names turns',{size:36,weight:600,fill:'--tink'});txt(rule,0,26,'one case into the other, word for word.',{size:36,weight:600,fill:'--tink'});
+    habit=gt(B,800,790,'Using it to skip a case you haven’t checked is a costly habit.',{size:32,weight:600,fill:'--muted'});
+  },
+  update(t){
+    show(thm,t,.5,20.1);
+    place(A,{o:1-P(t,19.6,20.1)});
+    place(l1,{o:P(t,3.4,3.9)});place(l2,{o:P(t,3.8,4.3),dy:(1-P(t,3.8,4.3,eout))*15});place(l3,{o:P(t,7.6,8.1)});
+    show(cL,t,8.6);
+    const fd=P(t,11.2,12.6),sx=Math.max(Math.abs(Math.cos(fd*Math.PI)),.03);
+    const v=pv(t,9.2);place(cR,{s:undefined,sx:v.s*sx,sy:v.s,o:v.o*(1-P(t,12.4,12.8)),dx:(480-1120)*fd});
+    mirror.setAttribute('opacity',P(t,10.4,10.8)*(1-P(t,12.6,13)));show(swapL,t,10.6,13);
+    show(same,t,12.6);show(wlog,t,13.2);
+    place(B,{o:P(t,20.1,20.6)});place(head2,{o:P(t,20.2,20.7)});place(ctx,{o:P(t,20.6,21.1)});
+    const sw=P(t,23.6,24.6);
+    ['3','+','5'].forEach(s=>place(toks[s],{o:P(t,21,21.5)}));
+    place(toks.m,{o:P(t,21,21.5),dx:(864-652)*sw,dy:-Math.sin(Math.PI*sw)*70});
+    place(toks.n,{o:P(t,21,21.5),dx:(652-864)*sw,dy:Math.sin(Math.PI*sw)*70});
+    show(neq,t,24.8);show(np,t,25.6);show(rule,t,26.4);place(habit,{o:P(t,28.2,28.7)});
+  }};
+})());
+
+/* 10. Beyond parity */
+scenes.push((()=>{
+  let head,rows=[],note,bottom;
+  const RW=[['a claim about |x|',['x ≥ 0','x < 0']],['an integer divided by 3',['remainder 0','remainder 1','remainder 2']],['a hypothesis “A or B”',['case A','case B']],['sets: x ∉ B ∩ C',['x ∉ B','x ∉ C']]];
+  const RT=[1,4.6,8.6,12.6],FILL=[['--sky','--on-strong'],['--mint','--tink'],['--sun','--tink']];
+  return {title:'Beyond parity',dur:22,
+  caps:[[0.6,'Parity isn’t the only split. A claim about |x|? Try x ≥ 0 and x < 0.'],[4.6,'Dividing by 3? Split by remainder: 0, 1, or 2.'],[8.6,'A hypothesis with “or” in it? One case per option.'],[12.6,'And for sets, x ∉ B ∩ C means x ∉ B or x ∉ C. You used that in Lecture 14 and on the midterm.'],[17.2,'Whenever you see an “or”, it’s an invitation to split.']],
+  build(r){
+    head=gt(r,800,95,'Cases beyond parity',{size:60,weight:600});
+    RW.forEach(([s,br],i)=>{const y=245+140*i,g=G(r,0,0);
+      const lc=G(g,380,y);el('rect',{x:-230,y:-40,width:460,height:80,rx:40,fill:'--card',stroke:'--line','stroke-width':4},lc);txt(lc,0,0,s,{size:32,weight:600});
+      const ar=G(g,700,y);el('line',{x1:-60,y1:0,x2:30,y2:0,stroke:'--ink','stroke-width':7,'stroke-linecap':'round'},ar);el('path',{d:'M26 -14 L48 0 L26 14Z',fill:'--ink'},ar);
+      const xs=br.length===2?[900,1150]:[880,1110,1340];
+      const bs=br.map((b,k)=>{const c=G(g,xs[k],y);pill(c,220,64,FILL[k][0],b,{size:28,color:FILL[k][1]});return c;});
+      rows.push({lc,ar,bs});});
+    note=gt(r,1025,712,'(you used this in Lecture 14 and on the midterm)',{size:24,weight:500,fill:'--muted'});
+    bottom=G(r,800,812);pill(bottom,860,76,'--grape','See an “or”? That’s an invitation to split.',{size:34,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    rows.forEach(({lc,ar,bs},i)=>{const a=RT[i];show(lc,t,a);const k=P(t,a+.4,a+.8,eout);place(ar,{o:k,dx:-(1-k)*20});bs.forEach((b,j)=>show(b,t,a+.8+j*.25));});
+    place(note,{o:P(t,14.2,14.7)});show(bottom,t,17.4);
+  }};
+})());
+
+/* 11. Takeaways */
+scenes.push((()=>{
+  let head,tk=[];
+  const L=['Split into cases that cover everything.','Fresh letters for different quantities in a case.','WLOG only when swapping names changes nothing.'];
+  const A=[.6,5.6,10.6];
+  return {title:'Takeaways',dur:16,
+  caps:[[0.6,'Split the domain into cases, and make sure they cover all of it.'],[5.6,'Within a case, give different quantities different letters.'],[10.6,'Say “without loss of generality” only when swapping the names really changes nothing.']],
+  build(r){
+    head=gt(r,800,95,'Three things to remember',{size:60,weight:600});
+    L.forEach((s,i)=>{const g=G(r,800,265+190*i);ticket(g,1180,150);
+      el('line',{x1:-410,y1:-58,x2:-410,y2:58,stroke:'--tink','stroke-width':4,'stroke-dasharray':'6 10','stroke-linecap':'round',opacity:.45},g);
+      const ic=G(g,-500,0);
+      if(i===0){el('path',{d:wedgeD(0,0,40,90,270),fill:'--sky'},ic);el('path',{d:wedgeD(6,0,40,-90,90),fill:'--mint'},ic);}
+      else if(i===1)txt(ic,0,0,'a ≠ b',{size:32,weight:700,fill:'--tink'});
+      else{el('path',{d:'M-8 -30 L-40 0 L-8 30Z',fill:'--sky'},ic);el('path',{d:'M8 -30 L40 0 L8 30Z',fill:'--sky'},ic);el('line',{x1:0,y1:-38,x2:0,y2:38,stroke:'--tink','stroke-width':4,'stroke-dasharray':'5 6'},ic);}
+      txt(g,-372,0,s,{size:38,weight:600,fill:'--tink',anchor:'start'});tk.push(g);});
+  },
+  update(t){place(head,{o:P(t,.4,1)});tk.forEach((g,i)=>{const k=P(t,A[i],A[i]+.6,eout);place(g,{dx:-(1-k)*120,o:k,r:(1-k)*-3});});}
+  };
+})());
+
+/* 12. Exit ticket */
+scenes.push((()=>{
+  let head,cards=[],backs=[],ans=[],timer,arc,cnt,foot;
+  const C=2*Math.PI*40;
+  const Q=[{q:'Q1',lines:[['Why must the cases',40,600],['cover the whole domain?',40,600]],a:[['Any element you miss',36,700],['gets no proof at all.',36,700]]},
+           {q:'Q2',lines:[['Prove by cases: for every',36,600],['integer n, n² + n is even.',36,600]],a:[['Even: n = 2a gives 2(2a² + a)',29,600],['Odd: n = 2b + 1 gives 4b² + 6b + 2',29,600],['= 2(2b² + 3b + 1). Even either way ✓',29,700]]}];
+  return {title:'Exit ticket',dur:18,
+  caps:[[0.6,'Exit ticket: try both in your head before the reveal.'],[8,'Check yourself!'],[10.6,'Q2: even gives 2(2a² + a), odd gives 2(2b² + 3b + 1). Even either way, and every integer is one or the other.'],[14.6,'Next up: Section 3.5, counterexamples.']],
+  build(r){
+    head=gt(r,800,95,'Exit ticket',{size:60,weight:600});
+    Q.forEach((d,i)=>{const g=G(r,i?1170:430,445);
+      el('rect',{x:-345,y:-235,width:690,height:470,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+      pill(G(g,-275,-185),84,52,'--pop',d.q,{size:28,color:'--on-strong',weight:700});
+      d.lines.forEach(([s,sz,w],j)=>txt(g,0,-115+56*j,s,{size:sz,weight:w}));
+      const b=G(g,0,105);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--line'},b);txt(b,0,0,'Think first…',{size:34,weight:600,fill:'--muted'});backs.push(b);
+      const a=G(g,0,105);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--stage',stroke:'--mint','stroke-width':5},a);
+      const n=d.a.length,step=n===3?52:58,y0=-(n-1)*step/2;d.a.forEach(([s,sz,w],j)=>txt(a,0,y0+step*j,s,{size:sz,weight:w}));ans.push(a);cards.push(g);});
+    timer=G(r,800,800);el('circle',{r:40,fill:'none',stroke:'--line','stroke-width':10},timer);
+    arc=el('circle',{r:40,fill:'none',stroke:'--sun','stroke-width':10,'stroke-linecap':'round','stroke-dasharray':C.toFixed(1),transform:'rotate(-90)'},timer);
+    cnt=txt(timer,0,0,'5',{size:34,weight:700});
+    foot=gt(r,800,800,'Next up: Section 3.5, Counterexamples',{size:36,weight:500,fill:'--muted'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    cards.forEach((g,i)=>show(g,t,.6+i*.3));
+    [8,8.6].forEach((a,i)=>{const k=P(t,a,a+.6),sy=Math.max(Math.abs(Math.cos(k*Math.PI)),.03);
+      place(backs[i],{sx:1,sy,o:k<.5?1:0});place(ans[i],{sx:1,sy,o:k>=.5?1:0});});
+    const tk=P(t,.9,7.6,x=>x);arc.setAttribute('stroke-dashoffset',(C*tk).toFixed(1));
+    const n=String(Math.max(1,5-Math.floor(tk*5)));if(cnt.textContent!==n)cnt.textContent=n;
+    place(timer,{o:Math.min(P(t,.9,1.3),1-P(t,7.6,8.1))});
+    place(foot,{o:P(t,14.6,15.2)});
+  }};
+})());
+
+/* ---------- assemble timeline ---------- */
+const root=el('g',{},svg);
+const starts=[];let acc=0;
+scenes.forEach(s=>{starts.push(acc);s.g=el('g',{},root);s.rows=[];BUILDING=s;s.build(s.g);BUILDING=null;s._lv=-1;s.g.style.display='none';acc+=s.dur;});
+const TOTAL=acc;
+const chapters=[];scenes.forEach((s,i)=>(s.chapters||[[0,s.title]]).forEach(([o,ti])=>chapters.push({t:starts[i]+o,title:ti})));
+const caps=[];scenes.forEach((s,i)=>s.caps.forEach(([o,c])=>caps.push([starts[i]+o,c])));
+
+/* ticket-wipe transition between scenes, carrying the next chapter's title */
+const wipe=el('g',{},svg);wipe._x=0;wipe._y=0;
+el('path',{d:'M0 0 H2000 L1800 900 H-200Z',fill:'--sun'},wipe);
+el('line',{x1:46,y1:0,x2:-154,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+el('line',{x1:1954,y1:0,x2:1754,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+const wNum=txt(wipe,900,372,'',{size:34,weight:600,fill:'--tink'});
+const wTitle=txt(wipe,900,456,'',{size:92,weight:700,fill:'--tink'});
+function renderWipe(t){
+  let b=null;for(let i=1;i<starts.length;i++)if(Math.abs(t-starts[i])<.6){b=starts[i];break;}
+  if(b===null){place(wipe,{o:0});return;}
+  const u=(t-(b-.6))/1.2;
+  const ci=chapters.findIndex(c=>Math.abs(c.t-b)<.01);
+  if(ci>=0&&wTitle.textContent!==chapters[ci].title){wTitle.textContent=chapters[ci].title;wNum.textContent='Part '+(ci+1)+' of '+chapters.length;}
+  if(RM){place(wipe,{dx:-100,o:clamp((.5-Math.abs(u-.5))*4)});return;}
+  const tx=u<.4?lerp(1800,0,eout(u/.4)):u<.6?lerp(0,-200,(u-.4)/.2):lerp(-200,-2000,ein((u-.6)/.4));
+  place(wipe,{dx:tx,o:1});
+}
+
+/* ---------- player ---------- */
+const $=id=>document.getElementById(id);
+const capEl=$('caption'),playBtn=$('play'),scrub=$('scrub'),timeEl=$('time'),poster=$('poster'),chapNav=$('chapters'),player=$('player');
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+scrub.max=TOTAL;
+$('posterLen').textContent=Math.floor(TOTAL/60)+' min '+Math.round(TOTAL%60)+' s';
+poster.setAttribute('aria-label','Play the explainer ('+Math.floor(TOTAL/60)+' minutes '+Math.round(TOTAL%60)+' seconds)');
+const ICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/><rect x="14" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/></svg>',
+  replay:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+const ticksEl=$('ticks');
+chapters.forEach((c,i)=>{if(i){const s=document.createElement('span');s.style.left=(c.t/TOTAL*100)+'%';ticksEl.appendChild(s);}
+  const b=document.createElement('button');b.type='button';b.className='chip';b.innerHTML='<b>'+(i+1)+'</b>';b.appendChild(document.createTextNode(c.title));
+  b.addEventListener('click',()=>{seek(c.t+.01);setPlaying(true);});c.btn=b;chapNav.appendChild(b);});
+
+let T=0,playing=false,started=false,speed=1,last=null,dirty=true,lastScene=-1,lastCap=null,lastChap=-1;
+const sceneAt=t=>{let i=0;for(let k=0;k<starts.length;k++)if(t>=starts[k])i=k;return i;};
+function render(){
+  const t=started?T:5.4;
+  const i=sceneAt(Math.min(t,TOTAL-1e-6));
+  if(i!==lastScene){scenes.forEach((s,k)=>s.g.style.display=k===i?'':'none');lastScene=i;}
+  if(scenes[i]._lv!==FONTV){scenes[i].rows.forEach(layoutRow);scenes[i]._lv=FONTV;}
+  scenes[i].update(t-starts[i]);
+  renderWipe(t);
+  let c='';if(started){for(const [ct,s] of caps){if(ct<=T)c=s;else break;}}
+  if(c!==lastCap){capEl.textContent=c;lastCap=c;}
+  scrub.value=T;scrub.style.setProperty('--pct',(T/TOTAL*100).toFixed(2)+'%');
+  timeEl.textContent=fmt(T)+' / '+fmt(TOTAL);
+  let ch=0;chapters.forEach((cc,k)=>{if(T>=cc.t-.001)ch=k;});
+  if(ch!==lastChap){chapters.forEach((cc,k)=>cc.btn.setAttribute('aria-current',k===ch?'true':'false'));
+    if(started){const b=chapters[ch].btn;chapNav.scrollTo({left:b.offsetLeft-chapNav.clientWidth/2+b.offsetWidth/2,behavior:RM?'auto':'smooth'});}lastChap=ch;}
+}
+function setPlaying(p){
+  if(p&&T>=TOTAL-.01)T=0;
+  playing=p;last=null;
+  if(p){started=true;poster.hidden=true;}
+  const ended=!p&&T>=TOTAL-.01;
+  playBtn.innerHTML=p?ICON.pause:(ended?ICON.replay:ICON.play);
+  playBtn.setAttribute('aria-label',p?'Pause':(ended?'Replay':'Play'));
+  dirty=true;
+}
+function seek(t){started=true;poster.hidden=true;T=clamp(t,0,TOTAL);dirty=true;}
+function loop(now){
+  if(playing){if(last!==null)T+=Math.min((now-last)/1000,.1)*speed;last=now;if(T>=TOTAL){T=TOTAL;setPlaying(false);}dirty=true;}
+  if(dirty){render();dirty=false;}
+  requestAnimationFrame(loop);
+}
+playBtn.addEventListener('click',()=>setPlaying(!playing));
+poster.addEventListener('click',()=>{T=0;setPlaying(true);playBtn.focus({preventScroll:true});});
+$('restart').addEventListener('click',()=>{seek(0);setPlaying(true);});
+scrub.addEventListener('input',()=>seek(parseFloat(scrub.value)));
+const speeds=[1,1.25,1.5,.75];
+$('speed').addEventListener('click',e=>{speed=speeds[(speeds.indexOf(speed)+1)%speeds.length];e.currentTarget.textContent=speed+'×';e.currentTarget.setAttribute('aria-label','Playback speed '+speed+' times');});
+$('cc').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);capEl.hidden=!on;});
+const fsBtn=$('fs');
+if(!(document.fullscreenEnabled&&player.requestFullscreen))fsBtn.hidden=true;
+fsBtn.addEventListener('click',()=>{try{if(document.fullscreenElement)document.exitFullscreen();else player.requestFullscreen().catch(()=>{});}catch(e){}});
+document.addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(e.altKey||e.ctrlKey||e.metaKey)return;
+  if(e.key===' '||e.key==='k'){if(tag==='button'&&e.key===' ')return;if(tag==='input'&&e.key===' '){e.preventDefault();setPlaying(!playing);return;}
+    if(tag!=='input'){e.preventDefault();setPlaying(!playing);}}
+  else if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&tag!=='input'){e.preventDefault();seek(T+(e.key==='ArrowRight'?5:-5));}
+});
+setPlaying(false);
+if(document.fonts){if(document.fonts.ready)document.fonts.ready.then(()=>{FONTV++;dirty=true;});document.fonts.addEventListener&&document.fonts.addEventListener('loadingdone',()=>{FONTV++;dirty=true;});}
+window.__seek=t=>{seek(t);render();};
+window.__total=TOTAL;
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Settling a Question From Week 1: an animated explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9E6FA; --stage:#FBFAFF; --card:#F0EDFD; --ink:#26215E; --muted:#6B67A3; --line:#D3CEF0;
+  --paper:#FFE7A3; --tink:#26215E; --pop:#E8395F; --mint:#14B983; --sky:#3D7BF5; --sun:#FFC23A; --grape:#7C4DEB;
+  --on-strong:#FFFFFF;
+  --display:"Fredoka","Nunito","Trebuchet MS","Segoe UI",system-ui,"Cambria Math","STIX Two Math",sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,"Cambria Math",sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+    --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+    --on-strong:#1B1846; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+  --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+  --on-strong:#1B1846; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 36px}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:4px 4px 14px}
+.intro h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.6vw,40px);margin:0;letter-spacing:-0.01em}
+.intro p{margin:0;color:var(--muted);font-size:17px;line-height:1.4}
+.player{background:var(--card);border-radius:24px;padding:10px;border:2px solid var(--line)}
+.stage{position:relative;border-radius:16px;overflow:hidden;background:var(--stage);aspect-ratio:16/9;width:100%}
+.stage svg{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+.td{font-family:var(--display)}
+.tb{font-family:var(--body)}
+.poster{position:absolute;inset:0;border:0;padding:0;margin:0;background:transparent;cursor:pointer;color:inherit;font:inherit}
+.poster[hidden]{display:none}
+.poster-btn{position:absolute;left:50%;top:19%;transform:translate(-50%,-50%);width:clamp(56px,10vw,104px);aspect-ratio:1;border-radius:50%;
+  background:var(--ink);color:var(--stage);display:grid;place-items:center;box-shadow:0 0 0 clamp(5px,.9vw,10px) var(--stage);transition:transform .18s ease}
+.poster-btn svg{width:42%;height:42%;margin-left:8%}
+.poster:hover .poster-btn,.poster:focus-visible .poster-btn{transform:translate(-50%,-50%) scale(1.07)}
+.poster:focus-visible{outline:4px solid var(--sky);outline-offset:-4px;border-radius:16px}
+.poster-len{position:absolute;left:14px;top:12px;background:var(--paper);color:var(--tink);font-weight:700;font-size:clamp(12px,1.5vw,15px);padding:5px 12px;border-radius:999px}
+.caption{min-height:3.3em;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 18px 6px;
+  font-size:clamp(16px,1.9vw,22px);line-height:1.38;font-weight:700;color:var(--ink);margin:0;text-wrap:balance}
+.caption:empty::before{content:"Captions appear here once you press play.";color:var(--muted);font-weight:400}
+.caption[hidden]{display:none}
+.controls{display:flex;align-items:center;gap:8px;padding:6px 4px 2px;flex-wrap:wrap}
+.btn{min-width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:var(--stage);color:var(--ink);
+  font:700 15px/1 var(--body);display:inline-grid;place-items:center;cursor:pointer;padding:0 10px}
+.btn svg{width:22px;height:22px}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,.chip:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.btn.play{background:var(--pop);border-color:var(--pop);color:var(--on-strong);min-width:52px}
+.btn[aria-pressed="false"]{color:var(--muted)}
+.scrub{position:relative;flex:1 1 220px;min-width:160px;height:44px;display:flex;align-items:center}
+.ticks{position:absolute;left:11px;right:11px;top:6px;height:6px;pointer-events:none}
+.ticks span{position:absolute;top:0;width:3px;height:7px;border-radius:2px;background:var(--muted);transform:translateX(-50%)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(to right,var(--pop) var(--pct,0%),var(--line) var(--pct,0%))}
+input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:10px;border-radius:6px;background:var(--pop)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--paper);border:3px solid var(--ink)}
+.time{font:700 15px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--muted);min-width:96px;text-align:center}
+.chapters{display:flex;gap:6px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:thin}
+.chip{flex:0 0 auto;border:2px solid var(--line);background:var(--stage);color:var(--ink);border-radius:999px;padding:7px 13px 7px 7px;
+  font:700 14px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--card);font-size:12px}
+.chip[aria-current="true"]{background:var(--ink);color:var(--stage);border-color:var(--ink)}
+.chip[aria-current="true"] b{background:var(--sun);color:var(--tink)}
+.hint{color:var(--muted);font-size:14px;margin:12px 6px 0;line-height:1.45}
+.rotate{display:none}
+@media (max-width:640px) and (orientation:portrait){.rotate{display:block}}
+.player:fullscreen{display:flex;flex-direction:column;justify-content:center;border-radius:0;border:0;padding:12px;background:var(--card)}
+.player:fullscreen .stage{width:min(100%,calc((100vh - 200px) * 16 / 9));margin:0 auto}
+.player:fullscreen .caption,.player:fullscreen .controls,.player:fullscreen .chapters{width:min(100%,calc((100vh - 200px) * 16 / 9));margin-left:auto;margin-right:auto}
+@media (max-width:560px){.time{min-width:0;font-size:13px}.btn{min-width:40px;height:40px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="intro">
+    <h1>Lecture 29, animated</h1>
+    <p>Induction from other starting points, with inequalities and divisibility, for CS 341.</p>
+  </header>
+  <section class="player" id="player" aria-label="Animated explainer player">
+    <div class="stage">
+      <svg id="svg" viewBox="0 0 1600 900" role="img" aria-label="Animation stage. The captions below describe each scene."></svg>
+      <button class="poster" id="poster" type="button" aria-label="Play the explainer">
+        <span class="poster-len" id="posterLen"></span>
+        <span class="poster-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5v15l13-7.5z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+    <div class="controls">
+      <button class="btn play" id="play" type="button" aria-label="Play"></button>
+      <button class="btn" id="restart" type="button" aria-label="Restart from the beginning"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="scrub"><div class="ticks" id="ticks"></div><input type="range" id="scrub" min="0" max="100" step="0.1" value="0" aria-label="Seek"></div>
+      <span class="time" id="time" aria-live="off">0:00</span>
+      <button class="btn" id="speed" type="button" aria-label="Playback speed">1×</button>
+      <button class="btn" id="cc" type="button" aria-pressed="true" aria-label="Captions">CC</button>
+      <button class="btn" id="fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+  </section>
+  <p class="hint">Space plays or pauses. The left and right arrow keys skip 5 seconds. Tap any chapter to jump there.</p>
+  <p class="hint rotate">Turn your phone sideways for a bigger picture.</p>
+</main>
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('svg');
+const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* ---------- math + easing ---------- */
+const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const lerp=(a,b,k)=>a+(b-a)*k;
+const eio=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+const eout=k=>1-Math.pow(1-k,3);
+const ein=k=>k*k*k;
+const back=k=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2);};
+const P=(t,a,b,fn=eio)=>fn(clamp((t-a)/(b-a)));
+const bump=(t,a,d)=>Math.sin(Math.PI*clamp((t-a)/d));
+const num=k=>k<0?'\u2212'+(-k):String(k);
+
+/* ---------- svg helpers ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);let st='';
+  for(const k in attrs){const v=attrs[k];if(v==null)continue;
+    if(k==='text')e.textContent=v;
+    else if((k==='fill'||k==='stroke')&&typeof v==='string'&&v.startsWith('--'))st+=k+':var('+v+');';
+    else e.setAttribute(k,v);}
+  if(st)e.setAttribute('style',st);
+  if(parent)parent.appendChild(e);return e;
+}
+function place(g,o={}){
+  const X=g._x+(o.dx||0),Y=g._y+(o.dy||0);
+  let tr='translate('+X.toFixed(2)+' '+Y.toFixed(2)+')';
+  if(o.r)tr+=' rotate('+o.r.toFixed(2)+')';
+  if(o.sx!=null||o.sy!=null){const sx=o.sx!=null?o.sx:(o.s!=null?o.s:1),sy=o.sy!=null?o.sy:(o.s!=null?o.s:1);tr+=' scale('+Math.max(sx,.001).toFixed(3)+' '+Math.max(sy,.001).toFixed(3)+')';}
+  else if(o.s!=null&&o.s!==1)tr+=' scale('+Math.max(o.s,.001).toFixed(3)+')';
+  g.setAttribute('transform',tr);
+  const op=o.o==null?1:clamp(o.o);
+  g.setAttribute('opacity',op.toFixed(3));
+  const vis=op<=.002?'hidden':'visible';if(g._vis!==vis){g.style.visibility=vis;g._vis=vis;}
+}
+function G(parent,x=0,y=0){const g=el('g',{},parent);g._x=x;g._y=y;place(g);return g;}
+function show(g,t,a,b=1e9,extra={}){
+  const k=clamp((t-a)/.5),f=1-P(t,b-.45,b,ein);
+  place(g,Object.assign({s:k?back(k):.001,o:Math.min(clamp(k*3),f)},extra));return k;
+}
+function txt(p,x,y,str,o={}){
+  return el('text',{x,y,dy:'.35em','font-size':o.size||40,'font-weight':o.weight||500,'text-anchor':o.anchor||'middle',
+    fill:o.fill||'--ink',class:o.body?'tb':'td',opacity:o.op,text:str},p);
+}
+function gt(p,x,y,str,o={}){const g=G(p,x,y);txt(g,0,0,str,o);return g;}
+function ticketD(w,h){const W=w/2,H=h/2,n=Math.min(14,h*.18),c=Math.min(14,h*.2);
+  return 'M'+(-W+c)+' '+(-H)+'H'+(W-c)+'A'+c+' '+c+' 0 0 1 '+W+' '+(-H+c)+'V'+(-n)+'A'+n+' '+n+' 0 0 0 '+W+' '+n+'V'+(H-c)+'A'+c+' '+c+' 0 0 1 '+(W-c)+' '+H+
+  'H'+(-W+c)+'A'+c+' '+c+' 0 0 1 '+(-W)+' '+(H-c)+'V'+n+'A'+n+' '+n+' 0 0 0 '+(-W)+' '+(-n)+'V'+(-H+c)+'A'+c+' '+c+' 0 0 1 '+(-W+c)+' '+(-H)+'Z';}
+function ticket(p,w,h,fill='--paper'){const g=el('g',{},p);el('path',{d:ticketD(w,h),fill},g);return g;}
+function pill(p,w,h,fill,label,o={}){const g=el('g',{},p);el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:h/2,fill},g);
+  if(label!=null)txt(g,0,0,label,{size:o.size||34,weight:o.weight||600,fill:o.color||'--tink'});return g;}
+function star(p,cx,cy,R,fill){let d='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?R*.45:R;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1);}
+  return el('path',{d:d+'Z',fill},p);}
+function shape(p,type,fill,s){
+  if(type===0)return el('circle',{r:s,fill},p);
+  if(type===1)return el('rect',{x:-s,y:-s,width:2*s,height:2*s,rx:12,fill},p);
+  if(type===2)return el('path',{d:'M0 '+(-s*1.05)+' L'+(s*1.05)+' '+(s*.8)+' L'+(-s*1.05)+' '+(s*.8)+'Z',fill,stroke:fill,'stroke-width':10,'stroke-linejoin':'round'},p);
+  if(type===3)return el('rect',{x:-s*.82,y:-s*.82,width:1.64*s,height:1.64*s,rx:10,fill,transform:'rotate(45)'},p);
+  return star(p,0,0,s*1.2,fill);
+}
+function mascot(p){const g=el('g',{},p);
+  el('path',{d:ticketD(124,84),fill:'--paper',stroke:'--tink','stroke-width':4},g);
+  el('circle',{cx:-34,cy:10,r:7,fill:'--pop',opacity:.45},g);el('circle',{cx:34,cy:10,r:7,fill:'--pop',opacity:.45},g);
+  el('circle',{cx:-17,cy:-8,r:6,fill:'--tink'},g);el('circle',{cx:17,cy:-8,r:6,fill:'--tink'},g);
+  el('path',{d:'M-13 10 Q0 22 13 10',fill:'none',stroke:'--tink','stroke-width':4,'stroke-linecap':'round'},g);return g;}
+function person(p,fill){const g=el('g',{},p);
+  el('rect',{x:-30,y:-4,width:60,height:58,rx:26,fill},g);el('circle',{cx:0,cy:-34,r:25,fill},g);
+  el('circle',{cx:-9,cy:-37,r:3.6,fill:'--tink'},g);el('circle',{cx:9,cy:-37,r:3.6,fill:'--tink'},g);
+  el('path',{d:'M-8 -27 Q0 -21 8 -27',fill:'none',stroke:'--tink','stroke-width':3,'stroke-linecap':'round'},g);return g;}
+function speech(p,w,h,label,o={}){const g=el('g',{},p);
+  el('path',{d:'M'+(-w/2+4)+' -14 L'+(-w/2-30)+' 16 L'+(-w/2+4)+' 14Z',fill:'--grape'},g);
+  el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--grape'},g);
+  txt(g,0,0,label,{size:o.size||36,weight:600,fill:'--on-strong'});return g;}
+function dart(g){el('line',{x1:0,y1:-96,x2:0,y2:-18,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},g);
+  el('path',{d:'M-11 -22 L11 -22 L0 4Z',fill:'--ink'},g);el('path',{d:'M0 -78 L-16 -106 L0 -96 L16 -106Z',fill:'--pop'},g);}
+function qlen(x0,y0,cx,cy,x1,y1){let L=0,px=x0,py=y0;for(let i=1;i<=40;i++){const u=i/40,a=(1-u)*(1-u),b=2*u*(1-u),c=u*u;
+  const x=a*x0+b*cx+c*x1,y=a*y0+b*cy+c*y1;L+=Math.hypot(x-px,y-py);px=x;py=y;}return L;}
+
+/* ---------- extra helpers for algebra rows ---------- */
+const pv=(t,a)=>{const k=clamp((t-a)/.5);return {s:k?back(k):.001,o:clamp(k*3)};};
+let BUILDING=null,FONTV=0;
+function row(p,x,y,pieces,o={}){
+  const g=el('g',{},p);g._x=0;g._y=0;g._pc=[];g._ax=x;g._ay=y;g._anchor=o.anchor||'start';const S=o.size||44;
+  if(o.bg){const h=o.bgH||S*1.9;g._bg=el('rect',{y:y-h/2,height:h,rx:22,fill:o.bg,stroke:o.bgStroke||null,'stroke-width':o.bgStroke?5:null},g);g._padX=o.padX||32;}
+  pieces.forEach(pc=>{const [s,q={}]=Array.isArray(pc)?pc:[pc,{}];const base=q.size||S,sz=q.sup?Math.round(base*.62):base;let rect=null;const span=q.span||1;
+    if(q.box)rect=el('rect',{y:y-base*.68,height:base*1.36,rx:12,fill:q.box},g);
+    const t=el('text',{x,y:q.sup?y-base*.36:y,dy:'.35em','font-size':sz,'font-weight':q.weight||o.weight||500,'text-anchor':'start',
+      fill:q.fill||(q.box||q.inbox?'--tink':(o.fill||'--ink')),class:'td',text:s.replace(/ /g,'\u00A0')},g);
+    g._pc.push({t,rect,span,padL:q.box?12:0,padR:((q.box&&span===1)||q.padR)?12:0});});
+  layoutRow(g);if(BUILDING)BUILDING.rows.push(g);return g;
+}
+let MEAS=null;const MCACHE={};
+function measure(t){
+  if(!MEAS)MEAS=el('text',{x:-5000,y:-5000,class:'td',opacity:0,'aria-hidden':'true'},svg);
+  const sz=t.getAttribute('font-size'),w=t.getAttribute('font-weight'),s=t.textContent,key=FONTV+'|'+sz+'|'+w+'|'+s;
+  if(MCACHE[key]!=null)return MCACHE[key];
+  MEAS.setAttribute('font-size',sz);MEAS.setAttribute('font-weight',w);MEAS.textContent=s;
+  let l=0;try{l=MEAS.getComputedTextLength();}catch(e){}
+  return MCACHE[key]=l;
+}
+function layoutRow(g){
+  const ws=g._pc.map(pc=>measure(pc.t)+pc.padL+pc.padR);
+  const tot=ws.reduce((a,b)=>a+b,0);let x=g._anchor==='middle'?g._ax-tot/2:g._ax;g._x0=x;g._w=tot;
+  g._pc.forEach((pc,i)=>{if(pc.rect){let w=0;for(let j=i;j<i+pc.span&&j<ws.length;j++)w+=ws[j];pc.rect.setAttribute('x',(x+3).toFixed(1));pc.rect.setAttribute('width',Math.max(w-6,0).toFixed(1));}
+    pc.t.setAttribute('x',(x+pc.padL).toFixed(1));pc.x=x;pc.w=ws[i];x+=ws[i];});
+  if(g._bg){g._bg.setAttribute('x',(g._x0-g._padX).toFixed(1));g._bg.setAttribute('width',(tot+2*g._padX).toFixed(1));}
+}
+function frac(p,x,y,num,den,o={}){const g=G(p,x,y),s=o.size||48,w=o.w||Math.max(num.length,den.length)*s*.55+24;
+  txt(g,0,-s*.78,num,{size:s,weight:o.weight||500,fill:o.fill});
+  el('line',{x1:-w/2,y1:0,x2:w/2,y2:0,stroke:o.fill||'--ink','stroke-width':5,'stroke-linecap':'round'},g);
+  txt(g,0,s*.78,den,{size:s,weight:o.weight||500,fill:o.fill});return g;}
+function tracker(p,x,y,gap,labels,o={}){
+  const W=o.w||250;
+  const items=labels.map((l,i)=>{const g=G(p,o.horiz?x+gap*i:x,o.horiz?y:y+gap*i);
+    const bg=el('rect',{x:-W/2,y:-30,width:W,height:60,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+    const c=el('circle',{cx:-W/2+32,cy:0,r:20,fill:'--line'},g);
+    const n=txt(g,-W/2+32,0,String(i+1),{size:24,weight:700,fill:'--muted'});
+    const tx=txt(g,-W/2+62,0,l,{size:28,weight:600,anchor:'start',fill:'--muted'});
+    return {g,bg,c,n,tx};});
+  return {items,update(t,times,end,appear){items.forEach((it,i)=>{
+    const on=t>=times[i],done=t>=(i<items.length-1?times[i+1]:end),st=done?2:on?1:0;
+    if(it._st!==st){it._st=st;
+      it.bg.setAttribute('style','fill:var('+(st===1?'--sun':'--card')+');stroke:var('+(st===1?'--sun':st===2?'--mint':'--line')+')');
+      it.c.setAttribute('style','fill:var('+(st===0?'--line':st===1?'--tink':'--mint')+')');
+      it.n.setAttribute('style','fill:var('+(st===0?'--muted':st===1?'--sun':'--tink')+')');it.n.textContent=st===2?'✓':String(i+1);
+      it.tx.setAttribute('style','fill:var('+(st===1?'--tink':st===2?'--ink':'--muted')+')');}
+    const k=P(t,appear+i*.15,appear+.4+i*.15);place(it.g,{o:k,s:1+.08*(on&&!done?bump(t,times[i],.4):0)});});}};
+}
+function check(p,x,y){const c=G(p,x,y);el('circle',{r:24,fill:'--mint'},c);
+  el('path',{d:'M-10 0 L-3 8 L11 -8',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);return c;}
+
+/* =================================================================
+   SCENES  (each: title, dur, caps [local time, text], build, update)
+   ================================================================= */
+const scenes=[];
+function boxCard(p,x,y,w,h,stroke){const g=G(p,x,y);g._r=el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--card',stroke:stroke||'--line','stroke-width':stroke?5:3},g);return g;}
+function slideIn(g,t,a,dx=40){const k=P(t,a,a+.5,eout);place(g,{dx:-(1-k)*dx,o:k});}
+function domino(p,cx,base,o={}){const w=o.w||34,h=o.h||130,g=G(p,cx+w/2,base);
+  g._rect=el('rect',{x:-w,y:-h,width:w,height:h,rx:6,fill:o.fill||'--ink',stroke:'--stage','stroke-width':3},g);
+  el('line',{x1:-w+6,y1:-h/2,x2:-6,y2:-h/2,stroke:'--stage','stroke-width':3},g);
+  [-h*.75,-h*.25].forEach(y=>el('circle',{cx:-w/2,cy:y,r:Math.max(3,w*.15),fill:'--stage'},g));g._w=w;g._h=h;return g;}
+const fallAng=(t,a,fin=66,dur=.38)=>fin*ein(clamp((t-a)/dur));
+function chkMark(p,x,y,ok){const c=G(p,x,y);el('circle',{r:22,fill:ok?'--mint':'--pop'},c);
+  if(ok)el('path',{d:'M-9 0 L-3 7 L10 -7',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);
+  else el('path',{d:'M-7 -7 L7 7 M7 -7 L-7 7',stroke:'--on-strong','stroke-width':5,'stroke-linecap':'round'},c);return c;}
+const SUP=(s,q={})=>[s,Object.assign({sup:1},q)];
+function thmTicket(p,y,w,label,pieces,size=34){const g=G(p,800,y);ticket(g,w,88);row(g,0,0,[[label,{weight:700}],'   ',...pieces],{size,anchor:'middle',fill:'--tink'});return g;}
+
+/* 1. A Week 1 question */
+scenes.push((()=>{
+  let tk,chart,bA={},bB={},vA={},vB={},lab={},ver={},leg,dots,more,notP,title,sub,six;
+  const CX=n=>230+170*(n-1),BASE=630,SC=5,OK=[1,0,0,0,1,1];
+  return {title:'A Week 1 question',dur:16,
+  caps:[[0.3,'Practice Set 1, Problem 15: is 2ⁿ bigger than n²?'],[2.6,'True at n = 1. False at 2, 3, and 4. Then true for every value you tried from 5 on.'],[8,'But checking cases isn’t proof, so you couldn’t settle it.'],[10.4,'Today you prove it. It takes about six lines.']],
+  build(r){
+    tk=thmTicket(r,140,900,'Practice Set 1, #15',['Is  2',SUP('n'),' > n²  ?'],36);
+    chart=G(r,0,0);
+    el('line',{x1:140,y1:BASE,x2:1160,y2:BASE,stroke:'--ink','stroke-width':5,'stroke-linecap':'round'},chart);
+    for(let n=1;n<=6;n++){const a=2**n,b=n*n,x=CX(n);
+      bA[n]=el('rect',{x:x-62,y:BASE,width:56,height:0,rx:10,fill:'--sky'},chart);bB[n]=el('rect',{x:x+6,y:BASE,width:56,height:0,rx:10,fill:'--sun'},chart);
+      vA[n]=gt(chart,x-34,BASE-a*SC-20,String(a),{size:24,weight:700});vB[n]=gt(chart,x+34,BASE-b*SC-20,String(b),{size:24,weight:700});
+      lab[n]=gt(chart,x,BASE+30,'n = '+n,{size:24,weight:600,fill:'--muted'});ver[n]=chkMark(chart,x,BASE+78,OK[n-1]);}
+    leg=G(chart,1330,300);el('rect',{x:-90,y:-14,width:30,height:30,rx:6,fill:'--sky'},leg);row(leg,-48,0,['2',SUP('n')],{size:30,weight:700});
+    el('rect',{x:-90,y:36,width:30,height:30,rx:6,fill:'--sun'},leg);txt(leg,-48,51,'n²',{size:30,weight:700,anchor:'start'});
+    more=G(chart,1330,500);pill(more,300,56,'--mint','…and on: ✓ ✓ ✓',{size:28});
+    notP=G(r,800,800);pill(notP,700,66,'--pop','But checking cases isn’t proof',{size:32,color:'--on-strong'});
+    title=gt(r,800,330,'Settling a Question',{size:84,weight:600});sub=gt(r,800,425,'From Week 1',{size:84,weight:600});
+    six=gt(r,800,520,'Other starting points, inequalities, and divisibility',{size:36,weight:400,fill:'--muted'});
+  },
+  update(t){
+    const lv=P(t,9.6,10.2,ein);show(tk,t,.3,10.2);place(chart,{o:1-lv});
+    for(let n=1;n<=6;n++){const a0=.8+(n-1)*.35,k=P(t,a0,a0+.5,eout),a=2**n,b=n*n;
+      bA[n].setAttribute('y',(BASE-a*SC*k).toFixed(1));bA[n].setAttribute('height',(a*SC*k).toFixed(1));
+      bB[n].setAttribute('y',(BASE-b*SC*k).toFixed(1));bB[n].setAttribute('height',(b*SC*k).toFixed(1));
+      place(vA[n],{o:P(t,a0+.3,a0+.5)});place(vB[n],{o:P(t,a0+.3,a0+.5)});place(lab[n],{o:P(t,a0,a0+.3)});
+      show(ver[n],t,[2.8,3.8,4.4,5,6,6.4][n-1]);}
+    place(leg,{o:P(t,1,1.4)});show(more,t,7);show(notP,t,8.2,10.2);
+    place(title,{o:P(t,10.2,10.8),dy:(1-P(t,10.2,10.8,eout))*30});place(sub,{o:P(t,10.6,11.2),dy:(1-P(t,10.6,11.2,eout))*30});place(six,{o:P(t,11.2,11.8)});
+  }};
+})());
+
+/* 2. Start at m */
+scenes.push((()=>{
+  let head,dom=[],labs=[],flag,brk,brkL,card,orig;
+  const X=i=>210+95*i,BASE=520,M=3;
+  return {title:'Start at m',dur:20,
+  caps:[[0.6,'Sometimes a claim only starts being true at some integer m, not at 1.'],[4.4,'No problem: start the chain at m. The integers before m just aren’t part of the claim.'],[8.6,'Base step: P(m). Inductive step: for every k ≥ m, P(k) ⇒ P(k + 1). Same method, new starting point.'],[15.4,'When m = 1, this is exactly the original principle.']],
+  build(r){
+    head=gt(r,800,95,'Starting somewhere else',{size:60,weight:600});
+    el('line',{x1:150,y1:BASE+2,x2:1460,y2:BASE+2,stroke:'--line','stroke-width':6,'stroke-linecap':'round'},r);
+    for(let i=0;i<12;i++){dom.push(domino(r,X(i),BASE,{fill:i<M?'--line':'--ink'}));labs.push(gt(r,X(i),BASE+40,i===M?'P(m)':i<M?'':'P(m+'+(i-M)+')',{size:22,weight:700,fill:'--muted'}));}
+    flag=G(r,X(M),BASE-190);pill(flag,180,50,'--sun','start: m',{size:28});
+    brk=el('path',{d:`M${X(M)-30} 300 V284 H${X(11)+30} V300`,fill:'none',stroke:'--ink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},r);
+    brkL=G(r,(X(M)+X(11))/2,250);row(brkL,0,0,['S = { i ∈ ℤ : i ≥ m }'],{size:32,anchor:'middle',weight:700});
+    card=boxCard(r,800,690,1280,140,'--grape');
+    row(card,0,-28,[['∀n ∈ S, P(n) is true',{weight:700}],'  if'],{size:34,anchor:'middle'});
+    row(card,0,28,['(1) P(m) is true,  and  (2) ∀k ∈ S, P(k) ⇒ P(k + 1)'],{size:32,anchor:'middle',fill:'--muted',weight:600});
+    orig=G(r,800,812);pill(orig,780,60,'--sun','When m = 1, it’s the original principle',{size:30});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    dom.forEach((g,i)=>{const v=pv(t,.8+i*.08);place(g,{s:v.s,o:v.o*(i<M?.7:1),r:i>=M?fallAng(t,9.4+(i-M)*.24):0});place(labs[i],{o:P(t,1.2+i*.08,1.6+i*.08)});});
+    show(flag,t,4.6);brk.setAttribute('opacity',P(t,5.4,5.8));place(brkL,{o:P(t,5.6,6)});
+    show(card,t,8.8);show(orig,t,15.6);
+  }};
+})());
+
+/* 3. Look first: n! vs 2^n */
+scenes.push((()=>{
+  let head,hdr=[],rF=[],rP=[],ver=[],ring,flag,note;
+  const CX=n=>480+150*(n-1),F=[1,2,6,24,120,720],PW=[2,4,8,16,32,64],VT=[3.4,3.7,4,7.8,8.4,8.8];
+  return {title:'Look first',dur:18,
+  caps:[[0.6,'Next: is n! bigger than 2ⁿ? Look first.'],[3,'At n = 1, 2, 3: no. 1 < 2, 2 < 4, 6 < 8.'],[7.6,'At n = 4: yes, 24 > 16. And from there, n! pulls away fast.'],[12.6,'So the claim starts at 4, and that’s where the base step goes.']],
+  build(r){
+    head=G(r,800,95);row(head,0,0,['Look first:  n!  vs.  2',SUP('n')],{size:60,anchor:'middle',weight:600});
+    const lab=(y,pieces)=>{const g=G(r,0,0);row(g,250,y,pieces,{size:38,weight:700,anchor:'middle'});return g;};
+    hdr.push(lab(270,['n']),lab(350,['n!']),lab(430,['2',SUP('n')]),lab(510,['n! > 2',SUP('n'),' ?']));
+    for(let n=1;n<=6;n++){hdr.push(gt(r,CX(n),270,String(n),{size:38,weight:700,fill:'--muted'}));
+      rF.push(gt(r,CX(n),350,String(F[n-1]),{size:38,weight:600}));rP.push(gt(r,CX(n),430,String(PW[n-1]),{size:38,weight:600}));ver.push(chkMark(r,CX(n),510,n>=4));}
+    ring=el('rect',{x:CX(4)-62,y:226,width:124,height:330,rx:26,fill:'none',stroke:'--sun','stroke-width':6,'stroke-dasharray':'12 9'},r);
+    flag=G(r,CX(4),620);pill(flag,340,62,'--sun','base step: n = 4',{size:32});
+    note=G(r,800,740);pill(note,820,66,'--grape','Testing small values tells you where to start',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});hdr.forEach((g,i)=>place(g,{o:P(t,1+i*.05,1.4+i*.05)}));
+    rF.forEach((g,i)=>place(g,{o:P(t,1.6+i*.15,2+i*.15)}));rP.forEach((g,i)=>place(g,{o:P(t,2.2+i*.15,2.6+i*.15)}));
+    ver.forEach((g,i)=>show(g,t,VT[i]));ring.setAttribute('opacity',P(t,12.8,13.2));show(flag,t,13);show(note,t,14.6);
+  }};
+})());
+
+/* 4. n! > 2^n */
+scenes.push((()=>{
+  let thm,trk,L=[],ih,b1,b2,concl;
+  const T=[1.6,3,7.6,22.6],END=26,LT=[1.8,3.2,7.8,11.8,14.8,18.6];
+  return {title:'n! > 2ⁿ',dur:28,
+  caps:[[0.6,'Result: for every integer n ≥ 4, n! > 2ⁿ.'],[1.6,'We proceed by induction.'],[3,'Base step: 4! = 24, which is bigger than 2⁴ = 16.'],[7.6,'Inductive step: assume k! > 2ᵏ for some integer k ≥ 4.'],[11.6,'Start with (k + 1)!, which is (k + 1) times k!.'],[14.6,'By the inductive hypothesis, that’s bigger than (k + 1) · 2ᵏ…'],[18.4,'…and since k + 1 > 2, that’s bigger than 2 · 2ᵏ, which is 2ᵏ⁺¹.'],[22.6,'By induction, n! > 2ⁿ for every n ≥ 4.']],
+  build(r){
+    thm=thmTicket(r,140,860,'Result',['For every integer n ≥ 4,  n! > 2',SUP('n'),'.']);
+    trk=tracker(r,200,300,92,['Announce','Base step','Inductive step','Conclude'],{w:270});
+    L.push(row(r,410,262,['We proceed by induction.'],{size:34,weight:700}));
+    L.push(row(r,410,340,['Base:  4! = 24 > 16 = 2',SUP('4'),'  ',['✓',{fill:'--mint',weight:700}]],{size:36}));
+    L.push(row(r,410,420,['Assume  ',['k! > 2',{box:'--sun',span:2,weight:700}],SUP('k',{inbox:1,padR:1,weight:700}),'  for an integer k ≥ 4'],{size:36}));
+    L.push(row(r,410,505,['(k + 1)! ','= (k + 1) · k!'],{size:38}));
+    L.push(row(r,0,585,['> (k + 1) · 2',SUP('k')],{size:38}));
+    L.push(row(r,0,665,['> 2 · 2',SUP('k'),' = 2',SUP('k+1'),'  ',['✓',{fill:'--mint',weight:700}]],{size:38}));
+    ih=G(r,0,420);pill(ih,270,44,'--sun','inductive hypothesis',{size:23});
+    b1=G(r,0,585);pill(b1,330,46,'--sky','by the inductive hypothesis',{size:24,color:'--on-strong'});
+    b2=G(r,0,665);pill(b2,240,46,'--sky','since k + 1 > 2',{size:24,color:'--on-strong'});
+    concl=G(r,800,775);pill(concl,860,72,'--grape','By induction, n! > 2ⁿ for every n ≥ 4.  ∎',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    show(thm,t,.4);trk.update(t,T,END,1);
+    const ex=L[3]._pc[1].x;for(let i=4;i<6;i++)if(Math.abs(L[i]._ax-ex)>.5){L[i]._ax=ex;layoutRow(L[i]);}
+    L.forEach((g,i)=>slideIn(g,t,LT[i]));
+    ih._x=410+L[2]._w+160;show(ih,t,8.6);b1._x=L[4]._x0+L[4]._w+190;show(b1,t,15.6);b2._x=L[5]._x0+L[5]._w+150;show(b2,t,19.4);
+    show(concl,t,22.8);
+  }};
+})());
+
+/* 5. How inequality proofs run */
+scenes.push((()=>{
+  let head,cards=[],rings=[],bottom;
+  const C=[['1','Start with one side','of P(k + 1)'],['2','Bring in the k version','with the hypothesis'],['3','Chain inequalities','to the other side']],A=[2.6,5,7.4];
+  return {title:'How inequalities run',dur:14,
+  caps:[[0.6,'Inequality proofs by induction all run the same way.'],[2.6,'Start with one side of P(k + 1).'],[5,'Use the inductive hypothesis to bring in the k version.'],[7.4,'Then chain inequalities to the other side.'],[9.8,'Every link must be justified, and one of them is always the hypothesis.']],
+  build(r){
+    head=gt(r,800,95,'How inequality proofs run',{size:60,weight:600});
+    C.forEach(([n,a,b],i)=>{const g=boxCard(r,330+470*i,420,400,240,i===1?'--sun':null);const c=G(g,0,-70);el('circle',{r:30,fill:'--ink'},c);txt(c,0,0,n,{size:32,weight:700,fill:'--stage'});
+      txt(g,0,10,a,{size:32,weight:700});txt(g,0,54,b,{size:30,weight:500,fill:'--muted'});cards.push(g);});
+    [565,1035].forEach(x=>{const g=G(r,x,420);el('ellipse',{cx:-18,cy:0,rx:30,ry:18,fill:'none',stroke:'--ink','stroke-width':8},g);el('ellipse',{cx:18,cy:0,rx:30,ry:18,fill:'none',stroke:'--ink','stroke-width':8},g);rings.push(g);});
+    bottom=G(r,800,700);pill(bottom,1180,76,'--grape','Every link must be justified, and one is always the hypothesis',{size:32,color:'--on-strong'});
+  },
+  update(t){place(head,{o:P(t,.4,1)});cards.forEach((g,i)=>show(g,t,A[i]));rings.forEach((g,i)=>show(g,t,A[i+1]-.3));show(bottom,t,10);}
+  };
+})());
+
+/* 6. 2^n > n^2 */
+scenes.push((()=>{
+  let thm,tag,trk,L=[],ih,bIH,b5,gap,gapQ,plank,concl;
+  const T=[1.6,3,7.6,31],END=34,LT=[1.8,3.2,7.8,11.8,17.4,22.8,28.2];
+  return {title:'2ⁿ > n², proved',dur:36,chapters:[[0,'2ⁿ > n², proved'],[17,'Closing the gap']],
+  caps:[[0.6,'Now the Week 1 question. Result: for every integer n ≥ 5, 2ⁿ > n².'],[3,'Base step: 2⁵ = 32, which beats 5² = 25.'],[7.6,'Inductive step: assume 2ᵏ > k² for some integer k ≥ 5.'],[11.6,'Then 2ᵏ⁺¹ = 2 · 2ᵏ, which by the hypothesis is bigger than 2k².'],[17,'Now get from 2k² to (k + 1)². That means showing k² ≥ 2k + 1.'],[22.6,'Since k ≥ 5: k² = k · k ≥ 5k = 2k + 3k ≥ 2k + 15, which is more than 2k + 1.'],[28,'So 2ᵏ⁺¹ > 2k² ≥ (k + 1)². The chain is complete.'],[31,'By induction, 2ⁿ > n² for every n ≥ 5. Week 1, settled.']],
+  build(r){
+    thm=thmTicket(r,140,860,'Result',['For every integer n ≥ 5,  2',SUP('n'),' > n².']);
+    tag=G(r,1310,140);pill(tag,220,46,'--sun','the Week 1 question',{size:22});
+    trk=tracker(r,200,300,92,['Announce','Base step','Inductive step','Conclude'],{w:270});
+    L.push(row(r,410,255,['We proceed by induction.'],{size:34,weight:700}));
+    L.push(row(r,410,325,['Base:  2',SUP('5'),' = 32 > 25 = 5²  ',['✓',{fill:'--mint',weight:700}]],{size:36}));
+    L.push(row(r,410,400,['Assume  ',['2',{box:'--sun',span:3,weight:700}],SUP('k',{inbox:1,weight:700}),[' > k²',{inbox:1,weight:700,padR:1}],'  for an integer k ≥ 5'],{size:36}));
+    L.push(row(r,410,475,['2',SUP('k+1'),' = 2 · 2',SUP('k'),' > 2k²'],{size:38}));
+    L.push(row(r,410,555,['Still need:  ',['2k² ≥ (k + 1)²',{box:'--sun',weight:700}],',  i.e.  ',['k² ≥ 2k + 1',{box:'--sun',weight:700}]],{size:34}));
+    L.push(row(r,410,632,['k² = k · k ≥ 5k = 2k + 3k ≥ 2k + 15 > 2k + 1  ',['✓',{fill:'--mint',weight:700}]],{size:34}));
+    L.push(row(r,410,708,['So  2',SUP('k+1'),' > 2k² ≥ (k + 1)²'],{size:38,weight:700}));
+    ih=G(r,0,400);pill(ih,260,42,'--sun','inductive hypothesis',{size:22});
+    bIH=G(r,0,475);pill(bIH,90,42,'--sky','IH',{size:24,color:'--on-strong'});
+    b5=G(r,0,632);pill(b5,130,42,'--sky','k ≥ 5',{size:24,color:'--on-strong'});
+    gap=G(r,1420,500);el('rect',{x:-150,y:-20,width:70,height:100,rx:10,fill:'--sky'},gap);el('rect',{x:80,y:-20,width:70,height:100,rx:10,fill:'--mint'},gap);
+    txt(gap,-115,-48,'2k²',{size:30,weight:700});txt(gap,115,-48,'(k+1)²',{size:28,weight:700});
+    gapQ=gt(gap,0,10,'?',{size:56,weight:700,fill:'--pop'});plank=G(gap,0,-26);el('rect',{x:-82,y:-10,width:164,height:20,rx:6,fill:'--sun',stroke:'--ink','stroke-width':3},plank);
+    concl=G(r,800,795);pill(concl,1000,68,'--grape','By induction, 2ⁿ > n² for every n ≥ 5. Week 1, settled.  ∎',{size:31,color:'--on-strong'});
+  },
+  update(t){
+    show(thm,t,.4);show(tag,t,1.2);trk.update(t,T,END,1);
+    L.forEach((g,i)=>slideIn(g,t,LT[i]));
+    ih._x=410+L[2]._w+150;show(ih,t,8.6);bIH._x=410+L[3]._w+70;show(bIH,t,13.4);b5._x=410+L[5]._w+80;show(b5,t,24);
+    show(gap,t,17.2);place(gapQ,{o:P(t,17.6,18)*(1-P(t,25.8,26.1))});
+    const pk=P(t,26,26.6,back);place(plank,{o:P(t,26,26.1),dy:-(1-clamp((t-26)/.6))*80});
+    show(concl,t,31.2);
+  }};
+})());
+
+/* 7. Why 5? */
+scenes.push((()=>{
+  let head,dom=[],badges=[],labs=[],bStep,bStepL,bTrue,bTrueL,lone,bottom;
+  const X=i=>220+120*i,BASE=470,TRUTH=[1,0,0,0,1,1,1,1,1,1];
+  return {title:'Why 5?',dur:18,
+  caps:[[0.6,'Why start at 5? The inductive step only needed k ≥ 3 to go through.'],[5,'But the claim itself is false at n = 2, 3, and 4. No chain can start before 5.'],[9.4,'So the base step goes at 5, and from there every domino falls.'],[13.4,'The base step decides where the result begins. That’s why testing small values first isn’t optional.']],
+  build(r){
+    head=gt(r,800,95,'Why the base step had to be 5',{size:58,weight:600});
+    el('line',{x1:150,y1:BASE+2,x2:1430,y2:BASE+2,stroke:'--line','stroke-width':6,'stroke-linecap':'round'},r);
+    for(let i=0;i<10;i++){const T=TRUTH[i];dom.push(domino(r,X(i),BASE,{fill:T?(i===0?'--sky':'--ink'):'--pop'}));labs.push(gt(r,X(i),BASE+38,'n = '+(i+1),{size:22,weight:700,fill:'--muted'}));
+      const b=G(r,X(i),BASE-170);pill(b,52,40,T?'--mint':'--pop',T?'T':'F',{size:24,color:T?'--tink':'--on-strong'});badges.push(b);}
+    bStep=el('path',{d:`M${X(2)-30} 560 V578 H${X(9)+30} V560`,fill:'none',stroke:'--sky','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'},r);
+    bStepL=G(r,(X(2)+X(9))/2,610);pill(bStepL,460,48,'--sky','the inductive step works for k ≥ 3',{size:26,color:'--on-strong'});
+    bTrue=el('path',{d:`M${X(4)-30} 660 V678 H${X(9)+30} V660`,fill:'none',stroke:'--mint','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'},r);
+    bTrueL=G(r,(X(4)+X(9))/2,712);pill(bTrueL,380,48,'--mint','the claim is true from 5 on',{size:26});
+    lone=G(r,X(0)+20,250);pill(lone,330,48,'--card','true at 1, but the chain breaks at 2',{size:22,color:'--ink'});
+    bottom=G(r,800,800);pill(bottom,1160,66,'--grape','The base step decides where the result begins. Test small values first.',{size:29,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    dom.forEach((g,i)=>{const v=pv(t,.8+i*.08);const sh=TRUTH[i]===0&&t>5.2&&t<6.2&&!RM?Math.sin((t-5.2)*30)*4:0;place(g,{s:v.s,o:v.o,r:(i>=4?fallAng(t,9.6+(i-4)*.26):0)+sh});place(labs[i],{o:P(t,1.2+i*.08,1.6+i*.08)});});
+    badges.forEach((g,i)=>show(g,t,2+i*.1));
+    bStep.setAttribute('opacity',P(t,1.8,2.2));show(bStepL,t,2.2);bTrue.setAttribute('opacity',P(t,6.4,6.8));show(bTrueL,t,6.8);
+    show(lone,t,7.4);show(bottom,t,13.6);
+  }};
+})());
+
+/* 8. Divisibility */
+scenes.push((()=>{
+  let claim,tab,tcols=[],L1,L2,ih,T=[],kTag,nest,ninner,concl,trick;
+  const CX=n=>620+180*(n-1),V=[3,15,63,255];
+  return {title:'Divisibility',dur:32,chapters:[[0,'Divisibility'],[16,'The trick']],
+  caps:[[0.6,'Divisibility. Claim: for every positive integer n, 3 divides 4ⁿ − 1.'],[3.6,'Look first: 3, 15, 63, 255. All multiples of 3.'],[8,'Base step: 4¹ − 1 = 3, which 3 divides.'],[11.4,'Inductive step: assume 3 divides 4ᵏ − 1, so 4ᵏ − 1 = 3m for some integer m.'],[16.4,'Now look at 4ᵏ⁺¹ − 1 = 4 · 4ᵏ − 1. We want 4ᵏ − 1 to show up.'],[20.6,'So subtract 4 and add it back: 4(4ᵏ − 1) + 3. There’s the k case!'],[25,'Substitute: 4(3m) + 3 = 3(4m + 1). Divisible by 3.'],[28.6,'The trick: find where the k case lives inside the k + 1 case.']],
+  build(r){
+    claim=thmTicket(r,140,1000,'Claim',['For every positive integer n,  3 divides 4',SUP('n'),' − 1.']);
+    tab=G(r,0,0);
+    const lab=(y,pc)=>row(tab,330,y,pc,{size:34,weight:700,anchor:'middle'});
+    lab(260,['n']);lab(330,['4',SUP('n'),' − 1']);lab(400,['= 3 ×']);
+    for(let n=1;n<=4;n++){const g=G(tab,0,0);txt(g,CX(n),260,String(n),{size:34,weight:700,fill:'--muted'});txt(g,CX(n),330,String(V[n-1]),{size:36,weight:600});txt(g,CX(n),400,String(V[n-1]/3),{size:36,weight:700,fill:'--mint'});tcols.push(g);}
+    L1=row(r,200,500,['Base:  4',SUP('1'),' − 1 = 3,  divisible by 3  ',['✓',{fill:'--mint',weight:700}]],{size:36});
+    L2=row(r,200,580,['Assume  ',['3 | 4',{box:'--sun',span:3,weight:700}],SUP('k',{inbox:1,weight:700}),[' − 1',{inbox:1,weight:700,padR:1}],',  so  4',SUP('k'),' − 1 = 3m'],{size:36});
+    ih=G(r,0,580);pill(ih,260,42,'--sun','inductive hypothesis',{size:22});
+    T.push(row(r,200,340,['4',SUP('k+1'),' − 1 ','= 4 · 4',SUP('k'),' − 1'],{size:38}));
+    T.push(row(r,0,420,['= 4 · 4',SUP('k'),['− 4 + 4',{box:'--sun',weight:700}],' − 1'],{size:38}));
+    T.push(row(r,0,500,['= 4',['(4',{box:'--sky',span:3,fill:'--on-strong',weight:700}],SUP('k',{fill:'--on-strong',weight:700}),[' − 1)',{fill:'--on-strong',weight:700,padR:1}],' + 3'],{size:38}));
+    T.push(row(r,0,580,['= 4(3m) + 3 = 3(4m + 1)  ',['✓',{fill:'--mint',weight:700}]],{size:38}));
+    kTag=G(r,0,500);pill(kTag,180,44,'--sky','the k case!',{size:24,color:'--on-strong'});
+    nest=G(r,1330,470);el('rect',{x:-150,y:-130,width:300,height:260,rx:26,fill:'--card',stroke:'--mint','stroke-width':6},nest);txt(nest,0,-96,'the k + 1 case',{size:28,weight:700});
+    ninner=G(nest,0,24);el('rect',{x:-100,y:-60,width:200,height:120,rx:20,fill:'--sky'},ninner);txt(ninner,0,0,'the k case',{size:28,weight:700,fill:'--on-strong'});
+    concl=G(r,800,690);pill(concl,920,66,'--mint','4m + 1 is an integer, so 3 divides 4ᵏ⁺¹ − 1.  ∎',{size:30});
+    trick=G(r,800,790);pill(trick,1040,70,'--grape','Find where the k case lives inside the k + 1 case',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    show(claim,t,.5);
+    place(tab,{o:P(t,3.4,3.8)*(1-P(t,15.6,16))});tcols.forEach((g,i)=>place(g,{o:P(t,3.8+i*.4,4.2+i*.4)}));
+    slideIn(L1,t,8.2);place(L1,{o:P(t,8.2,8.7)*(1-P(t,15.6,16))});
+    const up=P(t,16,16.6,eio);const k2=P(t,11.6,12.1,eout);place(L2,{dx:-(1-k2)*40,o:k2,dy:-up*330});
+    ih._x=200+L2._w+150;ih._y=580;show(ih,t,12.4,1e9,{dy:-up*330});
+    const ex=T[0]._pc[3].x;for(let i=1;i<4;i++)if(Math.abs(T[i]._ax-ex)>.5){T[i]._ax=ex;layoutRow(T[i]);}
+    [16.6,20.8,22.6,25.2].forEach((a,i)=>slideIn(T[i],t,a));
+    kTag._x=T[2]._x0+T[2]._w+110;show(kTag,t,23.2);
+    show(nest,t,22.8);show(ninner,t,23.6);show(concl,t,26.6);show(trick,t,28.8);
+  }};
+})());
+
+/* 9. Takeaways */
+scenes.push((()=>{
+  let head,tk=[];
+  const L=['Start the chain where the claim becomes true.','Inequalities: one side, the IH, justify every link.','Find the k case inside the k + 1 case.'];
+  const A=[.6,5.6,10.6];
+  return {title:'Takeaways',dur:16,
+  caps:[[0.6,'Test small values, then put the base step where the claim actually starts.'],[5.6,'For inequalities, start from one side, bring in the hypothesis, and justify every link.'],[10.6,'For sums and divisibility, find where the k case lives inside the k + 1 case.']],
+  build(r){
+    head=gt(r,800,95,'Three things to remember',{size:60,weight:600});
+    L.forEach((s,i)=>{const g=G(r,800,265+190*i);ticket(g,1180,150);
+      el('line',{x1:-410,y1:-58,x2:-410,y2:58,stroke:'--tink','stroke-width':4,'stroke-dasharray':'6 10','stroke-linecap':'round',opacity:.45},g);
+      const ic=G(g,-500,0);
+      if(i===0){pill(G(ic,0,0),70,40,'--sun','m',{size:26});}
+      else if(i===1){el('ellipse',{cx:-14,cy:0,rx:22,ry:13,fill:'none',stroke:'--tink','stroke-width':6},ic);el('ellipse',{cx:14,cy:0,rx:22,ry:13,fill:'none',stroke:'--tink','stroke-width':6},ic);}
+      else{el('rect',{x:-36,y:-30,width:72,height:60,rx:10,fill:'none',stroke:'--tink','stroke-width':5},ic);el('rect',{x:-18,y:-14,width:36,height:28,rx:6,fill:'--sky'},ic);}
+      txt(g,-372,0,s,{size:37,weight:600,fill:'--tink',anchor:'start'});tk.push(g);});
+  },
+  update(t){place(head,{o:P(t,.4,1)});tk.forEach((g,i)=>{const k=P(t,A[i],A[i]+.6,eout);place(g,{dx:-(1-k)*120,o:k,r:(1-k)*-3});});}
+  };
+})());
+
+/* 10. Exit ticket */
+scenes.push((()=>{
+  let head,cards=[],backs=[],ans=[],timer,arc,cnt,foot;
+  const C=2*Math.PI*40;
+  const Q=[{q:'Q1',lines:[['For the claim  3ⁿ ≥ 2n + 1',34,700],['for all n ≥ 1,',32,600],['what is the base step?',32,600]],a:[['n = 1:  3 ≥ 2 · 1 + 1 = 3  ✓',32,700],['(equality is fine: the claim says ≥)',24,500]]},
+           {q:'Q2',lines:[['In the proof that 2ⁿ > n²,',34,600],['why is the base step 5,',34,600],['and not 1?',34,600]],a:[['The claim is false at n = 2, 3, 4,',28,700],['so a chain from 1 breaks at once.',28,700],['It’s true from 5 on.',26,500]]}];
+  return {title:'Exit ticket',dur:18,
+  caps:[[0.6,'Exit ticket: try both in your head before the reveal.'],[8,'Check yourself!'],[10.6,'Q1: at n = 1, both sides are 3, and the claim allows equality. Q2: the claim fails at 2, 3, and 4.'],[14.6,'Next up: Sections 4.3 and 4.4, sequences and the strong principle.']],
+  build(r){
+    head=gt(r,800,95,'Exit ticket',{size:60,weight:600});
+    Q.forEach((d,i)=>{const g=G(r,i?1170:430,445);
+      el('rect',{x:-345,y:-235,width:690,height:470,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+      pill(G(g,-275,-185),84,52,'--pop',d.q,{size:28,color:'--on-strong',weight:700});
+      d.lines.forEach(([s,sz,w],j)=>txt(g,0,-140+46*j,s,{size:sz,weight:w}));
+      const b=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--line'},b);txt(b,0,0,'Think first…',{size:34,weight:600,fill:'--muted'});backs.push(b);
+      const a=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--stage',stroke:'--mint','stroke-width':5},a);
+      const k=d.a.length,step=50,y0=-(k-1)*step/2;d.a.forEach(([s,sz,w],j)=>txt(a,0,y0+step*j,s,{size:sz,weight:w,fill:j===k-1&&w<700?'--muted':'--ink'}));ans.push(a);cards.push(g);});
+    timer=G(r,800,800);el('circle',{r:40,fill:'none',stroke:'--line','stroke-width':10},timer);
+    arc=el('circle',{r:40,fill:'none',stroke:'--sun','stroke-width':10,'stroke-linecap':'round','stroke-dasharray':C.toFixed(1),transform:'rotate(-90)'},timer);
+    cnt=txt(timer,0,0,'5',{size:34,weight:700});
+    foot=gt(r,800,800,'Next up: Sections 4.3 and 4.4, Sequences and the Strong Principle',{size:32,weight:500,fill:'--muted'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    cards.forEach((g,i)=>show(g,t,.6+i*.3));
+    [8,8.6].forEach((a,i)=>{const k=P(t,a,a+.6),sy=Math.max(Math.abs(Math.cos(k*Math.PI)),.03);
+      place(backs[i],{sx:1,sy,o:k<.5?1:0});place(ans[i],{sx:1,sy,o:k>=.5?1:0});});
+    const tk=P(t,.9,7.6,x=>x);arc.setAttribute('stroke-dashoffset',(C*tk).toFixed(1));
+    const n=String(Math.max(1,5-Math.floor(tk*5)));if(cnt.textContent!==n)cnt.textContent=n;
+    place(timer,{o:Math.min(P(t,.9,1.3),1-P(t,7.6,8.1))});
+    place(foot,{o:P(t,14.6,15.2)});
+  }};
+})());
+
+/* ---------- assemble timeline ---------- */
+const root=el('g',{},svg);
+const starts=[];let acc=0;
+scenes.forEach(s=>{starts.push(acc);s.g=el('g',{},root);s.rows=[];BUILDING=s;s.build(s.g);BUILDING=null;s._lv=-1;s.g.style.display='none';acc+=s.dur;});
+const TOTAL=acc;
+const chapters=[];scenes.forEach((s,i)=>(s.chapters||[[0,s.title]]).forEach(([o,ti])=>chapters.push({t:starts[i]+o,title:ti})));
+const caps=[];scenes.forEach((s,i)=>s.caps.forEach(([o,c])=>caps.push([starts[i]+o,c])));
+
+/* ticket-wipe transition between scenes, carrying the next chapter's title */
+const wipe=el('g',{},svg);wipe._x=0;wipe._y=0;
+el('path',{d:'M0 0 H2000 L1800 900 H-200Z',fill:'--sun'},wipe);
+el('line',{x1:46,y1:0,x2:-154,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+el('line',{x1:1954,y1:0,x2:1754,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+const wNum=txt(wipe,900,372,'',{size:34,weight:600,fill:'--tink'});
+const wTitle=txt(wipe,900,456,'',{size:92,weight:700,fill:'--tink'});
+function renderWipe(t){
+  let b=null;for(let i=1;i<starts.length;i++)if(Math.abs(t-starts[i])<.6){b=starts[i];break;}
+  if(b===null){place(wipe,{o:0});return;}
+  const u=(t-(b-.6))/1.2;
+  const ci=chapters.findIndex(c=>Math.abs(c.t-b)<.01);
+  if(ci>=0&&wTitle.textContent!==chapters[ci].title){wTitle.textContent=chapters[ci].title;wNum.textContent='Part '+(ci+1)+' of '+chapters.length;}
+  if(RM){place(wipe,{dx:-100,o:clamp((.5-Math.abs(u-.5))*4)});return;}
+  const tx=u<.4?lerp(1800,0,eout(u/.4)):u<.6?lerp(0,-200,(u-.4)/.2):lerp(-200,-2000,ein((u-.6)/.4));
+  place(wipe,{dx:tx,o:1});
+}
+
+/* ---------- player ---------- */
+const $=id=>document.getElementById(id);
+const capEl=$('caption'),playBtn=$('play'),scrub=$('scrub'),timeEl=$('time'),poster=$('poster'),chapNav=$('chapters'),player=$('player');
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+scrub.max=TOTAL;
+$('posterLen').textContent=Math.floor(TOTAL/60)+' min '+Math.round(TOTAL%60)+' s';
+poster.setAttribute('aria-label','Play the explainer ('+Math.floor(TOTAL/60)+' minutes '+Math.round(TOTAL%60)+' seconds)');
+const ICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/><rect x="14" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/></svg>',
+  replay:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+const ticksEl=$('ticks');
+chapters.forEach((c,i)=>{if(i){const s=document.createElement('span');s.style.left=(c.t/TOTAL*100)+'%';ticksEl.appendChild(s);}
+  const b=document.createElement('button');b.type='button';b.className='chip';b.innerHTML='<b>'+(i+1)+'</b>';b.appendChild(document.createTextNode(c.title));
+  b.addEventListener('click',()=>{seek(c.t+.01);setPlaying(true);});c.btn=b;chapNav.appendChild(b);});
+
+let T=0,playing=false,started=false,speed=1,last=null,dirty=true,lastScene=-1,lastCap=null,lastChap=-1;
+const sceneAt=t=>{let i=0;for(let k=0;k<starts.length;k++)if(t>=starts[k])i=k;return i;};
+function render(){
+  const t=started?T:12.4;
+  const i=sceneAt(Math.min(t,TOTAL-1e-6));
+  if(i!==lastScene){scenes.forEach((s,k)=>s.g.style.display=k===i?'':'none');lastScene=i;}
+  if(scenes[i]._lv!==FONTV){scenes[i].rows.forEach(layoutRow);scenes[i]._lv=FONTV;}
+  scenes[i].update(t-starts[i]);
+  renderWipe(t);
+  let c='';if(started){for(const [ct,s] of caps){if(ct<=T)c=s;else break;}}
+  if(c!==lastCap){capEl.textContent=c;lastCap=c;}
+  scrub.value=T;scrub.style.setProperty('--pct',(T/TOTAL*100).toFixed(2)+'%');
+  timeEl.textContent=fmt(T)+' / '+fmt(TOTAL);
+  let ch=0;chapters.forEach((cc,k)=>{if(T>=cc.t-.001)ch=k;});
+  if(ch!==lastChap){chapters.forEach((cc,k)=>cc.btn.setAttribute('aria-current',k===ch?'true':'false'));
+    if(started){const b=chapters[ch].btn;chapNav.scrollTo({left:b.offsetLeft-chapNav.clientWidth/2+b.offsetWidth/2,behavior:RM?'auto':'smooth'});}lastChap=ch;}
+}
+function setPlaying(p){
+  if(p&&T>=TOTAL-.01)T=0;
+  playing=p;last=null;
+  if(p){started=true;poster.hidden=true;}
+  const ended=!p&&T>=TOTAL-.01;
+  playBtn.innerHTML=p?ICON.pause:(ended?ICON.replay:ICON.play);
+  playBtn.setAttribute('aria-label',p?'Pause':(ended?'Replay':'Play'));
+  dirty=true;
+}
+function seek(t){started=true;poster.hidden=true;T=clamp(t,0,TOTAL);dirty=true;}
+function loop(now){
+  if(playing){if(last!==null)T+=Math.min((now-last)/1000,.1)*speed;last=now;if(T>=TOTAL){T=TOTAL;setPlaying(false);}dirty=true;}
+  if(dirty){render();dirty=false;}
+  requestAnimationFrame(loop);
+}
+playBtn.addEventListener('click',()=>setPlaying(!playing));
+poster.addEventListener('click',()=>{T=0;setPlaying(true);playBtn.focus({preventScroll:true});});
+$('restart').addEventListener('click',()=>{seek(0);setPlaying(true);});
+scrub.addEventListener('input',()=>seek(parseFloat(scrub.value)));
+const speeds=[1,1.25,1.5,.75];
+$('speed').addEventListener('click',e=>{speed=speeds[(speeds.indexOf(speed)+1)%speeds.length];e.currentTarget.textContent=speed+'×';e.currentTarget.setAttribute('aria-label','Playback speed '+speed+' times');});
+$('cc').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);capEl.hidden=!on;});
+const fsBtn=$('fs');
+if(!(document.fullscreenEnabled&&player.requestFullscreen))fsBtn.hidden=true;
+fsBtn.addEventListener('click',()=>{try{if(document.fullscreenElement)document.exitFullscreen();else player.requestFullscreen().catch(()=>{});}catch(e){}});
+document.addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(e.altKey||e.ctrlKey||e.metaKey)return;
+  if(e.key===' '||e.key==='k'){if(tag==='button'&&e.key===' ')return;if(tag==='input'&&e.key===' '){e.preventDefault();setPlaying(!playing);return;}
+    if(tag!=='input'){e.preventDefault();setPlaying(!playing);}}
+  else if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&tag!=='input'){e.preventDefault();seek(T+(e.key==='ArrowRight'?5:-5));}
+});
+setPlaying(false);
+if(document.fonts){if(document.fonts.ready)document.fonts.ready.then(()=>{FONTV++;dirty=true;});document.fonts.addEventListener&&document.fonts.addEventListener('loadingdone',()=>{FONTV++;dirty=true;});}
+window.__seek=t=>{seek(t);render();};
+window.__total=TOTAL;
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

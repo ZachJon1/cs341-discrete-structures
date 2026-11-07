@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Assume the Opposite: an animated explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9E6FA; --stage:#FBFAFF; --card:#F0EDFD; --ink:#26215E; --muted:#6B67A3; --line:#D3CEF0;
+  --paper:#FFE7A3; --tink:#26215E; --pop:#E8395F; --mint:#14B983; --sky:#3D7BF5; --sun:#FFC23A; --grape:#7C4DEB;
+  --on-strong:#FFFFFF;
+  --display:"Fredoka","Nunito","Trebuchet MS","Segoe UI",system-ui,"Cambria Math","STIX Two Math",sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,"Cambria Math",sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+    --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+    --on-strong:#1B1846; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+  --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+  --on-strong:#1B1846; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 36px}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:4px 4px 14px}
+.intro h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.6vw,40px);margin:0;letter-spacing:-0.01em}
+.intro p{margin:0;color:var(--muted);font-size:17px;line-height:1.4}
+.player{background:var(--card);border-radius:24px;padding:10px;border:2px solid var(--line)}
+.stage{position:relative;border-radius:16px;overflow:hidden;background:var(--stage);aspect-ratio:16/9;width:100%}
+.stage svg{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+.td{font-family:var(--display)}
+.tb{font-family:var(--body)}
+.poster{position:absolute;inset:0;border:0;padding:0;margin:0;background:transparent;cursor:pointer;color:inherit;font:inherit}
+.poster[hidden]{display:none}
+.poster-btn{position:absolute;left:50%;top:33.3%;transform:translate(-50%,-50%);width:clamp(56px,10vw,104px);aspect-ratio:1;border-radius:50%;
+  background:var(--ink);color:var(--stage);display:grid;place-items:center;box-shadow:0 0 0 clamp(5px,.9vw,10px) var(--stage);transition:transform .18s ease}
+.poster-btn svg{width:42%;height:42%;margin-left:8%}
+.poster:hover .poster-btn,.poster:focus-visible .poster-btn{transform:translate(-50%,-50%) scale(1.07)}
+.poster:focus-visible{outline:4px solid var(--sky);outline-offset:-4px;border-radius:16px}
+.poster-len{position:absolute;left:14px;top:12px;background:var(--paper);color:var(--tink);font-weight:700;font-size:clamp(12px,1.5vw,15px);padding:5px 12px;border-radius:999px}
+.caption{min-height:3.3em;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 18px 6px;
+  font-size:clamp(16px,1.9vw,22px);line-height:1.38;font-weight:700;color:var(--ink);margin:0;text-wrap:balance}
+.caption:empty::before{content:"Captions appear here once you press play.";color:var(--muted);font-weight:400}
+.caption[hidden]{display:none}
+.controls{display:flex;align-items:center;gap:8px;padding:6px 4px 2px;flex-wrap:wrap}
+.btn{min-width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:var(--stage);color:var(--ink);
+  font:700 15px/1 var(--body);display:inline-grid;place-items:center;cursor:pointer;padding:0 10px}
+.btn svg{width:22px;height:22px}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,.chip:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.btn.play{background:var(--pop);border-color:var(--pop);color:var(--on-strong);min-width:52px}
+.btn[aria-pressed="false"]{color:var(--muted)}
+.scrub{position:relative;flex:1 1 220px;min-width:160px;height:44px;display:flex;align-items:center}
+.ticks{position:absolute;left:11px;right:11px;top:6px;height:6px;pointer-events:none}
+.ticks span{position:absolute;top:0;width:3px;height:7px;border-radius:2px;background:var(--muted);transform:translateX(-50%)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(to right,var(--pop) var(--pct,0%),var(--line) var(--pct,0%))}
+input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:10px;border-radius:6px;background:var(--pop)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--paper);border:3px solid var(--ink)}
+.time{font:700 15px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--muted);min-width:96px;text-align:center}
+.chapters{display:flex;gap:6px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:thin}
+.chip{flex:0 0 auto;border:2px solid var(--line);background:var(--stage);color:var(--ink);border-radius:999px;padding:7px 13px 7px 7px;
+  font:700 14px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--card);font-size:12px}
+.chip[aria-current="true"]{background:var(--ink);color:var(--stage);border-color:var(--ink)}
+.chip[aria-current="true"] b{background:var(--sun);color:var(--tink)}
+.hint{color:var(--muted);font-size:14px;margin:12px 6px 0;line-height:1.45}
+.rotate{display:none}
+@media (max-width:640px) and (orientation:portrait){.rotate{display:block}}
+.player:fullscreen{display:flex;flex-direction:column;justify-content:center;border-radius:0;border:0;padding:12px;background:var(--card)}
+.player:fullscreen .stage{width:min(100%,calc((100vh - 200px) * 16 / 9));margin:0 auto}
+.player:fullscreen .caption,.player:fullscreen .controls,.player:fullscreen .chapters{width:min(100%,calc((100vh - 200px) * 16 / 9));margin-left:auto;margin-right:auto}
+@media (max-width:560px){.time{min-width:0;font-size:13px}.btn{min-width:40px;height:40px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="intro">
+    <h1>Lecture 27, animated</h1>
+    <p>Proof by contradiction for CS 341: why it works, how to open, and why √2 is irrational.</p>
+  </header>
+  <section class="player" id="player" aria-label="Animated explainer player">
+    <div class="stage">
+      <svg id="svg" viewBox="0 0 1600 900" role="img" aria-label="Animation stage. The captions below describe each scene."></svg>
+      <button class="poster" id="poster" type="button" aria-label="Play the explainer">
+        <span class="poster-len" id="posterLen"></span>
+        <span class="poster-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5v15l13-7.5z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+    <div class="controls">
+      <button class="btn play" id="play" type="button" aria-label="Play"></button>
+      <button class="btn" id="restart" type="button" aria-label="Restart from the beginning"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="scrub"><div class="ticks" id="ticks"></div><input type="range" id="scrub" min="0" max="100" step="0.1" value="0" aria-label="Seek"></div>
+      <span class="time" id="time" aria-live="off">0:00</span>
+      <button class="btn" id="speed" type="button" aria-label="Playback speed">1×</button>
+      <button class="btn" id="cc" type="button" aria-pressed="true" aria-label="Captions">CC</button>
+      <button class="btn" id="fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+  </section>
+  <p class="hint">Space plays or pauses. The left and right arrow keys skip 5 seconds. Tap any chapter to jump there.</p>
+  <p class="hint rotate">Turn your phone sideways for a bigger picture.</p>
+</main>
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('svg');
+const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* ---------- math + easing ---------- */
+const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const lerp=(a,b,k)=>a+(b-a)*k;
+const eio=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+const eout=k=>1-Math.pow(1-k,3);
+const ein=k=>k*k*k;
+const back=k=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2);};
+const P=(t,a,b,fn=eio)=>fn(clamp((t-a)/(b-a)));
+const bump=(t,a,d)=>Math.sin(Math.PI*clamp((t-a)/d));
+const num=k=>k<0?'\u2212'+(-k):String(k);
+
+/* ---------- svg helpers ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);let st='';
+  for(const k in attrs){const v=attrs[k];if(v==null)continue;
+    if(k==='text')e.textContent=v;
+    else if((k==='fill'||k==='stroke')&&typeof v==='string'&&v.startsWith('--'))st+=k+':var('+v+');';
+    else e.setAttribute(k,v);}
+  if(st)e.setAttribute('style',st);
+  if(parent)parent.appendChild(e);return e;
+}
+function place(g,o={}){
+  const X=g._x+(o.dx||0),Y=g._y+(o.dy||0);
+  let tr='translate('+X.toFixed(2)+' '+Y.toFixed(2)+')';
+  if(o.r)tr+=' rotate('+o.r.toFixed(2)+')';
+  if(o.sx!=null||o.sy!=null){const sx=o.sx!=null?o.sx:(o.s!=null?o.s:1),sy=o.sy!=null?o.sy:(o.s!=null?o.s:1);tr+=' scale('+Math.max(sx,.001).toFixed(3)+' '+Math.max(sy,.001).toFixed(3)+')';}
+  else if(o.s!=null&&o.s!==1)tr+=' scale('+Math.max(o.s,.001).toFixed(3)+')';
+  g.setAttribute('transform',tr);
+  const op=o.o==null?1:clamp(o.o);
+  g.setAttribute('opacity',op.toFixed(3));
+  const vis=op<=.002?'hidden':'visible';if(g._vis!==vis){g.style.visibility=vis;g._vis=vis;}
+}
+function G(parent,x=0,y=0){const g=el('g',{},parent);g._x=x;g._y=y;place(g);return g;}
+function show(g,t,a,b=1e9,extra={}){
+  const k=clamp((t-a)/.5),f=1-P(t,b-.45,b,ein);
+  place(g,Object.assign({s:k?back(k):.001,o:Math.min(clamp(k*3),f)},extra));return k;
+}
+function txt(p,x,y,str,o={}){
+  return el('text',{x,y,dy:'.35em','font-size':o.size||40,'font-weight':o.weight||500,'text-anchor':o.anchor||'middle',
+    fill:o.fill||'--ink',class:o.body?'tb':'td',opacity:o.op,text:str},p);
+}
+function gt(p,x,y,str,o={}){const g=G(p,x,y);txt(g,0,0,str,o);return g;}
+function ticketD(w,h){const W=w/2,H=h/2,n=Math.min(14,h*.18),c=Math.min(14,h*.2);
+  return 'M'+(-W+c)+' '+(-H)+'H'+(W-c)+'A'+c+' '+c+' 0 0 1 '+W+' '+(-H+c)+'V'+(-n)+'A'+n+' '+n+' 0 0 0 '+W+' '+n+'V'+(H-c)+'A'+c+' '+c+' 0 0 1 '+(W-c)+' '+H+
+  'H'+(-W+c)+'A'+c+' '+c+' 0 0 1 '+(-W)+' '+(H-c)+'V'+n+'A'+n+' '+n+' 0 0 0 '+(-W)+' '+(-n)+'V'+(-H+c)+'A'+c+' '+c+' 0 0 1 '+(-W+c)+' '+(-H)+'Z';}
+function ticket(p,w,h,fill='--paper'){const g=el('g',{},p);el('path',{d:ticketD(w,h),fill},g);return g;}
+function pill(p,w,h,fill,label,o={}){const g=el('g',{},p);el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:h/2,fill},g);
+  if(label!=null)txt(g,0,0,label,{size:o.size||34,weight:o.weight||600,fill:o.color||'--tink'});return g;}
+function star(p,cx,cy,R,fill){let d='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?R*.45:R;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1);}
+  return el('path',{d:d+'Z',fill},p);}
+function shape(p,type,fill,s){
+  if(type===0)return el('circle',{r:s,fill},p);
+  if(type===1)return el('rect',{x:-s,y:-s,width:2*s,height:2*s,rx:12,fill},p);
+  if(type===2)return el('path',{d:'M0 '+(-s*1.05)+' L'+(s*1.05)+' '+(s*.8)+' L'+(-s*1.05)+' '+(s*.8)+'Z',fill,stroke:fill,'stroke-width':10,'stroke-linejoin':'round'},p);
+  if(type===3)return el('rect',{x:-s*.82,y:-s*.82,width:1.64*s,height:1.64*s,rx:10,fill,transform:'rotate(45)'},p);
+  return star(p,0,0,s*1.2,fill);
+}
+function mascot(p){const g=el('g',{},p);
+  el('path',{d:ticketD(124,84),fill:'--paper',stroke:'--tink','stroke-width':4},g);
+  el('circle',{cx:-34,cy:10,r:7,fill:'--pop',opacity:.45},g);el('circle',{cx:34,cy:10,r:7,fill:'--pop',opacity:.45},g);
+  el('circle',{cx:-17,cy:-8,r:6,fill:'--tink'},g);el('circle',{cx:17,cy:-8,r:6,fill:'--tink'},g);
+  el('path',{d:'M-13 10 Q0 22 13 10',fill:'none',stroke:'--tink','stroke-width':4,'stroke-linecap':'round'},g);return g;}
+function person(p,fill){const g=el('g',{},p);
+  el('rect',{x:-30,y:-4,width:60,height:58,rx:26,fill},g);el('circle',{cx:0,cy:-34,r:25,fill},g);
+  el('circle',{cx:-9,cy:-37,r:3.6,fill:'--tink'},g);el('circle',{cx:9,cy:-37,r:3.6,fill:'--tink'},g);
+  el('path',{d:'M-8 -27 Q0 -21 8 -27',fill:'none',stroke:'--tink','stroke-width':3,'stroke-linecap':'round'},g);return g;}
+function speech(p,w,h,label,o={}){const g=el('g',{},p);
+  el('path',{d:'M'+(-w/2+4)+' -14 L'+(-w/2-30)+' 16 L'+(-w/2+4)+' 14Z',fill:'--grape'},g);
+  el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--grape'},g);
+  txt(g,0,0,label,{size:o.size||36,weight:600,fill:'--on-strong'});return g;}
+function dart(g){el('line',{x1:0,y1:-96,x2:0,y2:-18,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},g);
+  el('path',{d:'M-11 -22 L11 -22 L0 4Z',fill:'--ink'},g);el('path',{d:'M0 -78 L-16 -106 L0 -96 L16 -106Z',fill:'--pop'},g);}
+function qlen(x0,y0,cx,cy,x1,y1){let L=0,px=x0,py=y0;for(let i=1;i<=40;i++){const u=i/40,a=(1-u)*(1-u),b=2*u*(1-u),c=u*u;
+  const x=a*x0+b*cx+c*x1,y=a*y0+b*cy+c*y1;L+=Math.hypot(x-px,y-py);px=x;py=y;}return L;}
+
+/* ---------- extra helpers for algebra rows ---------- */
+const pv=(t,a)=>{const k=clamp((t-a)/.5);return {s:k?back(k):.001,o:clamp(k*3)};};
+let BUILDING=null,FONTV=0;
+function row(p,x,y,pieces,o={}){
+  const g=el('g',{},p);g._x=0;g._y=0;g._pc=[];g._ax=x;g._ay=y;g._anchor=o.anchor||'start';const S=o.size||44;
+  if(o.bg){const h=o.bgH||S*1.9;g._bg=el('rect',{y:y-h/2,height:h,rx:22,fill:o.bg,stroke:o.bgStroke||null,'stroke-width':o.bgStroke?5:null},g);g._padX=o.padX||32;}
+  pieces.forEach(pc=>{const [s,q={}]=Array.isArray(pc)?pc:[pc,{}];const sz=q.size||S;let rect=null;
+    if(q.box)rect=el('rect',{y:y-sz*.68,height:sz*1.36,rx:12,fill:q.box},g);
+    const t=el('text',{x,y,dy:'.35em','font-size':sz,'font-weight':q.weight||o.weight||500,'text-anchor':'start',
+      fill:q.fill||(q.box?'--tink':(o.fill||'--ink')),class:'td',text:s.replace(/ /g,'\u00A0')},g);
+    g._pc.push({t,rect,pad:q.box?12:0});});
+  layoutRow(g);if(BUILDING)BUILDING.rows.push(g);return g;
+}
+let MEAS=null;const MCACHE={};
+function measure(t){
+  if(!MEAS)MEAS=el('text',{x:-5000,y:-5000,class:'td',opacity:0,'aria-hidden':'true'},svg);
+  const sz=t.getAttribute('font-size'),w=t.getAttribute('font-weight'),s=t.textContent,key=FONTV+'|'+sz+'|'+w+'|'+s;
+  if(MCACHE[key]!=null)return MCACHE[key];
+  MEAS.setAttribute('font-size',sz);MEAS.setAttribute('font-weight',w);MEAS.textContent=s;
+  let l=0;try{l=MEAS.getComputedTextLength();}catch(e){}
+  return MCACHE[key]=l;
+}
+function layoutRow(g){
+  const ws=g._pc.map(pc=>measure(pc.t)+pc.pad*2);
+  const tot=ws.reduce((a,b)=>a+b,0);let x=g._anchor==='middle'?g._ax-tot/2:g._ax;g._x0=x;g._w=tot;
+  g._pc.forEach((pc,i)=>{if(pc.rect){pc.rect.setAttribute('x',(x+3).toFixed(1));pc.rect.setAttribute('width',Math.max(ws[i]-6,0).toFixed(1));}
+    pc.t.setAttribute('x',(x+pc.pad).toFixed(1));pc.x=x;pc.w=ws[i];x+=ws[i];});
+  if(g._bg){g._bg.setAttribute('x',(g._x0-g._padX).toFixed(1));g._bg.setAttribute('width',(tot+2*g._padX).toFixed(1));}
+}
+function frac(p,x,y,num,den,o={}){const g=G(p,x,y),s=o.size||48,w=o.w||Math.max(num.length,den.length)*s*.55+24;
+  txt(g,0,-s*.78,num,{size:s,weight:o.weight||500,fill:o.fill});
+  el('line',{x1:-w/2,y1:0,x2:w/2,y2:0,stroke:o.fill||'--ink','stroke-width':5,'stroke-linecap':'round'},g);
+  txt(g,0,s*.78,den,{size:s,weight:o.weight||500,fill:o.fill});return g;}
+function tracker(p,x,y,gap,labels,o={}){
+  const W=o.w||250;
+  const items=labels.map((l,i)=>{const g=G(p,o.horiz?x+gap*i:x,o.horiz?y:y+gap*i);
+    const bg=el('rect',{x:-W/2,y:-30,width:W,height:60,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+    const c=el('circle',{cx:-W/2+32,cy:0,r:20,fill:'--line'},g);
+    const n=txt(g,-W/2+32,0,String(i+1),{size:24,weight:700,fill:'--muted'});
+    const tx=txt(g,-W/2+62,0,l,{size:28,weight:600,anchor:'start',fill:'--muted'});
+    return {g,bg,c,n,tx};});
+  return {items,update(t,times,end,appear){items.forEach((it,i)=>{
+    const on=t>=times[i],done=t>=(i<items.length-1?times[i+1]:end),st=done?2:on?1:0;
+    if(it._st!==st){it._st=st;
+      it.bg.setAttribute('style','fill:var('+(st===1?'--sun':'--card')+');stroke:var('+(st===1?'--sun':st===2?'--mint':'--line')+')');
+      it.c.setAttribute('style','fill:var('+(st===0?'--line':st===1?'--tink':'--mint')+')');
+      it.n.setAttribute('style','fill:var('+(st===0?'--muted':st===1?'--sun':'--tink')+')');it.n.textContent=st===2?'✓':String(i+1);
+      it.tx.setAttribute('style','fill:var('+(st===1?'--tink':st===2?'--ink':'--muted')+')');}
+    const k=P(t,appear+i*.15,appear+.4+i*.15);place(it.g,{o:k,s:1+.08*(on&&!done?bump(t,times[i],.4):0)});});}};
+}
+function check(p,x,y){const c=G(p,x,y);el('circle',{r:24,fill:'--mint'},c);
+  el('path',{d:'M-10 0 L-3 8 L11 -8',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);return c;}
+
+/* =================================================================
+   SCENES  (each: title, dur, caps [local time, text], build, update)
+   ================================================================= */
+const scenes=[];
+function boxCard(p,x,y,w,h,stroke){const g=G(p,x,y);g._r=el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--card',stroke:stroke||'--line','stroke-width':stroke?5:3},g);return g;}
+function slideIn(g,t,a,dx=40){const k=P(t,a,a+.5,eout);place(g,{dx:-(1-k)*dx,o:k});}
+function stampBox(p,x,y,w,label,size){const g=G(p,x,y);el('rect',{x:-w/2,y:-58,width:w,height:116,rx:18,fill:'--stage',stroke:'--pop','stroke-width':9},g);txt(g,0,0,label,{size:size||52,weight:700,fill:'--pop'});return g;}
+function slam(g,t,a,r=-5,b=1e9){const k=clamp((t-a)/.4);place(g,{s:k?lerp(1.8,1,eout(k)):.001,o:clamp(k*4)*(1-P(t,b-.4,b)),r});}
+function cellRect(g,w,v){el('rect',{x:-w/2,y:-26,width:w,height:52,rx:14,fill:v?'--mint':'--pop'},g);txt(g,0,0,v?'T':'F',{size:30,weight:700,fill:v?'--tink':'--on-strong'});}
+function balloon(p,x,y,w,h,fill,lines,o={}){const g=G(p,x,y),L=o.strLen==null?150:o.strLen;
+  g._str=el('path',{d:`M0 ${h/2+12} q 14 ${L*.27} -4 ${L*.53} q -14 ${L*.24} 6 ${L*.47}`,fill:'none',stroke:'--muted','stroke-width':4,'stroke-linecap':'round'},g);
+  const body=G(g,0,0);el('ellipse',{rx:w/2,ry:h/2,fill},body);el('path',{d:`M-11 ${h/2-3} L11 ${h/2-3} L0 ${h/2+14}Z`,fill},body);
+  el('ellipse',{cx:-w*.27,cy:-h*.2,rx:w*.06,ry:h*.13,fill:'--stage',opacity:.35,transform:`rotate(25 ${-w*.27} ${-h*.2})`},body);
+  lines.forEach(([s,sz,col],i)=>txt(body,0,(i-(lines.length-1)/2)*sz*1.2,s,{size:sz,weight:700,fill:col||'--on-strong'}));
+  const burst=G(g,0,0);for(let k=0;k<12;k++){const a=k*Math.PI/6;el('line',{x1:Math.cos(a)*w*.32,y1:Math.sin(a)*h*.32,x2:Math.cos(a)*w*.62,y2:Math.sin(a)*h*.62,stroke:fill,'stroke-width':9,'stroke-linecap':'round'},burst);}
+  g._body=body;g._burst=burst;return g;}
+function balloonUpdate(g,t,app,popAt,dx=0){const v=pv(t,app),bob=RM?0:Math.sin(t*2.2)*6;
+  if(t<popAt){place(g,{s:v.s,o:v.o,dy:bob,dx});place(g._body,{s:1+.12*P(t,popAt-.2,popAt)});place(g._burst,{o:0});g._str.setAttribute('opacity',1);}
+  else{place(g,{o:1,dy:bob,dx});place(g._body,{o:0});const k=P(t,popAt,popAt+.6,eout);place(g._burst,{s:.6+.9*k,o:1-k});g._str.setAttribute('opacity',(1-P(t,popAt,popAt+.4)).toFixed(2));}}
+function flag(p,x,y,label,fill,w=100,tc='--on-strong'){const g=G(p,x,y);el('line',{x1:0,y1:0,x2:0,y2:-150,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},g);
+  el('path',{d:`M0 -150 H${w} L${w-16} -123 L${w} -96 H0Z`,fill},g);txt(g,w/2-6,-123,label,{size:30,weight:700,fill:tc});el('circle',{r:8,fill:'--ink'},g);return g;}
+function zig(p,x0,y0,x1,y1,n=6){let d='M'+x0+' '+y0;for(let i=1;i<n;i++){const u=i/n,x=lerp(x0,x1,u),y=lerp(y0,y1,u),nx=-(y1-y0),ny=(x1-x0),L=Math.hypot(nx,ny),s=(i%2?1:-1)*18;d+=' L'+(x+nx/L*s).toFixed(1)+' '+(y+ny/L*s).toFixed(1);}
+  d+=' L'+x1+' '+y1;const e=el('path',{d,fill:'none',stroke:'--sun','stroke-width':9,'stroke-linecap':'round','stroke-linejoin':'round'},p);
+  let L=0,px=x0,py=y0;d.split(/[ML]/).filter(Boolean).forEach(s=>{const [a,b]=s.trim().split(' ').map(Number);L+=Math.hypot(a-px,b-py);px=a;py=b;});e.setAttribute('stroke-dasharray',L.toFixed(1));e._L=L;return e;}
+function drawZig(e,t,a,b,end=1e9){e.setAttribute('stroke-dashoffset',(e._L*(1-P(t,a,b))).toFixed(1));e.setAttribute('opacity',(t>a?1:0)*(1-P(t,end-.4,end)));}
+
+/* 1. Assume the opposite */
+scenes.push((()=>{
+  let bal,chain,CL,chips=[],head1,clash,rCard,title,sub,B,conf,tk1,tk2,stamp;
+  return {title:'Assume the opposite',dur:14,
+  caps:[[0.3,'Want to prove something? Try assuming the opposite…'],[2.4,'…and follow it until it leads somewhere impossible.'],[3.8,'The assumption pops, and what you wanted is left standing.'],[5.2,'Today: proof by contradiction.'],[8,'A confession: you’ve already seen this method twice, back in Lecture 21.'],[10.6,'Cantor’s power set proof and the diagonal argument were both proofs by contradiction.']],
+  build(r){
+    chain=el('path',{d:'M510 300 H1040 M1016 284 L1044 300 L1016 316',fill:'none',stroke:'--ink','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'},r);CL=530+70;chain.setAttribute('stroke-dasharray',CL);
+    [660,940].forEach(x=>{const g=G(r,x,300);pill(g,120,52,'--card','step',{size:26,color:'--ink'});chips.push(g);});
+    clash=G(r,1190,300);pill(clash,250,96,'--pop','P ∧ ∼P',{size:46,color:'--on-strong'});
+    head1=G(clash,0,-82);pill(head1,200,40,'--sun','impossible!',{size:24});
+    rCard=G(r,420,300);el('circle',{r:84,fill:'--mint'},rCard);txt(rCard,0,0,'R ✓',{size:62,weight:700,fill:'--tink'});
+    bal=balloon(r,420,300,320,180,'--sky',[['Assume ∼R',44]],{strLen:120});
+    title=gt(r,800,622,'Assume the Opposite',{size:100,weight:600});
+    sub=gt(r,800,716,'Proof by contradiction',{size:42,weight:400,fill:'--muted'});
+    B=G(r,0,0);
+    conf=gt(B,800,200,'A confession',{size:56,weight:600});
+    const tk=(x,a,b,c)=>{const g=G(B,x,430);ticket(g,560,200);txt(g,0,-58,a,{size:28,weight:600,fill:'--tink',op:.75});txt(g,0,0,b,{size:46,weight:700,fill:'--tink'});txt(g,0,52,c,{size:28,weight:500,fill:'--tink'});return g;};
+    tk1=tk(470,'Lecture 21','|A| < |P(A)|','Cantor’s power set proof');tk2=tk(1130,'Lecture 21','[0, 1] is uncountable','the diagonal argument');
+    stamp=stampBox(B,800,650,820,'both were proofs by contradiction!',40);
+  },
+  update(t){
+    const lv=P(t,7.4,8,ein);
+    balloonUpdate(bal,t,.3,3.6);place(bal,{o:(1-lv)*(t<.3?0:1),dy:RM?0:Math.sin(t*2.2)*6,s:pv(t,.3).s});
+    chain.setAttribute('stroke-dashoffset',(CL*(1-P(t,1,3))).toFixed(1));chain.setAttribute('opacity',(t>1?1:0)*(1-lv));
+    chips.forEach((g,i)=>show(g,t,1.6+i*.8,7.8));
+    show(clash,t,3,7.8,{dx:t>3.4&&t<4.2&&!RM?Math.sin((t-3.4)*40)*6:0});show(head1,t,3.3);
+    show(rCard,t,3.9,7.8);
+    place(title,{o:P(t,5,5.6)*(1-lv),dy:(1-P(t,5,5.6,eout))*30});
+    place(sub,{o:P(t,5.6,6.2)*(1-lv),dy:(1-P(t,5.6,6.2,eout))*20});
+    place(B,{o:P(t,7.8,8.2)});place(conf,{o:P(t,8,8.5)});show(tk1,t,8.4);show(tk2,t,9.2);slam(stamp,t,10.6,-3);
+  }};
+})());
+
+/* 2. Why it works */
+scenes.push((()=>{
+  let head,f=[],ar=[],impl,tab,rws=[],strike,note,surv,res,chips=[];
+  const CX=[600,760,960],CW=[100,100,220],RY=[470,540];
+  return {title:'Why it works',dur:28,
+  caps:[[0.6,'To prove a statement R, assume its opposite, ∼R…'],[3.6,'…and reason until you reach a contradiction C: something like “P and not P.”'],[7.6,'Now you’ve shown: if ∼R, then C. And C is false, always.'],[11.6,'Look at the truth table. C is false in every row.'],[14.6,'The row where ∼R is true makes the implication false. But we proved it’s true! So that row is out.'],[19.6,'Only one row survives: ∼R is false. So R is true.'],[23.6,'That’s modus tollens and double negation: tools you proved in the first three weeks.']],
+  build(r){
+    head=gt(r,800,95,'Why it works',{size:60,weight:600});
+    const F=(x,w,fill,l,c)=>{const g=G(r,x,205);pill(g,w,64,fill,l,{size:32,color:c});f.push(g);};
+    F(360,260,'--sky','Assume ∼R','--on-strong');F(800,240,'--line','reason…','--ink');F(1240,300,'--pop','C: P ∧ ∼P','--on-strong');
+    [580,1020].forEach(x=>{const g=G(r,x,205);el('line',{x1:-40,y1:0,x2:28,y2:0,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},g);el('path',{d:'M24 -13 L44 0 L24 13Z',fill:'--ink'},g);ar.push(g);});
+    impl=G(r,800,300);row(impl,0,0,['So you’ve shown  ',['(∼R) ⇒ C',{weight:700}],', and C is always false.'],{size:34,anchor:'middle'});
+    tab=G(r,0,0);['∼R','C','(∼R) ⇒ C'].forEach((h,j)=>txt(tab,CX[j],400,h,{size:34,weight:700}));
+    [[1,0,0],[0,0,1]].forEach((rw,i)=>{const g=G(tab,0,0);rw.forEach((v,j)=>{const c=G(g,CX[j],RY[i]);cellRect(c,CW[j],v);});rws.push(g);});
+    strike=el('line',{x1:520,y1:RY[0],x2:1100,y2:RY[0],stroke:'--ink','stroke-width':9,'stroke-linecap':'round','stroke-dasharray':580},r);
+    note=G(r,1310,RY[0]);pill(note,330,54,'--pop','but we proved it’s true!',{size:26,color:'--on-strong'});
+    surv=el('rect',{x:520,y:RY[1]-38,width:580,height:76,rx:22,fill:'none',stroke:'--mint','stroke-width':6},r);
+    res=G(r,800,645);pill(res,820,76,'--mint','So ∼R is false, which means R is true ✓',{size:34});
+    [['modus tollens (Lecture 7)','--sky','--on-strong',400,380],['double negation','--sun','--tink',260,800],['C: false in every row (Week 3)','--grape','--on-strong',440,1220]].forEach(([s,fl,c,w,x])=>{const g=G(r,x,752);pill(g,w,56,fl,s,{size:26,color:c});chips.push(g);});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    show(f[0],t,.8);show(ar[0],t,3.4);show(f[1],t,3.6);show(ar[1],t,5.2);show(f[2],t,5.6);
+    place(impl,{o:P(t,7.8,8.3)});
+    place(tab,{o:P(t,11.6,12.1)});rws.forEach((g,i)=>{const k=P(t,12+i*.4,12.5+i*.4,eout);place(g,{dx:-(1-k)*30,o:k*(i===0?1-.5*P(t,15.6,16):1)});});
+    strike.setAttribute('stroke-dashoffset',(580*(1-P(t,15.4,16))).toFixed(1));strike.setAttribute('opacity',t>15.4?1:0);
+    show(note,t,15.8);surv.setAttribute('opacity',P(t,19.8,20.2));show(res,t,20.2);
+    chips.forEach((g,i)=>show(g,t,23.8+i*.6));
+  }};
+})());
+
+/* 3. The opening line */
+scenes.push((()=>{
+  let head,rR,rN,tag,card,l1,l2,bottom;
+  const T1=[10.6,11.1,11.7],T2=[12.5,12.9,13.4,13.9,14.3];
+  return {title:'The opening line',dur:18,
+  caps:[[0.6,'Most statements look like this: for every x in S, if P(x), then Q(x).'],[3.6,'Its negation, from Lecture 25: some x makes P(x) true and Q(x) false.'],[7.6,'So a proof by contradiction of that statement always opens the same way:'],[10.4,'“Assume, to the contrary, that there exists x in S such that P(x) is true and Q(x) is false.”'],[15,'Negate exactly, and you have your first sentence.']],
+  build(r){
+    head=gt(r,800,95,'The opening line',{size:60,weight:600});
+    rR=G(r,800,205);row(rR,0,0,[['R:',{weight:700,fill:'--sky'}],'   ∀x ∈ S,  P(x) ⇒ Q(x)'],{size:46,anchor:'middle'});
+    rN=G(r,800,292);row(rN,0,0,[['∼R:',{weight:700,fill:'--pop'}],'   ∃x ∈ S,  P(x) ∧ ∼Q(x)'],{size:46,anchor:'middle'});
+    tag=G(r,1260,292);pill(tag,220,46,'--line','from Lecture 25',{size:24,color:'--ink'});
+    card=G(r,800,486);ticket(card,1380,214);
+    l1=row(card,0,-44,['Assume, ',['to the contrary',{box:'--sun',weight:700}],', that there exists x ∈ S'],{size:40,anchor:'middle',fill:'--tink',weight:600});
+    l2=row(card,0,44,['such that ',['P(x) is true',{box:'--sky',fill:'--on-strong',weight:700}],' and ',['Q(x) is false',{box:'--pop',fill:'--on-strong',weight:700}],'.'],{size:40,anchor:'middle',fill:'--tink',weight:600});
+    bottom=G(r,800,722);pill(bottom,900,76,'--grape','Negate exactly. That’s your first sentence.',{size:34,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});place(rR,{o:P(t,.8,1.3)});place(rN,{o:P(t,3.8,4.3),dy:(1-P(t,3.8,4.3,eout))*15});show(tag,t,4.6);
+    show(card,t,8);
+    [[l1,T1],[l2,T2]].forEach(([rw,T])=>rw._pc.forEach((pc,i)=>{const o=P(t,T[i],T[i]+.35).toFixed(2);pc.t.setAttribute('opacity',o);if(pc.rect)pc.rect.setAttribute('opacity',o);}));
+    show(bottom,t,15.2);
+  }};
+})());
+
+/* 4. No smallest positive real */
+scenes.push((()=>{
+  let claim,bal,line,zero,rF,rTag,sF,arr,AL,dv,p1,p2,stamp,halves=[],bottom;
+  const X0=170,XR=1250,LY=600,XS=(X0+XR)/2;
+  return {title:'No smallest positive',dur:26,
+  caps:[[0.6,'Claim: there is no smallest positive real number.'],[2.8,'Assume, to the contrary, that there is one. Give it a name: r.'],[7.4,'Now build from it: s = r/2. It’s positive, and it’s smaller than r.'],[12.4,'So r wasn’t the smallest after all. Contradiction!'],[16,'In fact, you can keep halving forever.'],[20,'The move worth stealing: name the object you assumed, then use it against itself.']],
+  build(r){
+    claim=G(r,800,140);ticket(claim,1000,88);row(claim,0,0,[['Claim',{weight:700}],'   There is no smallest positive real number.'],{size:36,anchor:'middle',fill:'--tink'});
+    line=G(r,0,0);el('line',{x1:X0,y1:LY,x2:1480,y2:LY,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},line);
+    el('line',{x1:X0,y1:LY-16,x2:X0,y2:LY+16,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},line);txt(line,X0,LY+44,'0',{size:32,weight:700});
+    [[XR/4+X0*3/4,'r/4'],[XR/8+X0*7/8,'r/8']].forEach(()=>{});
+    for(let k=2;k<=6;k++){const x=X0+(XR-X0)/Math.pow(2,k),g=G(r,x,LY);el('line',{x1:0,y1:-14,x2:0,y2:14,stroke:'--sky','stroke-width':5,'stroke-linecap':'round'},g);
+      if(k<=3)txt(g,0,44,'r/'+Math.pow(2,k),{size:26,weight:700,fill:'--sky'});halves.push(g);}
+    rF=flag(r,XR,LY,'r','--sky',90);
+    rTag=G(r,XR+40,LY-196);pill(rTag,240,48,'--sun','“the smallest”',{size:26});
+    sF=flag(r,XS,LY,'s = r/2','--mint',170,'--tink');
+    arr=el('path',{d:`M${XR} ${LY+28} Q${(XR+XS)/2} ${LY+150} ${XS+12} ${LY+30}`,fill:'none',stroke:'--ink','stroke-width':5,'stroke-linecap':'round'},r);AL=qlen(XR,LY+28,(XR+XS)/2,LY+150,XS+12,LY+30);arr.setAttribute('stroke-dasharray',AL.toFixed(1));
+    dv=G(r,(XR+XS)/2,LY+108);pill(dv,90,44,'--card','÷ 2',{size:28,color:'--ink'});
+    p1=G(r,560,775);pill(p1,200,56,'--mint','s > 0 ✓',{size:30});p2=G(r,820,775);pill(p2,200,56,'--mint','s < r ✓',{size:30});
+    bal=balloon(r,290,330,380,170,'--sky',[['Assume a smallest',30],['positive real exists',30]],{strLen:90});
+    stamp=stampBox(r,1060,330,520,'Contradiction!',56);
+    bottom=G(r,800,812);pill(bottom,1160,72,'--grape','The move worth stealing: name it, then use it against itself',{size:31,color:'--on-strong'});
+  },
+  update(t){
+    show(claim,t,.5);place(line,{o:P(t,1,1.5)});
+    balloonUpdate(bal,t,2.6,12.6);
+    const tp=P(t,12.4,13.2,ein);show(rF,t,3.6,1e9,{r:70*tp,o:undefined});place(rF,{s:pv(t,3.6).s,o:pv(t,3.6).o*(1-.6*tp),r:70*tp});
+    show(rTag,t,4.4,12.4);
+    arr.setAttribute('stroke-dashoffset',(AL*(1-P(t,7.6,8.4))).toFixed(1));arr.setAttribute('opacity',(t>7.6?1:0)*(1-P(t,15.4,15.8)));
+    show(dv,t,8.2,15.8);show(sF,t,8.2);show(p1,t,9.4,15.8);show(p2,t,10.2,15.8);
+    slam(stamp,t,12.8,-5,19.8);
+    halves.forEach((g,i)=>show(g,t,16.2+i*.45));
+    show(bottom,t,20.2);
+  }};
+})());
+
+/* 5. With parity */
+scenes.push((()=>{
+  let thm,lead,bA,bB,L=[],res,bolt,stamp,fin;
+  return {title:'With parity',dur:26,
+  caps:[[0.6,'Result 3.48: if 5n + 1 is odd, then n is even.'],[3,'Assume, to the contrary: some integer n has 5n + 1 odd, and n odd.'],[8,'n is odd, so n = 2k + 1. Then 5n + 1 = 10k + 6…'],[13.4,'…which is 2(5k + 3). So 5n + 1 is even.'],[17.4,'But we assumed 5n + 1 is odd. It can’t be both. Contradiction!'],[22,'So the assumption was false, and the result holds.']],
+  build(r){
+    thm=G(r,800,140);ticket(thm,1100,88);row(thm,0,0,[['Result 3.48',{weight:700}],'   Let n ∈ ℤ. If 5n + 1 is odd, then n is even.'],{size:34,anchor:'middle',fill:'--tink'});
+    lead=gt(r,800,234,'Assume, to the contrary, that some integer n has:',{size:32,weight:600,fill:'--muted'});
+    L.push(row(r,120,460,['n is odd, so  n = 2k + 1   ',['for some integer k',{box:'--sun',size:28,weight:600}]],{size:40}));
+    L.push(row(r,120,540,['5n + 1 ','= 5(2k + 1) + 1 = 10k + 6'],{size:40}));
+    L.push(row(r,0,620,['= 2(5k + 3)'],{size:40}));
+    res=G(r,1180,620);pill(res,380,70,'--mint','so 5n + 1 is even',{size:34});
+    bolt=zig(r,760,365,1040,590,7);
+    bA=balloon(r,560,330,330,110,'--sky',[['5n + 1 is odd',36]],{strLen:26});
+    bB=balloon(r,1040,330,280,110,'--pop',[['n is odd',36]],{strLen:26});
+    stamp=stampBox(r,800,722,560,'Contradiction!',54);
+    fin=G(r,800,816);pill(fin,900,62,'--grape','So the assumption was false, and the result holds.',{size:30,color:'--on-strong'});
+  },
+  update(t){
+    show(thm,t,.5);place(lead,{o:P(t,3,3.5)});
+    const sh=t>17.6&&t<18.4&&!RM?Math.sin((t-17.6)*40)*6:0;
+    balloonUpdate(bA,t,3.2,18.4,sh);balloonUpdate(bB,t,4,18.6);
+    const ex=L[1]._pc[1].x;if(Math.abs(L[2]._ax-ex)>.5){L[2]._ax=ex;layoutRow(L[2]);}
+    [8.2,10.2,13.6].forEach((a,i)=>slideIn(L[i],t,a));
+    show(res,t,14.6,1e9,{dx:sh});drawZig(bolt,t,17.6,18.2,21.6);
+    slam(stamp,t,18.6);show(fin,t,22.2);
+  }};
+})());
+
+/* 6. Contradiction vs contrapositive */
+scenes.push((()=>{
+  let head,cP,cC,vP=[],vC=[],same,bottom;
+  return {title:'vs. contrapositive',dur:20,
+  caps:[[0.6,'Compare that with a proof by contrapositive of the same result.'],[3.4,'Contrapositive assumes only “not Q”, and aims for “not P.”'],[7.6,'Contradiction assumes P and “not Q” together, and aims for any absurdity at all.'],[11.8,'Here, the algebra is identical.'],[14.4,'When it is, the contrapositive is cleaner. Contradiction earns its keep when there’s no implication to reverse.']],
+  build(r){
+    head=gt(r,800,95,'Contradiction vs. contrapositive',{size:56,weight:600});
+    const col=(x,title,tf,tc,A,As,M,Ms)=>{const g=boxCard(r,x,420,640,370);pill(G(g,0,-130),320,58,tf,title,{size:32,color:tc});
+      txt(g,-270,-50,'Assume:',{size:28,weight:700,fill:'--muted',anchor:'start'});txt(g,-270,70,'Aim for:',{size:28,weight:700,fill:'--muted',anchor:'start'});
+      const a=G(g,0,0);txt(a,-110,-50,A,{size:40,weight:700,anchor:'start'});txt(a,-110,-10,As,{size:26,weight:500,fill:'--muted',anchor:'start'});
+      const m=G(g,0,0);txt(m,-110,70,M,{size:40,weight:700,anchor:'start'});txt(m,-110,110,Ms,{size:26,weight:500,fill:'--muted',anchor:'start'});return [g,a,m];};
+    [cP,...vP]=col(430,'Contrapositive','--sky','--on-strong','only ∼Q','(n is odd)','∼P','(5n + 1 is even)');
+    [cC,...vC]=col(1170,'Contradiction','--grape','--on-strong','P and ∼Q','(5n + 1 odd, and n odd)','any absurdity','(here: 5n + 1 is even)');
+    same=G(r,800,665);pill(same,600,62,'--sun','Same algebra: n = 2k + 1, so 5n + 1 = 10k + 6',{size:28});
+    bottom=G(r,800,772);pill(bottom,1340,74,'--grape','Same algebra? Prefer the contrapositive. Contradiction is for when there’s nothing to flip.',{size:28,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    show(cP,t,1.2);slideIn(vP[0],t,3.6,20);slideIn(vP[1],t,5,20);
+    show(cC,t,1.6);slideIn(vC[0],t,7.8,20);slideIn(vC[1],t,9.4,20);
+    show(same,t,12);show(bottom,t,14.6);
+  }};
+})());
+
+/* 7. √2 is irrational */
+scenes.push((()=>{
+  let head,thm,nothing,tool,bal,stk,L=[],badges=[],toks=[],share,bolt,stamp,fin;
+  const LT=[14.6,19.6,24.6,27];
+  return {title:'√2 is irrational',dur:48,chapters:[[0,'√2 is irrational'],[30,'Both even!']],
+  caps:[[0.6,'Theorem 3.49: √2 is irrational. The most famous proof in the subject.'],[4.2,'There’s no “if… then” here, so nothing to flip. Contradiction is the natural tool.'],[8.4,'Assume, to the contrary, that √2 is rational: √2 = a/b. And we may assume the fraction is in lowest terms.'],[14.4,'Square both sides: 2 = a²/b², so a² = 2b². That makes a² even…'],[19.4,'…so by Theorem 3.24 from Lecture 23, a is even. Write a = 2c.'],[24.4,'Then 4c² = 2b², so b² = 2c². So b² is even, and b is even too.'],[30,'Both a and b are even, so they share a factor of 2.'],[34.4,'But we said a/b was in lowest terms! Contradiction.'],[40,'So √2 can’t be rational. It’s irrational.'],[44,'Exercise 11 does √3 with exactly the same argument.']],
+  build(r){
+    head=gt(r,800,95,'The most famous proof in the subject',{size:52,weight:600});
+    thm=G(r,800,172);ticket(thm,760,84);row(thm,0,0,[['Theorem 3.49',{weight:700}],'   √2 is irrational.'],{size:36,anchor:'middle',fill:'--tink'});
+    nothing=G(r,460,252);pill(nothing,440,48,'--line','no “if… then” to flip',{size:26,color:'--ink'});
+    tool=G(r,1110,252);pill(tool,600,48,'--sky','tool: n² even ⟺ n even (Theorem 3.24)',{size:24,color:'--on-strong'});
+    L.push(row(r,470,345,['Square:  2 = a²/b², so  ',['a² = 2b²',{weight:700}]],{size:36}));
+    L.push(row(r,470,415,['a² is even, so  ',['a is even',{box:'--mint',weight:700}]],{size:36}));
+    L.push(row(r,470,485,['a = 2c, so 4c² = 2b², so  ',['b² = 2c²',{weight:700}]],{size:36}));
+    L.push(row(r,470,555,['b² is even, so  ',['b is even',{box:'--mint',weight:700}]],{size:36}));
+    [1,3].forEach(i=>{const g=G(r,0,[0,415,0,555][i]);pill(g,150,40,'--sky','Thm 3.24',{size:22,color:'--on-strong'});g._i=i;badges.push(g);});
+    ['a','b'].forEach((s,i)=>{const g=G(r,1380,370+170*i);g._c=el('circle',{r:46,fill:'--card',stroke:'--line','stroke-width':4},g);txt(g,0,0,s,{size:44,weight:700});
+      g._e=G(g,0,66);pill(g._e,110,38,'--mint','even',{size:24});toks.push(g);});
+    share=G(r,700,650);pill(share,720,70,'--sky','a and b share a factor of 2',{size:34,color:'--on-strong'});
+    bolt=zig(r,370,632,300,575,4);
+    bal=balloon(r,240,440,330,200,'--grape',[['Assume',28],['√2 = a/b',46]],{strLen:70});
+    stk=G(bal._body,0,72);pill(stk,210,46,'--sun','lowest terms',{size:26});
+    stamp=stampBox(r,1240,742,420,'Contradiction!',48);
+    fin=G(r,700,820);pill(fin,560,60,'--grape','So √2 is irrational.  ∎',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});show(thm,t,.5);show(nothing,t,4.4);show(tool,t,5.4);
+    const sh=t>34.6&&t<35.4&&!RM?Math.sin((t-34.6)*40)*6:0;
+    balloonUpdate(bal,t,8.6,35.4,sh);
+    const sv=pv(t,10.6);place(stk,{s:sv.s*(1+.12*bump(t,11.4,.5)+.15*bump(t,34.6,.5)),o:sv.o,r:-4});
+    L.forEach((g,i)=>slideIn(g,t,LT[i]));
+    badges.forEach(g=>{g._x=470+L[g._i]._w+100;show(g,t,g._i===1?20.2:27.6);});
+    toks.forEach((g,i)=>{show(g,t,14.8+i*.2);const on=t>=(i?27.8:20.4);if(g._on!==on){g._on=on;g._c.setAttribute('style','fill:var('+(on?'--mint':'--card')+');stroke:var('+(on?'--mint':'--line')+')');}
+      show(g._e,t,i?27.8:20.4);});
+    show(share,t,30.2);drawZig(bolt,t,34.6,35.2,38);
+    slam(stamp,t,35.6);show(fin,t,40.2);
+  }};
+})());
+
+/* 8. The trap we set */
+scenes.push((()=>{
+  let head,path,PL,steps=[],trap,bar,tlab,masc,snap,t1,t2,t3;
+  const Y=420,SX=[380,660,920],TX=1260;
+  return {title:'The trap we set',dur:18,
+  caps:[[0.6,'Where did the contradiction come from? Not from the arithmetic.'],[3.8,'It came from an assumption we chose to add: lowest terms. We set that trap on purpose.'],[9.4,'Chartrand calls this the subtle part: it’s hard to know in advance where the contradiction will appear.'],[14.4,'That’s what makes proof by contradiction powerful, and hard to plan.']],
+  build(r){
+    head=gt(r,800,95,'Where did the contradiction come from?',{size:52,weight:600});
+    path=el('line',{x1:200,y1:Y,x2:TX-130,y2:Y,stroke:'--muted','stroke-width':6,'stroke-linecap':'round','stroke-dasharray':'2 18'},r);
+    [['√2 = a/b',260],['a is even',220],['b is even',220]].forEach(([s,w],i)=>{const g=G(r,SX[i],Y+70);pill(g,w,50,'--card',s,{size:28,color:'--ink'});steps.push(g);});
+    trap=G(r,TX,Y);el('rect',{x:-140,y:12,width:280,height:40,rx:10,fill:'--sun',stroke:'--ink','stroke-width':4},trap);
+    const ch=G(trap,0,0);el('path',{d:'M36 10 L118 10 L118 -38 Z',fill:'--paper',stroke:'--ink','stroke-width':4,'stroke-linejoin':'round'},ch);el('circle',{cx:98,cy:-6,r:6,fill:'--sun'},ch);el('circle',{cx:108,cy:-22,r:4,fill:'--sun'},ch);
+    bar=G(trap,0,10);el('path',{d:'M0 0 H-112 V-30 H0',fill:'none',stroke:'--ink','stroke-width':7,'stroke-linecap':'round','stroke-linejoin':'round'},bar);
+    el('circle',{cx:0,cy:10,r:13,fill:'none',stroke:'--ink','stroke-width':5},trap);el('circle',{cx:0,cy:10,r:5,fill:'--ink'},trap);
+    tlab=G(trap,0,96);pill(tlab,240,52,'--grape','lowest terms',{size:30,color:'--on-strong'});
+    snap=G(r,TX,Y-90);pill(snap,170,52,'--pop','snap!',{size:30,color:'--on-strong'});
+    masc=G(r,200,Y-36);el('g',{transform:'scale(.7)'},masc).appendChild(mascot(el('g',{},masc)));
+    t1=G(r,800,600);pill(t1,1120,66,'--mint','Not from arithmetic: from an assumption we chose to add',{size:30});
+    t2=G(r,800,690);pill(t2,1160,66,'--sun','It’s hard to know in advance where the contradiction will appear',{size:28});
+    t3=G(r,800,780);pill(t3,600,66,'--grape','Powerful, and hard to plan',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});path.setAttribute('opacity',P(t,1,1.5));
+    show(trap,t,1.6);show(tlab,t,4.2);
+    steps.forEach((g,i)=>show(g,t,5+i*1));
+    const mk=P(t,5,8.4,x=>x);masc._x=lerp(200,TX-150,mk);masc._y=Y-36-(RM?0:Math.abs(Math.sin(mk*Math.PI*6))*14);place(masc,{o:P(t,4.6,5)});
+    const sn=P(t,8.6,8.9,ein);place(bar,{r:180*sn});show(snap,t,8.8,13.6);
+    show(t1,t,4);show(t2,t,9.6);show(t3,t,14.6);
+  }};
+})());
+
+/* 9. Takeaways */
+scenes.push((()=>{
+  let head,tk=[];
+  const L=['Assume ∼R, derive P ∧ ∼P, conclude R.','Open with: “Assume, to the contrary, that…”','Name what you assume; prefer contrapositive if it fits.'];
+  const A=[.6,5.6,10.6];
+  return {title:'Takeaways',dur:16,
+  caps:[[0.6,'Assume the opposite of what you want, reach a contradiction, and conclude the original statement.'],[5.6,'Open with “Assume, to the contrary,” followed by the exact negation.'],[10.6,'Name whatever you assume exists. And when the contrapositive works just as well, use it.']],
+  build(r){
+    head=gt(r,800,95,'Three things to remember',{size:60,weight:600});
+    L.forEach((s,i)=>{const g=G(r,800,265+190*i);ticket(g,1180,150);
+      el('line',{x1:-410,y1:-58,x2:-410,y2:58,stroke:'--tink','stroke-width':4,'stroke-dasharray':'6 10','stroke-linecap':'round',opacity:.45},g);
+      const ic=G(g,-500,0);
+      if(i===0){for(let k=0;k<8;k++){const a=k*Math.PI/4;el('line',{x1:Math.cos(a)*14,y1:Math.sin(a)*14,x2:Math.cos(a)*34,y2:Math.sin(a)*34,stroke:'--pop','stroke-width':7,'stroke-linecap':'round'},ic);}}
+      else if(i===1)txt(ic,0,8,'“ ”',{size:60,weight:700,fill:'--tink'});
+      else{el('path',{d:'M-38 -22 H14 L38 0 L14 22 H-38Z',fill:'none',stroke:'--tink','stroke-width':6,'stroke-linejoin':'round'},ic);txt(ic,-8,0,'r',{size:30,weight:700,fill:'--tink'});}
+      txt(g,-372,0,s,{size:i===2?34:37,weight:600,fill:'--tink',anchor:'start'});tk.push(g);});
+  },
+  update(t){place(head,{o:P(t,.4,1)});tk.forEach((g,i)=>{const k=P(t,A[i],A[i]+.6,eout);place(g,{dx:-(1-k)*120,o:k,r:(1-k)*-3});});}
+  };
+})());
+
+/* 10. Exit ticket */
+scenes.push((()=>{
+  let head,cards=[],backs=[],ans=[],timer,arc,cnt,foot;
+  const C=2*Math.PI*40;
+  const Q=[{q:'Q1',lines:[['Write the opening sentence of a',32,600],['proof by contradiction of:',32,600],['“If n² is odd, then n is odd.”',34,700]],a:[['Assume, to the contrary, that there',28,700],['is an integer n such that n² is odd',28,700],['and n is even.',28,700]]},
+           {q:'Q2',lines:[['Why did the √2 proof assume',36,600],['a/b was in lowest terms?',36,600]],a:[['So that “a and b are both even”',30,700],['would contradict something.',30,700],['The trap had to be set first.',26,500]]}];
+  return {title:'Exit ticket',dur:18,
+  caps:[[0.6,'Exit ticket: try both in your head before the reveal.'],[8,'Check yourself!'],[10.6,'Q1: negate exactly. n² is odd, and n is even. Q2: lowest terms is where the contradiction lands.'],[14.6,'Next up: the Chapter 3 Highlights, every method on one page.']],
+  build(r){
+    head=gt(r,800,95,'Exit ticket',{size:60,weight:600});
+    Q.forEach((d,i)=>{const g=G(r,i?1170:430,445);
+      el('rect',{x:-345,y:-235,width:690,height:470,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+      pill(G(g,-275,-185),84,52,'--pop',d.q,{size:28,color:'--on-strong',weight:700});
+      const n=d.lines.length;d.lines.forEach(([s,sz,w],j)=>txt(g,0,(n===3?-140:-115)+(n===3?46:56)*j,s,{size:sz,weight:w}));
+      const b=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--line'},b);txt(b,0,0,'Think first…',{size:34,weight:600,fill:'--muted'});backs.push(b);
+      const a=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--stage',stroke:'--mint','stroke-width':5},a);
+      const k=d.a.length,step=50,y0=-(k-1)*step/2;d.a.forEach(([s,sz,w],j)=>txt(a,0,y0+step*j,s,{size:sz,weight:w,fill:i===1&&j===2?'--muted':'--ink'}));ans.push(a);cards.push(g);});
+    timer=G(r,800,800);el('circle',{r:40,fill:'none',stroke:'--line','stroke-width':10},timer);
+    arc=el('circle',{r:40,fill:'none',stroke:'--sun','stroke-width':10,'stroke-linecap':'round','stroke-dasharray':C.toFixed(1),transform:'rotate(-90)'},timer);
+    cnt=txt(timer,0,0,'5',{size:34,weight:700});
+    foot=gt(r,800,800,'Next up: Chapter 3 Highlights, pp. 112–113',{size:36,weight:500,fill:'--muted'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    cards.forEach((g,i)=>show(g,t,.6+i*.3));
+    [8,8.6].forEach((a,i)=>{const k=P(t,a,a+.6),sy=Math.max(Math.abs(Math.cos(k*Math.PI)),.03);
+      place(backs[i],{sx:1,sy,o:k<.5?1:0});place(ans[i],{sx:1,sy,o:k>=.5?1:0});});
+    const tk=P(t,.9,7.6,x=>x);arc.setAttribute('stroke-dashoffset',(C*tk).toFixed(1));
+    const n=String(Math.max(1,5-Math.floor(tk*5)));if(cnt.textContent!==n)cnt.textContent=n;
+    place(timer,{o:Math.min(P(t,.9,1.3),1-P(t,7.6,8.1))});
+    place(foot,{o:P(t,14.6,15.2)});
+  }};
+})());
+
+/* ---------- assemble timeline ---------- */
+const root=el('g',{},svg);
+const starts=[];let acc=0;
+scenes.forEach(s=>{starts.push(acc);s.g=el('g',{},root);s.rows=[];BUILDING=s;s.build(s.g);BUILDING=null;s._lv=-1;s.g.style.display='none';acc+=s.dur;});
+const TOTAL=acc;
+const chapters=[];scenes.forEach((s,i)=>(s.chapters||[[0,s.title]]).forEach(([o,ti])=>chapters.push({t:starts[i]+o,title:ti})));
+const caps=[];scenes.forEach((s,i)=>s.caps.forEach(([o,c])=>caps.push([starts[i]+o,c])));
+
+/* ticket-wipe transition between scenes, carrying the next chapter's title */
+const wipe=el('g',{},svg);wipe._x=0;wipe._y=0;
+el('path',{d:'M0 0 H2000 L1800 900 H-200Z',fill:'--sun'},wipe);
+el('line',{x1:46,y1:0,x2:-154,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+el('line',{x1:1954,y1:0,x2:1754,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+const wNum=txt(wipe,900,372,'',{size:34,weight:600,fill:'--tink'});
+const wTitle=txt(wipe,900,456,'',{size:92,weight:700,fill:'--tink'});
+function renderWipe(t){
+  let b=null;for(let i=1;i<starts.length;i++)if(Math.abs(t-starts[i])<.6){b=starts[i];break;}
+  if(b===null){place(wipe,{o:0});return;}
+  const u=(t-(b-.6))/1.2;
+  const ci=chapters.findIndex(c=>Math.abs(c.t-b)<.01);
+  if(ci>=0&&wTitle.textContent!==chapters[ci].title){wTitle.textContent=chapters[ci].title;wNum.textContent='Part '+(ci+1)+' of '+chapters.length;}
+  if(RM){place(wipe,{dx:-100,o:clamp((.5-Math.abs(u-.5))*4)});return;}
+  const tx=u<.4?lerp(1800,0,eout(u/.4)):u<.6?lerp(0,-200,(u-.4)/.2):lerp(-200,-2000,ein((u-.6)/.4));
+  place(wipe,{dx:tx,o:1});
+}
+
+/* ---------- player ---------- */
+const $=id=>document.getElementById(id);
+const capEl=$('caption'),playBtn=$('play'),scrub=$('scrub'),timeEl=$('time'),poster=$('poster'),chapNav=$('chapters'),player=$('player');
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+scrub.max=TOTAL;
+$('posterLen').textContent=Math.floor(TOTAL/60)+' min '+Math.round(TOTAL%60)+' s';
+poster.setAttribute('aria-label','Play the explainer ('+Math.floor(TOTAL/60)+' minutes '+Math.round(TOTAL%60)+' seconds)');
+const ICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/><rect x="14" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/></svg>',
+  replay:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+const ticksEl=$('ticks');
+chapters.forEach((c,i)=>{if(i){const s=document.createElement('span');s.style.left=(c.t/TOTAL*100)+'%';ticksEl.appendChild(s);}
+  const b=document.createElement('button');b.type='button';b.className='chip';b.innerHTML='<b>'+(i+1)+'</b>';b.appendChild(document.createTextNode(c.title));
+  b.addEventListener('click',()=>{seek(c.t+.01);setPlaying(true);});c.btn=b;chapNav.appendChild(b);});
+
+let T=0,playing=false,started=false,speed=1,last=null,dirty=true,lastScene=-1,lastCap=null,lastChap=-1;
+const sceneAt=t=>{let i=0;for(let k=0;k<starts.length;k++)if(t>=starts[k])i=k;return i;};
+function render(){
+  const t=started?T:6.2;
+  const i=sceneAt(Math.min(t,TOTAL-1e-6));
+  if(i!==lastScene){scenes.forEach((s,k)=>s.g.style.display=k===i?'':'none');lastScene=i;}
+  if(scenes[i]._lv!==FONTV){scenes[i].rows.forEach(layoutRow);scenes[i]._lv=FONTV;}
+  scenes[i].update(t-starts[i]);
+  renderWipe(t);
+  let c='';if(started){for(const [ct,s] of caps){if(ct<=T)c=s;else break;}}
+  if(c!==lastCap){capEl.textContent=c;lastCap=c;}
+  scrub.value=T;scrub.style.setProperty('--pct',(T/TOTAL*100).toFixed(2)+'%');
+  timeEl.textContent=fmt(T)+' / '+fmt(TOTAL);
+  let ch=0;chapters.forEach((cc,k)=>{if(T>=cc.t-.001)ch=k;});
+  if(ch!==lastChap){chapters.forEach((cc,k)=>cc.btn.setAttribute('aria-current',k===ch?'true':'false'));
+    if(started){const b=chapters[ch].btn;chapNav.scrollTo({left:b.offsetLeft-chapNav.clientWidth/2+b.offsetWidth/2,behavior:RM?'auto':'smooth'});}lastChap=ch;}
+}
+function setPlaying(p){
+  if(p&&T>=TOTAL-.01)T=0;
+  playing=p;last=null;
+  if(p){started=true;poster.hidden=true;}
+  const ended=!p&&T>=TOTAL-.01;
+  playBtn.innerHTML=p?ICON.pause:(ended?ICON.replay:ICON.play);
+  playBtn.setAttribute('aria-label',p?'Pause':(ended?'Replay':'Play'));
+  dirty=true;
+}
+function seek(t){started=true;poster.hidden=true;T=clamp(t,0,TOTAL);dirty=true;}
+function loop(now){
+  if(playing){if(last!==null)T+=Math.min((now-last)/1000,.1)*speed;last=now;if(T>=TOTAL){T=TOTAL;setPlaying(false);}dirty=true;}
+  if(dirty){render();dirty=false;}
+  requestAnimationFrame(loop);
+}
+playBtn.addEventListener('click',()=>setPlaying(!playing));
+poster.addEventListener('click',()=>{T=0;setPlaying(true);playBtn.focus({preventScroll:true});});
+$('restart').addEventListener('click',()=>{seek(0);setPlaying(true);});
+scrub.addEventListener('input',()=>seek(parseFloat(scrub.value)));
+const speeds=[1,1.25,1.5,.75];
+$('speed').addEventListener('click',e=>{speed=speeds[(speeds.indexOf(speed)+1)%speeds.length];e.currentTarget.textContent=speed+'×';e.currentTarget.setAttribute('aria-label','Playback speed '+speed+' times');});
+$('cc').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);capEl.hidden=!on;});
+const fsBtn=$('fs');
+if(!(document.fullscreenEnabled&&player.requestFullscreen))fsBtn.hidden=true;
+fsBtn.addEventListener('click',()=>{try{if(document.fullscreenElement)document.exitFullscreen();else player.requestFullscreen().catch(()=>{});}catch(e){}});
+document.addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(e.altKey||e.ctrlKey||e.metaKey)return;
+  if(e.key===' '||e.key==='k'){if(tag==='button'&&e.key===' ')return;if(tag==='input'&&e.key===' '){e.preventDefault();setPlaying(!playing);return;}
+    if(tag!=='input'){e.preventDefault();setPlaying(!playing);}}
+  else if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&tag!=='input'){e.preventDefault();seek(T+(e.key==='ArrowRight'?5:-5));}
+});
+setPlaying(false);
+if(document.fonts){if(document.fonts.ready)document.fonts.ready.then(()=>{FONTV++;dirty=true;});document.fonts.addEventListener&&document.fonts.addEventListener('loadingdone',()=>{FONTV++;dirty=true;});}
+window.__seek=t=>{seek(t);render();};
+window.__total=TOTAL;
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

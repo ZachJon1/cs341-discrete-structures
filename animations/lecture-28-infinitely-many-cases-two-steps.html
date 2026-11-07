@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Infinitely Many Cases, Two Steps: an animated explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9E6FA; --stage:#FBFAFF; --card:#F0EDFD; --ink:#26215E; --muted:#6B67A3; --line:#D3CEF0;
+  --paper:#FFE7A3; --tink:#26215E; --pop:#E8395F; --mint:#14B983; --sky:#3D7BF5; --sun:#FFC23A; --grape:#7C4DEB;
+  --on-strong:#FFFFFF;
+  --display:"Fredoka","Nunito","Trebuchet MS","Segoe UI",system-ui,"Cambria Math","STIX Two Math",sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,"Cambria Math",sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+    --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+    --on-strong:#1B1846; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+  --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+  --on-strong:#1B1846; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 36px}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:4px 4px 14px}
+.intro h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.6vw,40px);margin:0;letter-spacing:-0.01em}
+.intro p{margin:0;color:var(--muted);font-size:17px;line-height:1.4}
+.player{background:var(--card);border-radius:24px;padding:10px;border:2px solid var(--line)}
+.stage{position:relative;border-radius:16px;overflow:hidden;background:var(--stage);aspect-ratio:16/9;width:100%}
+.stage svg{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+.td{font-family:var(--display)}
+.tb{font-family:var(--body)}
+.poster{position:absolute;inset:0;border:0;padding:0;margin:0;background:transparent;cursor:pointer;color:inherit;font:inherit}
+.poster[hidden]{display:none}
+.poster-btn{position:absolute;left:50%;top:19%;transform:translate(-50%,-50%);width:clamp(56px,10vw,104px);aspect-ratio:1;border-radius:50%;
+  background:var(--ink);color:var(--stage);display:grid;place-items:center;box-shadow:0 0 0 clamp(5px,.9vw,10px) var(--stage);transition:transform .18s ease}
+.poster-btn svg{width:42%;height:42%;margin-left:8%}
+.poster:hover .poster-btn,.poster:focus-visible .poster-btn{transform:translate(-50%,-50%) scale(1.07)}
+.poster:focus-visible{outline:4px solid var(--sky);outline-offset:-4px;border-radius:16px}
+.poster-len{position:absolute;left:14px;top:12px;background:var(--paper);color:var(--tink);font-weight:700;font-size:clamp(12px,1.5vw,15px);padding:5px 12px;border-radius:999px}
+.caption{min-height:3.3em;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 18px 6px;
+  font-size:clamp(16px,1.9vw,22px);line-height:1.38;font-weight:700;color:var(--ink);margin:0;text-wrap:balance}
+.caption:empty::before{content:"Captions appear here once you press play.";color:var(--muted);font-weight:400}
+.caption[hidden]{display:none}
+.controls{display:flex;align-items:center;gap:8px;padding:6px 4px 2px;flex-wrap:wrap}
+.btn{min-width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:var(--stage);color:var(--ink);
+  font:700 15px/1 var(--body);display:inline-grid;place-items:center;cursor:pointer;padding:0 10px}
+.btn svg{width:22px;height:22px}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,.chip:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.btn.play{background:var(--pop);border-color:var(--pop);color:var(--on-strong);min-width:52px}
+.btn[aria-pressed="false"]{color:var(--muted)}
+.scrub{position:relative;flex:1 1 220px;min-width:160px;height:44px;display:flex;align-items:center}
+.ticks{position:absolute;left:11px;right:11px;top:6px;height:6px;pointer-events:none}
+.ticks span{position:absolute;top:0;width:3px;height:7px;border-radius:2px;background:var(--muted);transform:translateX(-50%)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(to right,var(--pop) var(--pct,0%),var(--line) var(--pct,0%))}
+input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:10px;border-radius:6px;background:var(--pop)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--paper);border:3px solid var(--ink)}
+.time{font:700 15px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--muted);min-width:96px;text-align:center}
+.chapters{display:flex;gap:6px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:thin}
+.chip{flex:0 0 auto;border:2px solid var(--line);background:var(--stage);color:var(--ink);border-radius:999px;padding:7px 13px 7px 7px;
+  font:700 14px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--card);font-size:12px}
+.chip[aria-current="true"]{background:var(--ink);color:var(--stage);border-color:var(--ink)}
+.chip[aria-current="true"] b{background:var(--sun);color:var(--tink)}
+.hint{color:var(--muted);font-size:14px;margin:12px 6px 0;line-height:1.45}
+.rotate{display:none}
+@media (max-width:640px) and (orientation:portrait){.rotate{display:block}}
+.player:fullscreen{display:flex;flex-direction:column;justify-content:center;border-radius:0;border:0;padding:12px;background:var(--card)}
+.player:fullscreen .stage{width:min(100%,calc((100vh - 200px) * 16 / 9));margin:0 auto}
+.player:fullscreen .caption,.player:fullscreen .controls,.player:fullscreen .chapters{width:min(100%,calc((100vh - 200px) * 16 / 9));margin-left:auto;margin-right:auto}
+@media (max-width:560px){.time{min-width:0;font-size:13px}.btn{min-width:40px;height:40px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="intro">
+    <h1>Lecture 28, animated</h1>
+    <p>Mathematical induction for CS 341: two steps, infinitely many cases, and why the base step matters.</p>
+  </header>
+  <section class="player" id="player" aria-label="Animated explainer player">
+    <div class="stage">
+      <svg id="svg" viewBox="0 0 1600 900" role="img" aria-label="Animation stage. The captions below describe each scene."></svg>
+      <button class="poster" id="poster" type="button" aria-label="Play the explainer">
+        <span class="poster-len" id="posterLen"></span>
+        <span class="poster-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5v15l13-7.5z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+    <div class="controls">
+      <button class="btn play" id="play" type="button" aria-label="Play"></button>
+      <button class="btn" id="restart" type="button" aria-label="Restart from the beginning"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="scrub"><div class="ticks" id="ticks"></div><input type="range" id="scrub" min="0" max="100" step="0.1" value="0" aria-label="Seek"></div>
+      <span class="time" id="time" aria-live="off">0:00</span>
+      <button class="btn" id="speed" type="button" aria-label="Playback speed">1×</button>
+      <button class="btn" id="cc" type="button" aria-pressed="true" aria-label="Captions">CC</button>
+      <button class="btn" id="fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+  </section>
+  <p class="hint">Space plays or pauses. The left and right arrow keys skip 5 seconds. Tap any chapter to jump there.</p>
+  <p class="hint rotate">Turn your phone sideways for a bigger picture.</p>
+</main>
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('svg');
+const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* ---------- math + easing ---------- */
+const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const lerp=(a,b,k)=>a+(b-a)*k;
+const eio=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+const eout=k=>1-Math.pow(1-k,3);
+const ein=k=>k*k*k;
+const back=k=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2);};
+const P=(t,a,b,fn=eio)=>fn(clamp((t-a)/(b-a)));
+const bump=(t,a,d)=>Math.sin(Math.PI*clamp((t-a)/d));
+const num=k=>k<0?'\u2212'+(-k):String(k);
+
+/* ---------- svg helpers ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);let st='';
+  for(const k in attrs){const v=attrs[k];if(v==null)continue;
+    if(k==='text')e.textContent=v;
+    else if((k==='fill'||k==='stroke')&&typeof v==='string'&&v.startsWith('--'))st+=k+':var('+v+');';
+    else e.setAttribute(k,v);}
+  if(st)e.setAttribute('style',st);
+  if(parent)parent.appendChild(e);return e;
+}
+function place(g,o={}){
+  const X=g._x+(o.dx||0),Y=g._y+(o.dy||0);
+  let tr='translate('+X.toFixed(2)+' '+Y.toFixed(2)+')';
+  if(o.r)tr+=' rotate('+o.r.toFixed(2)+')';
+  if(o.sx!=null||o.sy!=null){const sx=o.sx!=null?o.sx:(o.s!=null?o.s:1),sy=o.sy!=null?o.sy:(o.s!=null?o.s:1);tr+=' scale('+Math.max(sx,.001).toFixed(3)+' '+Math.max(sy,.001).toFixed(3)+')';}
+  else if(o.s!=null&&o.s!==1)tr+=' scale('+Math.max(o.s,.001).toFixed(3)+')';
+  g.setAttribute('transform',tr);
+  const op=o.o==null?1:clamp(o.o);
+  g.setAttribute('opacity',op.toFixed(3));
+  const vis=op<=.002?'hidden':'visible';if(g._vis!==vis){g.style.visibility=vis;g._vis=vis;}
+}
+function G(parent,x=0,y=0){const g=el('g',{},parent);g._x=x;g._y=y;place(g);return g;}
+function show(g,t,a,b=1e9,extra={}){
+  const k=clamp((t-a)/.5),f=1-P(t,b-.45,b,ein);
+  place(g,Object.assign({s:k?back(k):.001,o:Math.min(clamp(k*3),f)},extra));return k;
+}
+function txt(p,x,y,str,o={}){
+  return el('text',{x,y,dy:'.35em','font-size':o.size||40,'font-weight':o.weight||500,'text-anchor':o.anchor||'middle',
+    fill:o.fill||'--ink',class:o.body?'tb':'td',opacity:o.op,text:str},p);
+}
+function gt(p,x,y,str,o={}){const g=G(p,x,y);txt(g,0,0,str,o);return g;}
+function ticketD(w,h){const W=w/2,H=h/2,n=Math.min(14,h*.18),c=Math.min(14,h*.2);
+  return 'M'+(-W+c)+' '+(-H)+'H'+(W-c)+'A'+c+' '+c+' 0 0 1 '+W+' '+(-H+c)+'V'+(-n)+'A'+n+' '+n+' 0 0 0 '+W+' '+n+'V'+(H-c)+'A'+c+' '+c+' 0 0 1 '+(W-c)+' '+H+
+  'H'+(-W+c)+'A'+c+' '+c+' 0 0 1 '+(-W)+' '+(H-c)+'V'+n+'A'+n+' '+n+' 0 0 0 '+(-W)+' '+(-n)+'V'+(-H+c)+'A'+c+' '+c+' 0 0 1 '+(-W+c)+' '+(-H)+'Z';}
+function ticket(p,w,h,fill='--paper'){const g=el('g',{},p);el('path',{d:ticketD(w,h),fill},g);return g;}
+function pill(p,w,h,fill,label,o={}){const g=el('g',{},p);el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:h/2,fill},g);
+  if(label!=null)txt(g,0,0,label,{size:o.size||34,weight:o.weight||600,fill:o.color||'--tink'});return g;}
+function star(p,cx,cy,R,fill){let d='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?R*.45:R;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1);}
+  return el('path',{d:d+'Z',fill},p);}
+function shape(p,type,fill,s){
+  if(type===0)return el('circle',{r:s,fill},p);
+  if(type===1)return el('rect',{x:-s,y:-s,width:2*s,height:2*s,rx:12,fill},p);
+  if(type===2)return el('path',{d:'M0 '+(-s*1.05)+' L'+(s*1.05)+' '+(s*.8)+' L'+(-s*1.05)+' '+(s*.8)+'Z',fill,stroke:fill,'stroke-width':10,'stroke-linejoin':'round'},p);
+  if(type===3)return el('rect',{x:-s*.82,y:-s*.82,width:1.64*s,height:1.64*s,rx:10,fill,transform:'rotate(45)'},p);
+  return star(p,0,0,s*1.2,fill);
+}
+function mascot(p){const g=el('g',{},p);
+  el('path',{d:ticketD(124,84),fill:'--paper',stroke:'--tink','stroke-width':4},g);
+  el('circle',{cx:-34,cy:10,r:7,fill:'--pop',opacity:.45},g);el('circle',{cx:34,cy:10,r:7,fill:'--pop',opacity:.45},g);
+  el('circle',{cx:-17,cy:-8,r:6,fill:'--tink'},g);el('circle',{cx:17,cy:-8,r:6,fill:'--tink'},g);
+  el('path',{d:'M-13 10 Q0 22 13 10',fill:'none',stroke:'--tink','stroke-width':4,'stroke-linecap':'round'},g);return g;}
+function person(p,fill){const g=el('g',{},p);
+  el('rect',{x:-30,y:-4,width:60,height:58,rx:26,fill},g);el('circle',{cx:0,cy:-34,r:25,fill},g);
+  el('circle',{cx:-9,cy:-37,r:3.6,fill:'--tink'},g);el('circle',{cx:9,cy:-37,r:3.6,fill:'--tink'},g);
+  el('path',{d:'M-8 -27 Q0 -21 8 -27',fill:'none',stroke:'--tink','stroke-width':3,'stroke-linecap':'round'},g);return g;}
+function speech(p,w,h,label,o={}){const g=el('g',{},p);
+  el('path',{d:'M'+(-w/2+4)+' -14 L'+(-w/2-30)+' 16 L'+(-w/2+4)+' 14Z',fill:'--grape'},g);
+  el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--grape'},g);
+  txt(g,0,0,label,{size:o.size||36,weight:600,fill:'--on-strong'});return g;}
+function dart(g){el('line',{x1:0,y1:-96,x2:0,y2:-18,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},g);
+  el('path',{d:'M-11 -22 L11 -22 L0 4Z',fill:'--ink'},g);el('path',{d:'M0 -78 L-16 -106 L0 -96 L16 -106Z',fill:'--pop'},g);}
+function qlen(x0,y0,cx,cy,x1,y1){let L=0,px=x0,py=y0;for(let i=1;i<=40;i++){const u=i/40,a=(1-u)*(1-u),b=2*u*(1-u),c=u*u;
+  const x=a*x0+b*cx+c*x1,y=a*y0+b*cy+c*y1;L+=Math.hypot(x-px,y-py);px=x;py=y;}return L;}
+
+/* ---------- extra helpers for algebra rows ---------- */
+const pv=(t,a)=>{const k=clamp((t-a)/.5);return {s:k?back(k):.001,o:clamp(k*3)};};
+let BUILDING=null,FONTV=0;
+function row(p,x,y,pieces,o={}){
+  const g=el('g',{},p);g._x=0;g._y=0;g._pc=[];g._ax=x;g._ay=y;g._anchor=o.anchor||'start';const S=o.size||44;
+  if(o.bg){const h=o.bgH||S*1.9;g._bg=el('rect',{y:y-h/2,height:h,rx:22,fill:o.bg,stroke:o.bgStroke||null,'stroke-width':o.bgStroke?5:null},g);g._padX=o.padX||32;}
+  pieces.forEach(pc=>{const [s,q={}]=Array.isArray(pc)?pc:[pc,{}];const sz=q.size||S;let rect=null;
+    if(q.box)rect=el('rect',{y:y-sz*.68,height:sz*1.36,rx:12,fill:q.box},g);
+    const t=el('text',{x,y,dy:'.35em','font-size':sz,'font-weight':q.weight||o.weight||500,'text-anchor':'start',
+      fill:q.fill||(q.box?'--tink':(o.fill||'--ink')),class:'td',text:s.replace(/ /g,'\u00A0')},g);
+    g._pc.push({t,rect,pad:q.box?12:0});});
+  layoutRow(g);if(BUILDING)BUILDING.rows.push(g);return g;
+}
+let MEAS=null;const MCACHE={};
+function measure(t){
+  if(!MEAS)MEAS=el('text',{x:-5000,y:-5000,class:'td',opacity:0,'aria-hidden':'true'},svg);
+  const sz=t.getAttribute('font-size'),w=t.getAttribute('font-weight'),s=t.textContent,key=FONTV+'|'+sz+'|'+w+'|'+s;
+  if(MCACHE[key]!=null)return MCACHE[key];
+  MEAS.setAttribute('font-size',sz);MEAS.setAttribute('font-weight',w);MEAS.textContent=s;
+  let l=0;try{l=MEAS.getComputedTextLength();}catch(e){}
+  return MCACHE[key]=l;
+}
+function layoutRow(g){
+  const ws=g._pc.map(pc=>measure(pc.t)+pc.pad*2);
+  const tot=ws.reduce((a,b)=>a+b,0);let x=g._anchor==='middle'?g._ax-tot/2:g._ax;g._x0=x;g._w=tot;
+  g._pc.forEach((pc,i)=>{if(pc.rect){pc.rect.setAttribute('x',(x+3).toFixed(1));pc.rect.setAttribute('width',Math.max(ws[i]-6,0).toFixed(1));}
+    pc.t.setAttribute('x',(x+pc.pad).toFixed(1));pc.x=x;pc.w=ws[i];x+=ws[i];});
+  if(g._bg){g._bg.setAttribute('x',(g._x0-g._padX).toFixed(1));g._bg.setAttribute('width',(tot+2*g._padX).toFixed(1));}
+}
+function frac(p,x,y,num,den,o={}){const g=G(p,x,y),s=o.size||48,w=o.w||Math.max(num.length,den.length)*s*.55+24;
+  txt(g,0,-s*.78,num,{size:s,weight:o.weight||500,fill:o.fill});
+  el('line',{x1:-w/2,y1:0,x2:w/2,y2:0,stroke:o.fill||'--ink','stroke-width':5,'stroke-linecap':'round'},g);
+  txt(g,0,s*.78,den,{size:s,weight:o.weight||500,fill:o.fill});return g;}
+function tracker(p,x,y,gap,labels,o={}){
+  const W=o.w||250;
+  const items=labels.map((l,i)=>{const g=G(p,o.horiz?x+gap*i:x,o.horiz?y:y+gap*i);
+    const bg=el('rect',{x:-W/2,y:-30,width:W,height:60,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+    const c=el('circle',{cx:-W/2+32,cy:0,r:20,fill:'--line'},g);
+    const n=txt(g,-W/2+32,0,String(i+1),{size:24,weight:700,fill:'--muted'});
+    const tx=txt(g,-W/2+62,0,l,{size:28,weight:600,anchor:'start',fill:'--muted'});
+    return {g,bg,c,n,tx};});
+  return {items,update(t,times,end,appear){items.forEach((it,i)=>{
+    const on=t>=times[i],done=t>=(i<items.length-1?times[i+1]:end),st=done?2:on?1:0;
+    if(it._st!==st){it._st=st;
+      it.bg.setAttribute('style','fill:var('+(st===1?'--sun':'--card')+');stroke:var('+(st===1?'--sun':st===2?'--mint':'--line')+')');
+      it.c.setAttribute('style','fill:var('+(st===0?'--line':st===1?'--tink':'--mint')+')');
+      it.n.setAttribute('style','fill:var('+(st===0?'--muted':st===1?'--sun':'--tink')+')');it.n.textContent=st===2?'✓':String(i+1);
+      it.tx.setAttribute('style','fill:var('+(st===1?'--tink':st===2?'--ink':'--muted')+')');}
+    const k=P(t,appear+i*.15,appear+.4+i*.15);place(it.g,{o:k,s:1+.08*(on&&!done?bump(t,times[i],.4):0)});});}};
+}
+function check(p,x,y){const c=G(p,x,y);el('circle',{r:24,fill:'--mint'},c);
+  el('path',{d:'M-10 0 L-3 8 L11 -8',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);return c;}
+
+/* =================================================================
+   SCENES  (each: title, dur, caps [local time, text], build, update)
+   ================================================================= */
+const scenes=[];
+function boxCard(p,x,y,w,h,stroke){const g=G(p,x,y);g._r=el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--card',stroke:stroke||'--line','stroke-width':stroke?5:3},g);return g;}
+function slideIn(g,t,a,dx=40){const k=P(t,a,a+.5,eout);place(g,{dx:-(1-k)*dx,o:k});}
+function stampBox(p,x,y,w,label,size){const g=G(p,x,y);el('rect',{x:-w/2,y:-58,width:w,height:116,rx:18,fill:'--stage',stroke:'--pop','stroke-width':9},g);txt(g,0,0,label,{size:size||52,weight:700,fill:'--pop'});return g;}
+function slam(g,t,a,r=-5,b=1e9){const k=clamp((t-a)/.4);place(g,{s:k?lerp(1.8,1,eout(k)):.001,o:clamp(k*4)*(1-P(t,b-.4,b)),r});}
+function domino(p,cx,base,o={}){const w=o.w||34,h=o.h||130,g=G(p,cx+w/2,base);
+  el('rect',{x:-w,y:-h,width:w,height:h,rx:6,fill:o.fill||'--ink',stroke:'--stage','stroke-width':3},g);
+  el('line',{x1:-w+6,y1:-h/2,x2:-6,y2:-h/2,stroke:'--stage','stroke-width':3},g);
+  [-h*.75,-h*.25].forEach(y=>el('circle',{cx:-w/2,cy:y,r:Math.max(3,w*.15),fill:'--stage'},g));g._w=w;g._h=h;return g;}
+const fallAng=(t,a,fin=66,dur=.38)=>fin*ein(clamp((t-a)/dur));
+function sqTile(p,x,y,w,h,fill,label,lc){const g=G(p,x,y);el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:12,fill},g);if(label!=null)txt(g,0,0,label,{size:26,weight:700,fill:lc||'--tink'});return g;}
+
+/* 1. Checking fails */
+scenes.push((()=>{
+  let form,tiles=[],cnt,big,bigL,title,sub,lesson,dom=[];
+  return {title:'Checking fails',dur:16,
+  caps:[[0.3,'Remember Homework 1? n² − n + 41 is prime for n = 1, 2, 3…'],[3.4,'Forty values in a row, all prime…'],[5.2,'…and then n = 41 gives 41², which isn’t prime.'],[7.8,'The lesson all term: checking cases can’t prove a claim about infinitely many integers.'],[12,'Today’s method does it with exactly two steps: mathematical induction.']],
+  build(r){
+    form=G(r,800,150);ticket(form,760,88);row(form,0,0,[['Homework 1',{weight:700}],'   Is n² − n + 41 prime?'],{size:36,anchor:'middle',fill:'--tink'});
+    for(let i=0;i<40;i++){const c=i%10,rw=Math.floor(i/10);tiles.push(sqTile(r,260+120*c,262+86*rw,84,64,'--mint',String(i+1)));}
+    cnt=G(r,560,670);pill(cnt,300,60,'--mint','40 for 40 ✓',{size:32});
+    big=sqTile(r,980,670,120,90,'--pop','41','--on-strong');
+    bigL=G(r,980,770);pill(bigL,540,56,'--pop','41² − 41 + 41 = 41² = 1681, not prime',{size:26,color:'--on-strong'});
+    title=gt(r,800,330,'Infinitely Many Cases,',{size:84,weight:600});
+    sub=gt(r,800,425,'Two Steps',{size:84,weight:600});
+    lesson=gt(r,800,512,'The Principle of Mathematical Induction',{size:40,weight:400,fill:'--muted'});
+    for(let i=0;i<12;i++)dom.push(domino(r,250+100*i,760,{w:30,h:110}));
+  },
+  update(t){
+    const lv=P(t,7.2,7.8,ein);
+    show(form,t,.3,7.8);
+    tiles.forEach((g,i)=>{const v=pv(t,.8+i*.06);place(g,{s:v.s,o:v.o*(1-lv)});});
+    show(cnt,t,3.6,7.8);show(big,t,5.2,7.8,{dx:t>5.6&&t<6.4&&!RM?Math.sin((t-5.6)*40)*6:0});show(bigL,t,5.6,7.8);
+    place(title,{o:P(t,7.8,8.4),dy:(1-P(t,7.8,8.4,eout))*30});place(sub,{o:P(t,8.2,8.8),dy:(1-P(t,8.2,8.8,eout))*30});place(lesson,{o:P(t,8.8,9.4)});
+    dom.forEach((g,i)=>{const v=pv(t,9+i*.06);place(g,{s:v.s,o:v.o,r:fallAng(t,12.4+i*.2)});});
+  }};
+})());
+
+/* 2. Finite vs infinite */
+scenes.push((()=>{
+  let head,cF,cI,fin=[],belt=[],masc,tagF,tagI,bottom,clip;
+  return {title:'Finite vs. infinite',dur:14,
+  caps:[[0.6,'When there are finitely many cases, checking them all is a proof. You did that in Homework 2.'],[5.6,'With infinitely many, you’d never finish.'],[9.6,'Induction resolves the tension: infinitely many statements, proved by an argument of two steps.']],
+  build(r){
+    head=gt(r,800,95,'Finite vs. infinite',{size:60,weight:600});
+    cF=boxCard(r,430,430,620,420);txt(cF,0,-160,'Finitely many cases',{size:38,weight:700});
+    for(let i=0;i<6;i++){const g=sqTile(cF,-200+80*i,-50,64,64,'--mint','✓');fin.push(g);}
+    tagF=G(cF,0,90);pill(tagF,470,60,'--mint','check them all: that’s a proof',{size:28});
+    txt(cF,0,160,'(Homework 2, Problem 7)',{size:26,weight:500,fill:'--muted'});
+    cI=boxCard(r,1170,430,620,420);txt(cI,0,-160,'Infinitely many cases',{size:38,weight:700});
+    const defs=el('defs',{},r);clip=el('clipPath',{id:'l28clip'},defs);el('rect',{x:880,y:330,width:580,height:110},clip);
+    const bg=el('g',{'clip-path':'url(#l28clip)'},r);
+    for(let i=0;i<14;i++){const g=sqTile(bg,0,380,64,64,'--line',String(i+1),'--ink');g._i=i;belt.push(g);}
+    masc=G(r,1170,520);mascot(masc);
+    tagI=G(cI,0,180);pill(tagI,360,56,'--pop','you’d never finish',{size:28,color:'--on-strong'});
+    bottom=G(r,800,780);pill(bottom,1000,74,'--grape','Induction: infinitely many statements, two steps',{size:34,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    show(cF,t,.8);fin.forEach((g,i)=>show(g,t,1.4+i*.3));show(tagF,t,3.6);
+    show(cI,t,5.4);
+    belt.forEach(g=>{const off=RM?0:(t-5.6)*140;let x=900+((g._i*84-off)%1176+1176)%1176;g._x=x;place(g,{o:P(t,5.8,6.2)});});
+    show(masc,t,6,1e9,{r:RM?0:Math.sin(t*12)*6});show(tagI,t,7.4);
+    show(bottom,t,9.8);
+  }};
+})());
+
+/* 3. Dominoes */
+scenes.push((()=>{
+  let head,dom=[],labs=[],dots,cB,cI,masc,ringK,arc,AL,kLab,k1Lab,formal;
+  const X=i=>210+95*i,BASE=540,N=12,K=6;
+  return {title:'Dominoes',dur:30,
+  caps:[[0.6,'Picture the statements P(1), P(2), P(3), … as an endless row of dominoes.'],[3.8,'Step 1, the base step: P(1) is true. The first domino falls.'],[8,'Step 2, the inductive step: for every k, if P(k) is true, then P(k + 1) is true. Each domino knocks over the next.'],[14,'Put them together, and every domino falls.'],[19.6,'That’s the Principle of Mathematical Induction: those two steps prove P(n) for every positive integer n.']],
+  build(r){
+    head=gt(r,800,95,'The principle: dominoes',{size:60,weight:600});
+    el('line',{x1:150,y1:BASE+2,x2:1470,y2:BASE+2,stroke:'--line','stroke-width':6,'stroke-linecap':'round'},r);
+    ringK=el('rect',{x:X(K)-40,y:BASE-160,width:X(K+1)-X(K)+80,height:200,rx:28,fill:'none',stroke:'--sun','stroke-width':6,'stroke-dasharray':'12 9'},r);
+    for(let i=0;i<N;i++){dom.push(domino(r,X(i),BASE));labs.push(gt(r,X(i),BASE+40,'P('+(i+1)+')',{size:24,weight:700,fill:'--muted'}));}
+    dots=gt(r,1420,BASE-60,'…',{size:64,fill:'--muted'});
+    kLab=G(r,X(K),BASE+82);pill(kLab,80,40,'--sun','k',{size:26});k1Lab=G(r,X(K+1),BASE+82);pill(k1Lab,110,40,'--sun','k + 1',{size:24});
+    arc=el('path',{d:`M${X(K)+17} ${BASE-136} Q${X(K)+60} ${BASE-200} ${X(K+1)} ${BASE-140}`,fill:'none',stroke:'--pop','stroke-width':5,'stroke-dasharray':'8 8','stroke-linecap':'round'},r);
+    cB=G(r,430,235);ticket(cB,560,110);txt(cB,0,-20,'(1) Base step',{size:32,weight:700,fill:'--tink'});txt(cB,0,22,'P(1) is true',{size:30,weight:600,fill:'--tink'});
+    cI=G(r,1150,235);ticket(cI,600,110,'--paper');txt(cI,0,-20,'(2) Inductive step',{size:32,weight:700,fill:'--tink'});txt(cI,0,22,'∀k ∈ ℕ,  P(k) ⇒ P(k + 1)',{size:30,weight:600,fill:'--tink'});
+    masc=G(r,X(0)-90,BASE-70);el('g',{transform:'scale(.8)'},masc).appendChild(mascot(el('g',{},masc)));
+    formal=boxCard(r,800,740,1260,150,'--grape');
+    row(formal,0,-28,[['∀n ∈ ℕ, P(n) is true',{weight:700}],'  if'],{size:34,anchor:'middle'});
+    row(formal,0,28,['(1) P(1) is true,  and  (2) ∀k ∈ ℕ, P(k) ⇒ P(k + 1)'],{size:32,anchor:'middle',fill:'--muted',weight:600});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    const wob=t>4.6&&t<5.8&&!RM?Math.sin((t-4.6)*14)*5*(1-(t-4.6)/1.2):0;
+    dom.forEach((g,i)=>{const v=pv(t,.8+i*.08);place(g,{s:v.s,o:v.o,r:(i===0?Math.max(wob,0):0)+fallAng(t,14.2+i*.24)});place(labs[i],{o:P(t,1.2+i*.08,1.6+i*.08)});});
+    place(dots,{o:P(t,2,2.4)});
+    show(cB,t,3.8);show(masc,t,4,13.8,{dx:wob>0?6:0});
+    show(cI,t,8.2);ringK.setAttribute('opacity',P(t,9,9.4)*(1-P(t,13.4,13.8)));show(kLab,t,9.2,13.8);show(k1Lab,t,9.4,13.8);
+    arc.setAttribute('opacity',P(t,10.4,10.8)*(1-P(t,13.4,13.8)));
+    show(formal,t,19.8);
+  }};
+})());
+
+/* 4. "And so on" */
+scenes.push((()=>{
+  let head,panel,lines=[],content,stamp,ax,what;
+  const LS=['P(1) is true.','k = 1:  P(1) ⇒ P(2), so P(2) is true.','k = 2:  P(2) ⇒ P(3), so P(3) is true.','k = 3:  P(3) ⇒ P(4), so P(4) is true.','k = 4:  P(4) ⇒ P(5), so P(5) is true.','k = 5:  P(5) ⇒ P(6), so P(6) is true.','k = 6:  P(6) ⇒ P(7), so P(7) is true.','k = 7:  P(7) ⇒ P(8), so P(8) is true.','k = 8:  P(8) ⇒ P(9), so P(9) is true.','k = 9:  …'];
+  const LT=[.8,2.4,3.8,5,5.9,6.6,7.2,7.7,8.1,8.4];
+  return {title:'“And so on”',dur:20,
+  caps:[[0.6,'Why does it work? P(1) is true. Then k = 1 gives P(1) ⇒ P(2), so P(2) holds by modus ponens…'],[5.6,'…then k = 2 gives P(3), and so on. But you could never finish writing that out.'],[9.4,'That chain is the intuition, not the justification.'],[12,'In fact, Chartrand takes the Principle as an axiom about the positive integers, accepted without proof.'],[16.4,'What you actually prove are the two steps.']],
+  build(r){
+    head=gt(r,800,95,'“And so on” is not a proof',{size:60,weight:600});
+    panel=boxCard(r,800,370,1000,310);
+    const defs=el('defs',{},r);const cp=el('clipPath',{id:'l28clip2'},defs);el('rect',{x:310,y:226,width:980,height:288},cp);
+    const cg=el('g',{'clip-path':'url(#l28clip2)'},r);content=G(cg,0,0);
+    LS.forEach((s,i)=>lines.push(gt(content,800,262+56*i,s,{size:34,weight:600})));
+    stamp=stampBox(r,800,370,620,'intuition, not proof',50);
+    ax=G(r,800,630);ticket(ax,1220,130);txt(ax,0,-24,'The Principle is an axiom about the positive integers,',{size:32,weight:600,fill:'--tink'});txt(ax,0,24,'accepted without proof.',{size:32,weight:600,fill:'--tink'});
+    what=G(r,800,775);pill(what,820,72,'--grape','What you prove: step (1) and step (2)',{size:34,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});show(panel,t,.4);
+    lines.forEach((g,i)=>place(g,{o:P(t,LT[i],LT[i]+.3)}));
+    const sc=Math.max(0,(t-4.4))*0;let shift=0;for(let i=5;i<LS.length;i++)shift+=56*P(t,LT[i]-.2,LT[i]+.1);
+    place(content,{dy:-shift});
+    slam(stamp,t,9.4,-4);show(ax,t,12.2);show(what,t,16.6);
+  }};
+})());
+
+/* 5. A proof inside */
+scenes.push((()=>{
+  let head,dk,dk1,lk,lk1,ring,card,pk,pk1,arr,AL,lA,lD,ih,bottom;
+  return {title:'A proof inside',dur:18,
+  caps:[[0.6,'Look closely at step 2. It says: for every k, P(k) implies P(k + 1).'],[4.6,'That’s a universal implication, so you prove it directly: assume P(k) for an arbitrary k, and derive P(k + 1).'],[10.4,'The assumption P(k) has a name: the inductive hypothesis.'],[14,'So every induction proof has a Chapter 3 proof inside it.']],
+  build(r){
+    head=gt(r,800,95,'Step 2 is a direct proof',{size:60,weight:600});
+    el('line',{x1:200,y1:560,x2:560,y2:560,stroke:'--line','stroke-width':6,'stroke-linecap':'round'},r);
+    dk=domino(r,300,558,{w:56,h:210,fill:'--sky'});dk1=domino(r,450,558,{w:56,h:210,fill:'--mint'});
+    lk=gt(r,300,600,'k',{size:34,weight:700});lk1=gt(r,450,600,'k + 1',{size:34,weight:700});
+    ring=el('circle',{cx:380,cy:440,r:230,fill:'none',stroke:'--sun','stroke-width':8},r);
+    el('line',{x1:545,y1:350,x2:700,y2:300,stroke:'--sun','stroke-width':8,'stroke-linecap':'round'},r);
+    card=boxCard(r,1110,430,760,420,'--grape');
+    txt(card,0,-155,'∀k ∈ ℕ,  P(k) ⇒ P(k + 1)',{size:40,weight:700});
+    pk=G(card,-200,-10);el('circle',{r:80,fill:'--sky'},pk);txt(pk,0,0,'P(k)',{size:44,weight:700,fill:'--on-strong'});
+    pk1=G(card,200,-10);el('circle',{r:80,fill:'--mint'},pk1);txt(pk1,0,0,'P(k+1)',{size:38,weight:700,fill:'--tink'});
+    arr=el('path',{d:'M-96 -10 H86 M64 -28 L92 -10 L64 8',fill:'none',stroke:'--ink','stroke-width':10,'stroke-linecap':'round','stroke-linejoin':'round'},card);AL=182+70;arr.setAttribute('stroke-dasharray',AL);
+    lA=gt(card,-200,110,'assume',{size:32,weight:600,fill:'--muted'});lD=gt(card,200,110,'derive',{size:32,weight:600,fill:'--muted'});
+    ih=G(card,-200,165);pill(ih,330,52,'--sun','the inductive hypothesis',{size:26});
+    bottom=G(r,800,780);pill(bottom,1020,74,'--grape','Every induction proof has a Chapter 3 proof inside it',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    show(dk,t,.8);show(dk1,t,1.1);place(lk,{o:P(t,1.2,1.6)});place(lk1,{o:P(t,1.4,1.8)});ring.setAttribute('opacity',P(t,2,2.4));
+    show(card,t,2.6);show(pk,t,4.8);arr.setAttribute('stroke-dashoffset',(AL*(1-P(t,6.4,7.4))).toFixed(1));arr.setAttribute('opacity',t>6.4?1:0);show(pk1,t,7.4);
+    place(lA,{o:P(t,5.2,5.6)});place(lD,{o:P(t,7.8,8.2)});
+    show(ih,t,10.6);show(bottom,t,14.2);
+  }};
+})());
+
+/* 6. The template */
+scenes.push((()=>{
+  let head,tk=[];
+  const R=[['Announce it','“We proceed by induction.”',null],['Base step','Verify P(1) directly.',null],['Inductive step','Assume P(k) for a positive integer k. Show P(k + 1),','and say where you use the inductive hypothesis.'],['Conclude','“By the Principle of Mathematical Induction,','P(n) holds for every positive integer n.”']];
+  const A=[2.6,5.6,8.6,13.4];
+  return {title:'The template',dur:18,
+  caps:[[0.6,'Every induction proof has four parts.'],[2.6,'Announce it: “We proceed by induction.”'],[5.6,'Base step: check P(1) directly.'],[8.6,'Inductive step: assume P(k), show P(k + 1), and say where you used the hypothesis.'],[13.4,'Conclude: by the Principle of Mathematical Induction, P(n) holds for every positive integer n.']],
+  build(r){
+    head=gt(r,800,95,'Every induction proof has four parts',{size:56,weight:600});
+    R.forEach(([a,b,c],i)=>{const g=G(r,800,240+152*i);ticket(g,1300,124);
+      el('line',{x1:-470,y1:-48,x2:-470,y2:48,stroke:'--tink','stroke-width':4,'stroke-dasharray':'6 10','stroke-linecap':'round',opacity:.45},g);
+      txt(g,-560,0,String(i+1),{size:52,weight:700,fill:'--tink'});
+      txt(g,-430,c?-22:0,a,{size:34,weight:700,fill:'--tink',anchor:'start'});
+      if(c){txt(g,-140,-22,b,{size:28,weight:600,fill:'--tink',anchor:'start'});txt(g,-140,22,c,{size:28,weight:600,fill:'--tink',anchor:'start'});}
+      else txt(g,-140,0,b,{size:30,weight:600,fill:'--tink',anchor:'start'});
+      tk.push(g);});
+  },
+  update(t){place(head,{o:P(t,.4,1)});tk.forEach((g,i)=>{const k=P(t,A[i],A[i]+.6,eout);place(g,{dx:-(1-k)*120,o:k,r:(1-k)*-2});});}
+  };
+})());
+
+/* 7. Look first */
+scenes.push((()=>{
+  let head,cols=[],labs=[],conj;
+  const CXs=[250,540,880,1290],CELL=44,BASE=600,COL=['--sun','--sky','--mint','--grape'],T0=[1,3,5.4,7.8];
+  const LB=['1 = 1²','1 + 3 = 2²','1 + 3 + 5 = 3²','1 + 3 + 5 + 7 = 4²'];
+  return {title:'Look first',dur:16,
+  caps:[[0.6,'Before proving anything, look. Add up odd numbers: 1, then 1 + 3, then 1 + 3 + 5…'],[5.6,'The totals are 1, 4, 9, 16: perfect squares. Each new odd number wraps an L around the square.'],[11.4,'Result 4.4 says this works forever: 1 + 3 + 5 + ⋯ + (2n − 1) = n².']],
+  build(r){
+    head=gt(r,800,95,'Look first',{size:60,weight:600});
+    CXs.forEach((cx,j)=>{const n=j+1,x0=cx-n*CELL/2,layers=[];for(let m=0;m<n;m++)layers.push(G(r,0,0));
+      for(let rr=0;rr<n;rr++)for(let c=0;c<n;c++){const m=Math.max(rr,c);el('rect',{x:x0+c*CELL+2,y:BASE-(rr+1)*CELL+2,width:CELL-4,height:CELL-4,rx:7,fill:COL[m]},layers[m]);}
+      cols.push(layers);labs.push(gt(r,cx,BASE+50,LB[j],{size:30,weight:700}));});
+    conj=G(r,800,770);pill(conj,820,80,'--grape','Result 4.4:  1 + 3 + 5 + ⋯ + (2n − 1) = n²',{size:36,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    cols.forEach((layers,j)=>layers.forEach((g,m)=>{const a=T0[j]+m*.35,k=P(t,a,a+.4,eout);place(g,{o:k,dy:-(1-k)*20});}));
+    labs.forEach((g,j)=>place(g,{o:P(t,T0[j]+(j+1)*.35,T0[j]+(j+1)*.35+.4)}));
+    show(conj,t,11.6);
+  }};
+})());
+
+/* 8. Result 4.4 */
+scenes.push((()=>{
+  let thm,trk,L0,L1,L2,ihTag,L3,L4a,L4b,byIH,L5,gn,gk,gL,gLab1,gLab2,concl;
+  const T=[1.8,3.6,8.2,27.6],END=31;
+  return {title:'Result 4.4',dur:34,
+  caps:[[0.6,'Result 4.4: for every positive integer n, 1 + 3 + ⋯ + (2n − 1) = n².'],[1.8,'Announce it: we proceed by induction.'],[3.6,'Base step: for n = 1, the left side is 1 and the right side is 1². They agree.'],[8.2,'Inductive step: assume the formula holds for some positive integer k. That’s the inductive hypothesis.'],[13,'We want the sum up to 2k + 1 to equal (k + 1)².'],[16.4,'Split off the last term. The rest is exactly the sum up to k, which the hypothesis says is k².'],[22,'So we get k² + 2k + 1, which is (k + 1)². The square grows by one L.'],[27.6,'By the Principle of Mathematical Induction, the formula holds for every positive integer n.']],
+  build(r){
+    thm=G(r,800,140);ticket(thm,1260,88);row(thm,0,0,[['Result 4.4',{weight:700}],'   For every positive integer n,  1 + 3 + 5 + ⋯ + (2n − 1) = n².'],{size:32,anchor:'middle',fill:'--tink'});
+    trk=tracker(r,200,300,92,['Announce','Base step','Inductive step','Conclude'],{w:270});
+    L0=row(r,400,262,['We proceed by induction.'],{size:34,weight:700});
+    L1=row(r,400,340,['Base:  n = 1.   Left = 1,  right = 1² = 1  ',['✓',{fill:'--mint',weight:700}]],{size:34});
+    L2=row(r,400,425,['Assume  ',['1 + 3 + ⋯ + (2k − 1) = k²',{box:'--sun',weight:700}]],{size:36});
+    ihTag=G(r,0,425);pill(ihTag,300,46,'--sun','inductive hypothesis',{size:24});
+    L3=row(r,400,505,['Show:  1 + 3 + ⋯ + (2k + 1) = (k + 1)²'],{size:36});
+    L4a=row(r,400,585,[['1 + 3 + ⋯ + (2k − 1)',{box:'--sky',fill:'--on-strong',weight:700}],' + (2k + 1)'],{size:36});
+    L4b=row(r,400,585,[['k²',{box:'--sun',weight:700}],' + (2k + 1)'],{size:36});
+    byIH=G(r,0,585);pill(byIH,330,46,'--sun','← by the inductive hypothesis',{size:24});
+    L5=row(r,400,665,['= k² + 2k + 1 = (k + 1)²  ',['✓',{fill:'--mint',weight:700}]],{size:36});
+    gn=G(r,1370,560);const C=30;gk=G(gn,0,0);gL=G(gn,0,0);
+    for(let rr=0;rr<5;rr++)for(let c=0;c<5;c++){const inK=rr<4&&c<4;el('rect',{x:-75+c*C+2,y:75-(rr+1)*C+2,width:C-4,height:C-4,rx:5,fill:inK?'--sky':'--sun'},inK?gk:gL);}
+    gLab1=gt(gn,-15,105,'k²',{size:28,weight:700,fill:'--sky'});gLab2=gt(gn,0,-110,'+ (2k + 1)',{size:26,weight:700,fill:'--muted'});
+    concl=G(r,800,775);pill(concl,1180,74,'--grape','By the Principle of Mathematical Induction, it holds for every n.  ∎',{size:31,color:'--on-strong'});
+  },
+  update(t){
+    show(thm,t,.4);trk.update(t,T,END,1);
+    slideIn(L0,t,2);slideIn(L1,t,3.8);slideIn(L2,t,8.4);
+    ihTag._x=400+L2._w+170;show(ihTag,t,9.2);
+    slideIn(L3,t,13.2);
+    const mf=P(t,18.6,19.2);const ka=P(t,16.6,17.1,eout);place(L4a,{dx:-(1-ka)*40,o:ka*(1-mf)});place(L4b,{o:mf});
+    byIH._x=400+L4b._w+190;show(byIH,t,19);
+    slideIn(L5,t,22.2);
+    show(gn,t,22.2);place(gk,{});place(gL,{o:P(t,23.2,23.8),dx:(1-P(t,23.2,23.8,eout))*30});place(gLab1,{o:P(t,22.6,23)});place(gLab2,{o:P(t,23.6,24)});
+    show(concl,t,27.8);
+  }};
+})());
+
+/* 9. Split off the last term */
+scenes.push((()=>{
+  let head,cars=[],last,brk,brkL,big,eq,warn;
+  const CX=[250,400,550,700,850],LBL=['1','3','5','⋯','2k − 1'];
+  return {title:'Split off the last term',dur:14,
+  caps:[[0.6,'Here’s the move that makes every sum proof work: split off the last term.'],[4.4,'What’s left is the sum up to k, exactly what the inductive hypothesis describes. Substitute it.'],[10.4,'If you never replace anything using the hypothesis, you haven’t done an induction proof.']],
+  build(r){
+    head=gt(r,800,95,'Split off the last term',{size:60,weight:600});
+    el('line',{x1:130,y1:500,x2:1470,y2:500,stroke:'--line','stroke-width':6,'stroke-linecap':'round'},r);
+    const car=(x,l,fill,tc,w=130,sz=30)=>{const g=G(r,x,430);el('rect',{x:-w/2,y:-46,width:w,height:84,rx:16,fill},g);
+      [-w/2+26,w/2-26].forEach(cx=>el('circle',{cx,cy:46,r:14,fill:'--ink'},g));txt(g,0,-4,l,{size:sz,weight:700,fill:tc});return g;};
+    CX.forEach((x,i)=>cars.push(car(x,LBL[i],'--sky','--on-strong')));
+    last=car(1030,'2k + 1','--sun','--tink',150);
+    brk=el('path',{d:'M185 352 V330 H915 V352',fill:'none',stroke:'--ink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},r);
+    brkL=G(r,550,290);pill(brkL,560,52,'--sun','the sum up to k: the hypothesis says k²',{size:26});
+    big=car(550,'k²','--mint','--tink',600,48);
+    eq=G(r,800,640);row(eq,0,0,['sum up to k + 1  =  ',['k²',{box:'--mint',weight:700}],'  +  ',['(2k + 1)',{box:'--sun',weight:700}]],{size:40,anchor:'middle'});
+    warn=G(r,800,780);pill(warn,1180,74,'--pop','Never used the hypothesis? Then it isn’t an induction proof.',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    const cl=P(t,7.6,8.4);
+    cars.forEach((g,i)=>{const v=pv(t,.8+i*.15);place(g,{s:v.s,o:v.o*(1-cl),dx:(550-CX[i])*cl*.6});});
+    const dt=P(t,3,4,eout),bk=P(t,8.8,9.6,eout);last._x=1030+150*dt-240*bk;place(last,{s:pv(t,1.6).s,o:pv(t,1.6).o});
+    brk.setAttribute('opacity',P(t,4.6,5)*(1-cl));show(brkL,t,5,8.4);
+    show(big,t,7.9);show(eq,t,9.6);show(warn,t,10.6);
+  }};
+})());
+
+/* 10. The warning */
+scenes.push((()=>{
+  let head,claim,A,W=[],ok,fail,B,bars=[],vals=[],labs=[],allOdd,why,dom=[],arcs=[],noPush,vac,bottom;
+  const V=[5,13,27,47,73,105],BX=i=>200+100*i,BASE=600,SC=2.6;
+  return {title:'The warning',dur:34,chapters:[[0,'The warning'],[17.6,'No first domino']],
+  caps:[[0.6,'Now a warning. Here’s a “proof” that 3n² − n + 3 is even for every positive integer n.'],[4.4,'The inductive step: assume 3k² − k + 3 is even, say 2ℓ.'],[8,'Then the next value is 2ℓ + 2(3k + 1) = 2(ℓ + 3k + 1). Even! The algebra is completely correct.'],[13.4,'But check n = 1: 3 − 1 + 3 = 5. That’s odd.'],[17.8,'In fact, 3n² − n + 3 is never even. Every value is odd.'],[22.4,'The inductive step worked because P(k) is never true. Every implication has a false hypothesis, so they’re all vacuously true: Lecture 4.'],[29,'The dominoes are perfectly spaced, but the first one never falls. The base step connects the chain to something real.']],
+  build(r){
+    head=gt(r,800,95,'A warning',{size:60,weight:600});
+    claim=G(r,800,175);ticket(claim,1160,88);row(claim,0,0,[['“Claim”',{weight:700}],'   3n² − n + 3 is even for every positive integer n.'],{size:34,anchor:'middle',fill:'--tink'});
+    A=G(r,0,0);
+    W.push(row(A,180,280,[['Inductive step:',{weight:700}],'  assume 3k² − k + 3 is even, say = 2ℓ.'],{size:34}));
+    W.push(row(A,180,360,['3(k + 1)² − (k + 1) + 3 ','= (3k² − k + 3) + 6k + 2'],{size:36}));
+    W.push(row(A,0,440,['= 2ℓ + 2(3k + 1) = 2(ℓ + 3k + 1)  ',['even ✓',{box:'--mint',weight:700}]],{size:36}));
+    ok=G(A,800,535);pill(ok,620,62,'--mint','The algebra is completely correct',{size:32});
+    fail=G(A,800,640);pill(fail,760,72,'--pop','But n = 1:  3 − 1 + 3 = 5.  Odd ✗',{size:36,color:'--on-strong'});
+    B=G(r,0,0);
+    el('line',{x1:140,y1:BASE,x2:760,y2:BASE,stroke:'--ink','stroke-width':5,'stroke-linecap':'round'},B);
+    txt(B,450,300,'3n² − n + 3',{size:30,weight:700,fill:'--muted'});
+    V.forEach((v,i)=>{bars.push(el('rect',{x:BX(i)-34,y:BASE,width:68,height:0,rx:12,fill:'--pop'},B));vals.push(gt(B,BX(i),BASE-v*SC-24,String(v),{size:28,weight:700}));labs.push(gt(B,BX(i),BASE+32,'n = '+(i+1),{size:24,weight:600,fill:'--muted'}));});
+    allOdd=G(B,450,680);pill(allOdd,280,54,'--pop','all odd, always',{size:28,color:'--on-strong'});
+    why=gt(B,450,735,'(3n² − n = n(3n − 1) is always even, so adding 3 makes it odd)',{size:22,weight:500,fill:'--muted'});
+    el('line',{x1:880,y1:BASE+2,x2:1460,y2:BASE+2,stroke:'--line','stroke-width':6,'stroke-linecap':'round'},B);
+    for(let i=0;i<6;i++){dom.push(domino(B,930+95*i,BASE));if(i<5){const x=930+95*i;arcs.push(el('path',{d:`M${x+17} ${BASE-136} Q${x+60} ${BASE-196} ${x+95} ${BASE-140}`,fill:'none',stroke:'--mint','stroke-width':4,'stroke-dasharray':'7 7','stroke-linecap':'round'},B));}}
+    noPush=G(B,1170,330);pill(noPush,520,58,'--pop','P(1) is false: nothing ever falls',{size:28,color:'--on-strong'});
+    vac=G(B,1170,700);pill(vac,560,62,'--sun','every step: vacuously true (Lecture 4)',{size:28});
+    bottom=G(r,800,810);pill(bottom,1200,70,'--grape','The base step connects the chain to something real',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});show(claim,t,.5);
+    place(A,{o:1-P(t,17.2,17.6)});
+    const ex=W[1]._pc[1].x;if(Math.abs(W[2]._ax-ex)>.5){W[2]._ax=ex;layoutRow(W[2]);}
+    [4.6,8.2,10].forEach((a,i)=>slideIn(W[i],t,a));show(ok,t,11.6);show(fail,t,13.6,1e9,{dx:t>14&&t<14.8&&!RM?Math.sin((t-14)*40)*6:0});
+    place(B,{o:P(t,17.6,18)});
+    V.forEach((v,i)=>{const a=18+i*.2,k=P(t,a,a+.5,eout),h=v*SC*k;bars[i].setAttribute('y',(BASE-h).toFixed(1));bars[i].setAttribute('height',h.toFixed(1));place(vals[i],{o:P(t,a+.3,a+.5),dy:(1-k)*v*SC});place(labs[i],{o:P(t,a,a+.3)});});
+    show(allOdd,t,19.8);place(why,{o:P(t,20.4,20.9)});
+    dom.forEach((g,i)=>show(g,t,22.6+i*.08));arcs.forEach(a=>a.setAttribute('opacity',P(t,23.4,23.8)));
+    show(vac,t,24.6);show(noPush,t,29.2);show(bottom,t,30.6);
+  }};
+})());
+
+/* 11. Takeaways */
+scenes.push((()=>{
+  let head,tk=[];
+  const L=['Base step: show P(1). Tip the first domino.','Inductive step: assume P(k), show P(k + 1), use the IH.','No base step, no proof: the chain needs an anchor.'];
+  const A=[.6,5.6,10.6];
+  return {title:'Takeaways',dur:16,
+  caps:[[0.6,'The base step checks P(1). It tips the first domino.'],[5.6,'The inductive step assumes P(k) and proves P(k + 1), using the inductive hypothesis.'],[10.6,'And without a base step, the chain is attached to nothing.']],
+  build(r){
+    head=gt(r,800,95,'Three things to remember',{size:60,weight:600});
+    L.forEach((s,i)=>{const g=G(r,800,265+190*i);ticket(g,1180,150);
+      el('line',{x1:-410,y1:-58,x2:-410,y2:58,stroke:'--tink','stroke-width':4,'stroke-dasharray':'6 10','stroke-linecap':'round',opacity:.45},g);
+      const ic=G(g,-500,44);
+      if(i===0){const d=domino(ic,-10,0,{w:22,h:80,fill:'--tink'});place(d,{r:35});}
+      else if(i===1){domino(ic,-24,0,{w:22,h:80,fill:'--tink'});domino(ic,20,0,{w:22,h:80,fill:'--tink'});}
+      else{domino(ic,0,0,{w:22,h:80,fill:'--tink'});el('path',{d:'M14 -96 L38 -72 M38 -96 L14 -72',stroke:'--pop','stroke-width':7,'stroke-linecap':'round'},ic);}
+      txt(g,-372,0,s,{size:i===1?34:37,weight:600,fill:'--tink',anchor:'start'});tk.push(g);});
+  },
+  update(t){place(head,{o:P(t,.4,1)});tk.forEach((g,i)=>{const k=P(t,A[i],A[i]+.6,eout);place(g,{dx:-(1-k)*120,o:k,r:(1-k)*-3});});}
+  };
+})());
+
+/* 12. Exit ticket */
+scenes.push((()=>{
+  let head,cards=[],backs=[],ans=[],timer,arc,cnt,foot;
+  const C=2*Math.PI*40;
+  const Q=[{q:'Q1',lines:[['Write the base step and the',32,600],['inductive hypothesis for',32,600],['2 + 4 + ⋯ + 2n = n(n + 1).',34,700]],a:[['Base: n = 1 gives 2 = 1 · 2 ✓',30,700],['IH: assume 2 + 4 + ⋯ + 2k = k(k + 1)',27,700],['for a positive integer k',24,500]]},
+           {q:'Q2',lines:[['Why does an inductive step',36,600],['alone not prove anything?',36,600]],a:[['P(k) ⇒ P(k + 1) can be vacuously',28,700],['true even if P is never true.',28,700],['The base step anchors the chain.',26,500]]}];
+  return {title:'Exit ticket',dur:18,
+  caps:[[0.6,'Exit ticket: try both in your head before the reveal.'],[8,'Check yourself!'],[10.6,'Q1: the base step is 2 = 1 · 2, and the hypothesis is the formula with k in place of n.'],[14.6,'Next up: Section 4.2, more induction proofs.']],
+  build(r){
+    head=gt(r,800,95,'Exit ticket',{size:60,weight:600});
+    Q.forEach((d,i)=>{const g=G(r,i?1170:430,445);
+      el('rect',{x:-345,y:-235,width:690,height:470,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+      pill(G(g,-275,-185),84,52,'--pop',d.q,{size:28,color:'--on-strong',weight:700});
+      const n=d.lines.length;d.lines.forEach(([s,sz,w],j)=>txt(g,0,(n===3?-140:-115)+(n===3?46:56)*j,s,{size:sz,weight:w}));
+      const b=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--line'},b);txt(b,0,0,'Think first…',{size:34,weight:600,fill:'--muted'});backs.push(b);
+      const a=G(g,0,108);el('rect',{x:-315,y:-100,width:630,height:200,rx:26,fill:'--stage',stroke:'--mint','stroke-width':5},a);
+      const k=d.a.length,step=52,y0=-(k-1)*step/2;d.a.forEach(([s,sz,w],j)=>txt(a,0,y0+step*j,s,{size:sz,weight:w,fill:j===2?'--muted':'--ink'}));ans.push(a);cards.push(g);});
+    timer=G(r,800,800);el('circle',{r:40,fill:'none',stroke:'--line','stroke-width':10},timer);
+    arc=el('circle',{r:40,fill:'none',stroke:'--sun','stroke-width':10,'stroke-linecap':'round','stroke-dasharray':C.toFixed(1),transform:'rotate(-90)'},timer);
+    cnt=txt(timer,0,0,'5',{size:34,weight:700});
+    foot=gt(r,800,800,'Next up: Section 4.2, Additional Examples of Induction Proofs',{size:34,weight:500,fill:'--muted'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    cards.forEach((g,i)=>show(g,t,.6+i*.3));
+    [8,8.6].forEach((a,i)=>{const k=P(t,a,a+.6),sy=Math.max(Math.abs(Math.cos(k*Math.PI)),.03);
+      place(backs[i],{sx:1,sy,o:k<.5?1:0});place(ans[i],{sx:1,sy,o:k>=.5?1:0});});
+    const tk=P(t,.9,7.6,x=>x);arc.setAttribute('stroke-dashoffset',(C*tk).toFixed(1));
+    const n=String(Math.max(1,5-Math.floor(tk*5)));if(cnt.textContent!==n)cnt.textContent=n;
+    place(timer,{o:Math.min(P(t,.9,1.3),1-P(t,7.6,8.1))});
+    place(foot,{o:P(t,14.6,15.2)});
+  }};
+})());
+
+/* ---------- assemble timeline ---------- */
+const root=el('g',{},svg);
+const starts=[];let acc=0;
+scenes.forEach(s=>{starts.push(acc);s.g=el('g',{},root);s.rows=[];BUILDING=s;s.build(s.g);BUILDING=null;s._lv=-1;s.g.style.display='none';acc+=s.dur;});
+const TOTAL=acc;
+const chapters=[];scenes.forEach((s,i)=>(s.chapters||[[0,s.title]]).forEach(([o,ti])=>chapters.push({t:starts[i]+o,title:ti})));
+const caps=[];scenes.forEach((s,i)=>s.caps.forEach(([o,c])=>caps.push([starts[i]+o,c])));
+
+/* ticket-wipe transition between scenes, carrying the next chapter's title */
+const wipe=el('g',{},svg);wipe._x=0;wipe._y=0;
+el('path',{d:'M0 0 H2000 L1800 900 H-200Z',fill:'--sun'},wipe);
+el('line',{x1:46,y1:0,x2:-154,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+el('line',{x1:1954,y1:0,x2:1754,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+const wNum=txt(wipe,900,372,'',{size:34,weight:600,fill:'--tink'});
+const wTitle=txt(wipe,900,456,'',{size:92,weight:700,fill:'--tink'});
+function renderWipe(t){
+  let b=null;for(let i=1;i<starts.length;i++)if(Math.abs(t-starts[i])<.6){b=starts[i];break;}
+  if(b===null){place(wipe,{o:0});return;}
+  const u=(t-(b-.6))/1.2;
+  const ci=chapters.findIndex(c=>Math.abs(c.t-b)<.01);
+  if(ci>=0&&wTitle.textContent!==chapters[ci].title){wTitle.textContent=chapters[ci].title;wNum.textContent='Part '+(ci+1)+' of '+chapters.length;}
+  if(RM){place(wipe,{dx:-100,o:clamp((.5-Math.abs(u-.5))*4)});return;}
+  const tx=u<.4?lerp(1800,0,eout(u/.4)):u<.6?lerp(0,-200,(u-.4)/.2):lerp(-200,-2000,ein((u-.6)/.4));
+  place(wipe,{dx:tx,o:1});
+}
+
+/* ---------- player ---------- */
+const $=id=>document.getElementById(id);
+const capEl=$('caption'),playBtn=$('play'),scrub=$('scrub'),timeEl=$('time'),poster=$('poster'),chapNav=$('chapters'),player=$('player');
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+scrub.max=TOTAL;
+$('posterLen').textContent=Math.floor(TOTAL/60)+' min '+Math.round(TOTAL%60)+' s';
+poster.setAttribute('aria-label','Play the explainer ('+Math.floor(TOTAL/60)+' minutes '+Math.round(TOTAL%60)+' seconds)');
+const ICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/><rect x="14" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/></svg>',
+  replay:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+const ticksEl=$('ticks');
+chapters.forEach((c,i)=>{if(i){const s=document.createElement('span');s.style.left=(c.t/TOTAL*100)+'%';ticksEl.appendChild(s);}
+  const b=document.createElement('button');b.type='button';b.className='chip';b.innerHTML='<b>'+(i+1)+'</b>';b.appendChild(document.createTextNode(c.title));
+  b.addEventListener('click',()=>{seek(c.t+.01);setPlaying(true);});c.btn=b;chapNav.appendChild(b);});
+
+let T=0,playing=false,started=false,speed=1,last=null,dirty=true,lastScene=-1,lastCap=null,lastChap=-1;
+const sceneAt=t=>{let i=0;for(let k=0;k<starts.length;k++)if(t>=starts[k])i=k;return i;};
+function render(){
+  const t=started?T:10.2;
+  const i=sceneAt(Math.min(t,TOTAL-1e-6));
+  if(i!==lastScene){scenes.forEach((s,k)=>s.g.style.display=k===i?'':'none');lastScene=i;}
+  if(scenes[i]._lv!==FONTV){scenes[i].rows.forEach(layoutRow);scenes[i]._lv=FONTV;}
+  scenes[i].update(t-starts[i]);
+  renderWipe(t);
+  let c='';if(started){for(const [ct,s] of caps){if(ct<=T)c=s;else break;}}
+  if(c!==lastCap){capEl.textContent=c;lastCap=c;}
+  scrub.value=T;scrub.style.setProperty('--pct',(T/TOTAL*100).toFixed(2)+'%');
+  timeEl.textContent=fmt(T)+' / '+fmt(TOTAL);
+  let ch=0;chapters.forEach((cc,k)=>{if(T>=cc.t-.001)ch=k;});
+  if(ch!==lastChap){chapters.forEach((cc,k)=>cc.btn.setAttribute('aria-current',k===ch?'true':'false'));
+    if(started){const b=chapters[ch].btn;chapNav.scrollTo({left:b.offsetLeft-chapNav.clientWidth/2+b.offsetWidth/2,behavior:RM?'auto':'smooth'});}lastChap=ch;}
+}
+function setPlaying(p){
+  if(p&&T>=TOTAL-.01)T=0;
+  playing=p;last=null;
+  if(p){started=true;poster.hidden=true;}
+  const ended=!p&&T>=TOTAL-.01;
+  playBtn.innerHTML=p?ICON.pause:(ended?ICON.replay:ICON.play);
+  playBtn.setAttribute('aria-label',p?'Pause':(ended?'Replay':'Play'));
+  dirty=true;
+}
+function seek(t){started=true;poster.hidden=true;T=clamp(t,0,TOTAL);dirty=true;}
+function loop(now){
+  if(playing){if(last!==null)T+=Math.min((now-last)/1000,.1)*speed;last=now;if(T>=TOTAL){T=TOTAL;setPlaying(false);}dirty=true;}
+  if(dirty){render();dirty=false;}
+  requestAnimationFrame(loop);
+}
+playBtn.addEventListener('click',()=>setPlaying(!playing));
+poster.addEventListener('click',()=>{T=0;setPlaying(true);playBtn.focus({preventScroll:true});});
+$('restart').addEventListener('click',()=>{seek(0);setPlaying(true);});
+scrub.addEventListener('input',()=>seek(parseFloat(scrub.value)));
+const speeds=[1,1.25,1.5,.75];
+$('speed').addEventListener('click',e=>{speed=speeds[(speeds.indexOf(speed)+1)%speeds.length];e.currentTarget.textContent=speed+'×';e.currentTarget.setAttribute('aria-label','Playback speed '+speed+' times');});
+$('cc').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);capEl.hidden=!on;});
+const fsBtn=$('fs');
+if(!(document.fullscreenEnabled&&player.requestFullscreen))fsBtn.hidden=true;
+fsBtn.addEventListener('click',()=>{try{if(document.fullscreenElement)document.exitFullscreen();else player.requestFullscreen().catch(()=>{});}catch(e){}});
+document.addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(e.altKey||e.ctrlKey||e.metaKey)return;
+  if(e.key===' '||e.key==='k'){if(tag==='button'&&e.key===' ')return;if(tag==='input'&&e.key===' '){e.preventDefault();setPlaying(!playing);return;}
+    if(tag!=='input'){e.preventDefault();setPlaying(!playing);}}
+  else if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&tag!=='input'){e.preventDefault();seek(T+(e.key==='ArrowRight'?5:-5));}
+});
+setPlaying(false);
+if(document.fonts){if(document.fonts.ready)document.fonts.ready.then(()=>{FONTV++;dirty=true;});document.fonts.addEventListener&&document.fonts.addEventListener('loadingdone',()=>{FONTV++;dirty=true;});}
+window.__seek=t=>{seek(t);render();};
+window.__total=TOTAL;
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

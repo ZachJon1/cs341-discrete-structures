@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--topic', default='Other')
     parser.add_argument('--summary', default='')
     parser.add_argument('--notes', default='', help='Path like notes/lecture-22.pdf or HTTPS link')
+    parser.add_argument('--animation', default='', help='Path like animations/lecture-22-topic.html')
     parser.add_argument('--slides', default='')
     parser.add_argument('--video', default='', help='Actual HTTPS YouTube video URL')
     args = parser.parse_args()
@@ -28,21 +29,23 @@ def main():
     old = next((r for r in rows if r.get('number') == args.number), None)
     if old is None:
         old = {'number': args.number, 'title': '', 'topic': '', 'summary': '',
-               'notes': '', 'slides': '', 'video': '', 'updated': '', 'status': 'planned'}
+               'notes': '', 'animation': '', 'slides': '', 'video': '', 'updated': '', 'status': 'planned'}
         rows.append(old)
     old['title'] = args.title
     old['topic'] = args.topic
     if args.summary:
         old['summary'] = args.summary
-    for field in ['notes', 'slides', 'video']:
+    for field in ['notes', 'animation', 'slides', 'video']:
         if getattr(args, field):
             old[field] = getattr(args, field)
-    old['status'] = 'published' if any(old.get(f) for f in ('notes','slides','video')) else 'planned'
+    old['status'] = 'published' if any(old.get(f) for f in ('notes','animation','slides','video')) else 'planned'
     rows.sort(key=lambda item: int(item.get('number',0)))
     DATA_FILE.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(f"Saved lecture {args.number}: {args.title}")
     if old.get('notes') and not old['notes'].startswith('https://') and not (ROOT / old['notes']).is_file():
         print(f"Note: {old['notes']} does not exist yet; upload the file before publishing.")
+    if old.get('animation') and not old['animation'].startswith('https://') and not (ROOT / old['animation']).is_file():
+        print(f"Note: {old['animation']} does not exist yet; upload the file before publishing.")
 
 
 if __name__ == '__main__':

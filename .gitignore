@@ -1,0 +1,43 @@
+# Local course sources and authoring files that are not published by GitHub Pages.
+/Latex Lectures/
+/pdf lectures/
+/CS341_lecture_links_update_v2/
+/*.docx
+/*.pdf
+/*.zip
+/*.tex
+
+# Local agent and tooling state.
+/.agents/
+/.aws/
+/.codex/
+/.qodo/
+
+# Operating system and editor files.
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.tmp
+*.bak
+*~
+
+# Python cache files.
+__pycache__/
+*.py[cod]
+
+# LaTeX build output. Keep the published PDFs in notes/.
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# Local build folders and archives.
+/.venv/
+/node_modules/
+/build/
+/dist/
+*.zip

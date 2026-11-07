@@ -3,42 +3,20 @@
 **Instructor:** Dr. Abdul-Rashid Zakaria, Ph.D.  
 **Department:** Mathematics, Computer and Information Sciences
 
-Welcome to the CS 341 Discrete Structures course repository!
+Welcome to the CS 341 Discrete Structures course repository. The searchable [lecture library](https://zachjon1.github.io/cs341-discrete-structures/lectures.html) now lists 35 lectures with student notes. Interactive HTML animations are available for Lectures 22–30.
 
-This repository provides lecture notes, study resources, and supplementary learning materials to help students understand the mathematical foundations of computer science. The course emphasizes logical reasoning, mathematical proofs, problem-solving, and computational thinking.
+## Course resources
 
-## Course Resources
+- [Course website](https://zachjon1.github.io/cs341-discrete-structures/) — course overview and weekly roadmap.
+- [Lecture library](https://zachjon1.github.io/cs341-discrete-structures/lectures.html) — student PDFs and interactive animations.
+- [Study resources](https://zachjon1.github.io/cs341-discrete-structures/resources.html) — recommended textbooks and supplementary materials.
 
-- **[Course Website](https://zachjon1.github.io/cs341-discrete-structures/)** — Course overview and weekly roadmap.
-- **[Lecture Notes](https://zachjon1.github.io/cs341-discrete-structures/lectures.html)** — Lecture materials, PDFs, and video recordings as they become available.
-- **[Study Resources](https://zachjon1.github.io/cs341-discrete-structures/resources.html)** — Recommended textbooks and supplementary learning materials.
+## Topics covered
 
-## Topics Covered
+- Mathematical logic, sets, and proof techniques
+- Relations, functions, induction, and counting
+- Graph theory, trees, algorithms, and recurrences
 
-- Mathematical Logic and Truth Tables
-- Set Theory, Relations, and Functions
-- Mathematical Proof Techniques and Induction
-- Algorithms and Computational Complexity
-- Counting and Combinatorics
-- Graph Theory and Trees
-- Matrices and Finite-State Structures
-
-## Lecture Notes
-
-Lecture notes and recordings will be added throughout the semester.
-
-**Lecture 21 — Sizes of Infinity:** Planned catalog entry; materials will be linked when available.
-
-Visit the [Lecture Library](https://zachjon1.github.io/cs341-discrete-structures/lectures.html) to explore available materials.
-
-## Recommended Textbooks
-
-**Required:** *Discrete Mathematics* by Gary Chartrand and Ping Zhang, 1st Edition.
-
-**Supplementary:** [MIT Mathematics for Computer Science](https://ocw.mit.edu/courses/6-1200j-mathematics-for-computer-science-spring-2024/).
-
----
-
-
+Canvas remains the official platform for announcements, assignments, and grades.
 
 **© 2026 Dr. Abdul-Rashid Zakaria**

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Assume, Then Derive: an animated explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9E6FA; --stage:#FBFAFF; --card:#F0EDFD; --ink:#26215E; --muted:#6B67A3; --line:#D3CEF0;
+  --paper:#FFE7A3; --tink:#26215E; --pop:#E8395F; --mint:#14B983; --sky:#3D7BF5; --sun:#FFC23A; --grape:#7C4DEB;
+  --on-strong:#FFFFFF;
+  --display:"Fredoka","Nunito","Trebuchet MS","Segoe UI",system-ui,"Cambria Math","STIX Two Math",sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,"Cambria Math",sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+    --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+    --on-strong:#1B1846; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141230; --stage:#201C4D; --card:#2A2560; --ink:#F3F1FF; --muted:#A7A2DD; --line:#3E3880;
+  --paper:#FFE08A; --tink:#26215E; --pop:#FF5C80; --mint:#34D399; --sky:#6EA2FF; --sun:#FFC94D; --grape:#A784FF;
+  --on-strong:#1B1846; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 36px}
+.intro{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:4px 4px 14px}
+.intro h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.6vw,40px);margin:0;letter-spacing:-0.01em}
+.intro p{margin:0;color:var(--muted);font-size:17px;line-height:1.4}
+.player{background:var(--card);border-radius:24px;padding:10px;border:2px solid var(--line)}
+.stage{position:relative;border-radius:16px;overflow:hidden;background:var(--stage);aspect-ratio:16/9;width:100%}
+.stage svg{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+.td{font-family:var(--display)}
+.tb{font-family:var(--body)}
+.poster{position:absolute;inset:0;border:0;padding:0;margin:0;background:transparent;cursor:pointer;color:inherit;font:inherit}
+.poster[hidden]{display:none}
+.poster-btn{position:absolute;left:50%;top:35.6%;transform:translate(-50%,-50%);width:clamp(56px,10vw,104px);aspect-ratio:1;border-radius:50%;
+  background:var(--ink);color:var(--stage);display:grid;place-items:center;box-shadow:0 0 0 clamp(5px,.9vw,10px) var(--stage);transition:transform .18s ease}
+.poster-btn svg{width:42%;height:42%;margin-left:8%}
+.poster:hover .poster-btn,.poster:focus-visible .poster-btn{transform:translate(-50%,-50%) scale(1.07)}
+.poster:focus-visible{outline:4px solid var(--sky);outline-offset:-4px;border-radius:16px}
+.poster-len{position:absolute;left:14px;top:12px;background:var(--paper);color:var(--tink);font-weight:700;font-size:clamp(12px,1.5vw,15px);padding:5px 12px;border-radius:999px}
+.caption{min-height:3.3em;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 18px 6px;
+  font-size:clamp(16px,1.9vw,22px);line-height:1.38;font-weight:700;color:var(--ink);margin:0;text-wrap:balance}
+.caption:empty::before{content:"Captions appear here once you press play.";color:var(--muted);font-weight:400}
+.caption[hidden]{display:none}
+.controls{display:flex;align-items:center;gap:8px;padding:6px 4px 2px;flex-wrap:wrap}
+.btn{min-width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:var(--stage);color:var(--ink);
+  font:700 15px/1 var(--body);display:inline-grid;place-items:center;cursor:pointer;padding:0 10px}
+.btn svg{width:22px;height:22px}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,.chip:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.btn.play{background:var(--pop);border-color:var(--pop);color:var(--on-strong);min-width:52px}
+.btn[aria-pressed="false"]{color:var(--muted)}
+.scrub{position:relative;flex:1 1 220px;min-width:160px;height:44px;display:flex;align-items:center}
+.ticks{position:absolute;left:11px;right:11px;top:6px;height:6px;pointer-events:none}
+.ticks span{position:absolute;top:0;width:3px;height:7px;border-radius:2px;background:var(--muted);transform:translateX(-50%)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(to right,var(--pop) var(--pct,0%),var(--line) var(--pct,0%))}
+input[type=range]::-moz-range-track{height:10px;border-radius:6px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:10px;border-radius:6px;background:var(--pop)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--paper);border:3px solid var(--ink)}
+.time{font:700 15px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--muted);min-width:96px;text-align:center}
+.chapters{display:flex;gap:6px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:thin}
+.chip{flex:0 0 auto;border:2px solid var(--line);background:var(--stage);color:var(--ink);border-radius:999px;padding:7px 13px 7px 7px;
+  font:700 14px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--card);font-size:12px}
+.chip[aria-current="true"]{background:var(--ink);color:var(--stage);border-color:var(--ink)}
+.chip[aria-current="true"] b{background:var(--sun);color:var(--tink)}
+.hint{color:var(--muted);font-size:14px;margin:12px 6px 0;line-height:1.45}
+.rotate{display:none}
+@media (max-width:640px) and (orientation:portrait){.rotate{display:block}}
+.player:fullscreen{display:flex;flex-direction:column;justify-content:center;border-radius:0;border:0;padding:12px;background:var(--card)}
+.player:fullscreen .stage{width:min(100%,calc((100vh - 200px) * 16 / 9));margin:0 auto}
+.player:fullscreen .caption,.player:fullscreen .controls,.player:fullscreen .chapters{width:min(100%,calc((100vh - 200px) * 16 / 9));margin-left:auto;margin-right:auto}
+@media (max-width:560px){.time{min-width:0;font-size:13px}.btn{min-width:40px;height:40px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="intro">
+    <h1>Lecture 22, animated</h1>
+    <p>Direct proof for CS 341: assume, then derive, in under five minutes.</p>
+  </header>
+  <section class="player" id="player" aria-label="Animated explainer player">
+    <div class="stage">
+      <svg id="svg" viewBox="0 0 1600 900" role="img" aria-label="Animation stage. The captions below describe each scene."></svg>
+      <button class="poster" id="poster" type="button" aria-label="Play the explainer">
+        <span class="poster-len" id="posterLen"></span>
+        <span class="poster-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5v15l13-7.5z" fill="currentColor"/></svg></span>
+      </button>
+    </div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+    <div class="controls">
+      <button class="btn play" id="play" type="button" aria-label="Play"></button>
+      <button class="btn" id="restart" type="button" aria-label="Restart from the beginning"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="scrub"><div class="ticks" id="ticks"></div><input type="range" id="scrub" min="0" max="100" step="0.1" value="0" aria-label="Seek"></div>
+      <span class="time" id="time" aria-live="off">0:00</span>
+      <button class="btn" id="speed" type="button" aria-label="Playback speed">1×</button>
+      <button class="btn" id="cc" type="button" aria-pressed="true" aria-label="Captions">CC</button>
+      <button class="btn" id="fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+  </section>
+  <p class="hint">Space plays or pauses. The left and right arrow keys skip 5 seconds. Tap any chapter to jump there.</p>
+  <p class="hint rotate">Turn your phone sideways for a bigger picture.</p>
+</main>
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('svg');
+const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* ---------- math + easing ---------- */
+const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const lerp=(a,b,k)=>a+(b-a)*k;
+const eio=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+const eout=k=>1-Math.pow(1-k,3);
+const ein=k=>k*k*k;
+const back=k=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2);};
+const P=(t,a,b,fn=eio)=>fn(clamp((t-a)/(b-a)));
+const bump=(t,a,d)=>Math.sin(Math.PI*clamp((t-a)/d));
+const num=k=>k<0?'\u2212'+(-k):String(k);
+
+/* ---------- svg helpers ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);let st='';
+  for(const k in attrs){const v=attrs[k];if(v==null)continue;
+    if(k==='text')e.textContent=v;
+    else if((k==='fill'||k==='stroke')&&typeof v==='string'&&v.startsWith('--'))st+=k+':var('+v+');';
+    else e.setAttribute(k,v);}
+  if(st)e.setAttribute('style',st);
+  if(parent)parent.appendChild(e);return e;
+}
+function place(g,o={}){
+  const X=g._x+(o.dx||0),Y=g._y+(o.dy||0);
+  let tr='translate('+X.toFixed(2)+' '+Y.toFixed(2)+')';
+  if(o.r)tr+=' rotate('+o.r.toFixed(2)+')';
+  if(o.sx!=null||o.sy!=null){const sx=o.sx!=null?o.sx:(o.s!=null?o.s:1),sy=o.sy!=null?o.sy:(o.s!=null?o.s:1);tr+=' scale('+Math.max(sx,.001).toFixed(3)+' '+Math.max(sy,.001).toFixed(3)+')';}
+  else if(o.s!=null&&o.s!==1)tr+=' scale('+Math.max(o.s,.001).toFixed(3)+')';
+  g.setAttribute('transform',tr);
+  const op=o.o==null?1:clamp(o.o);
+  g.setAttribute('opacity',op.toFixed(3));
+  const vis=op<=.002?'hidden':'visible';if(g._vis!==vis){g.style.visibility=vis;g._vis=vis;}
+}
+function G(parent,x=0,y=0){const g=el('g',{},parent);g._x=x;g._y=y;place(g);return g;}
+function show(g,t,a,b=1e9,extra={}){
+  const k=clamp((t-a)/.5),f=1-P(t,b-.45,b,ein);
+  place(g,Object.assign({s:k?back(k):.001,o:Math.min(clamp(k*3),f)},extra));return k;
+}
+function txt(p,x,y,str,o={}){
+  return el('text',{x,y,dy:'.35em','font-size':o.size||40,'font-weight':o.weight||500,'text-anchor':o.anchor||'middle',
+    fill:o.fill||'--ink',class:o.body?'tb':'td',opacity:o.op,text:str},p);
+}
+function gt(p,x,y,str,o={}){const g=G(p,x,y);txt(g,0,0,str,o);return g;}
+function ticketD(w,h){const W=w/2,H=h/2,n=Math.min(14,h*.18),c=Math.min(14,h*.2);
+  return 'M'+(-W+c)+' '+(-H)+'H'+(W-c)+'A'+c+' '+c+' 0 0 1 '+W+' '+(-H+c)+'V'+(-n)+'A'+n+' '+n+' 0 0 0 '+W+' '+n+'V'+(H-c)+'A'+c+' '+c+' 0 0 1 '+(W-c)+' '+H+
+  'H'+(-W+c)+'A'+c+' '+c+' 0 0 1 '+(-W)+' '+(H-c)+'V'+n+'A'+n+' '+n+' 0 0 0 '+(-W)+' '+(-n)+'V'+(-H+c)+'A'+c+' '+c+' 0 0 1 '+(-W+c)+' '+(-H)+'Z';}
+function ticket(p,w,h,fill='--paper'){const g=el('g',{},p);el('path',{d:ticketD(w,h),fill},g);return g;}
+function pill(p,w,h,fill,label,o={}){const g=el('g',{},p);el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:h/2,fill},g);
+  if(label!=null)txt(g,0,0,label,{size:o.size||34,weight:o.weight||600,fill:o.color||'--tink'});return g;}
+function star(p,cx,cy,R,fill){let d='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?R*.45:R;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1);}
+  return el('path',{d:d+'Z',fill},p);}
+function shape(p,type,fill,s){
+  if(type===0)return el('circle',{r:s,fill},p);
+  if(type===1)return el('rect',{x:-s,y:-s,width:2*s,height:2*s,rx:12,fill},p);
+  if(type===2)return el('path',{d:'M0 '+(-s*1.05)+' L'+(s*1.05)+' '+(s*.8)+' L'+(-s*1.05)+' '+(s*.8)+'Z',fill,stroke:fill,'stroke-width':10,'stroke-linejoin':'round'},p);
+  if(type===3)return el('rect',{x:-s*.82,y:-s*.82,width:1.64*s,height:1.64*s,rx:10,fill,transform:'rotate(45)'},p);
+  return star(p,0,0,s*1.2,fill);
+}
+function mascot(p){const g=el('g',{},p);
+  el('path',{d:ticketD(124,84),fill:'--paper',stroke:'--tink','stroke-width':4},g);
+  el('circle',{cx:-34,cy:10,r:7,fill:'--pop',opacity:.45},g);el('circle',{cx:34,cy:10,r:7,fill:'--pop',opacity:.45},g);
+  el('circle',{cx:-17,cy:-8,r:6,fill:'--tink'},g);el('circle',{cx:17,cy:-8,r:6,fill:'--tink'},g);
+  el('path',{d:'M-13 10 Q0 22 13 10',fill:'none',stroke:'--tink','stroke-width':4,'stroke-linecap':'round'},g);return g;}
+function person(p,fill){const g=el('g',{},p);
+  el('rect',{x:-30,y:-4,width:60,height:58,rx:26,fill},g);el('circle',{cx:0,cy:-34,r:25,fill},g);
+  el('circle',{cx:-9,cy:-37,r:3.6,fill:'--tink'},g);el('circle',{cx:9,cy:-37,r:3.6,fill:'--tink'},g);
+  el('path',{d:'M-8 -27 Q0 -21 8 -27',fill:'none',stroke:'--tink','stroke-width':3,'stroke-linecap':'round'},g);return g;}
+function speech(p,w,h,label,o={}){const g=el('g',{},p);
+  el('path',{d:'M'+(-w/2+4)+' -14 L'+(-w/2-30)+' 16 L'+(-w/2+4)+' 14Z',fill:'--grape'},g);
+  el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:28,fill:'--grape'},g);
+  txt(g,0,0,label,{size:o.size||36,weight:600,fill:'--on-strong'});return g;}
+function dart(g){el('line',{x1:0,y1:-96,x2:0,y2:-18,stroke:'--ink','stroke-width':6,'stroke-linecap':'round'},g);
+  el('path',{d:'M-11 -22 L11 -22 L0 4Z',fill:'--ink'},g);el('path',{d:'M0 -78 L-16 -106 L0 -96 L16 -106Z',fill:'--pop'},g);}
+function qlen(x0,y0,cx,cy,x1,y1){let L=0,px=x0,py=y0;for(let i=1;i<=40;i++){const u=i/40,a=(1-u)*(1-u),b=2*u*(1-u),c=u*u;
+  const x=a*x0+b*cx+c*x1,y=a*y0+b*cy+c*y1;L+=Math.hypot(x-px,y-py);px=x;py=y;}return L;}
+
+/* ---------- extra helpers for algebra rows ---------- */
+const pv=(t,a)=>{const k=clamp((t-a)/.5);return {s:k?back(k):.001,o:clamp(k*3)};};
+let BUILDING=null,FONTV=0;
+function row(p,x,y,pieces,o={}){
+  const g=el('g',{},p);g._x=0;g._y=0;g._pc=[];g._ax=x;g._ay=y;g._anchor=o.anchor||'start';const S=o.size||44;
+  if(o.bg){const h=o.bgH||S*1.9;g._bg=el('rect',{y:y-h/2,height:h,rx:22,fill:o.bg,stroke:o.bgStroke||null,'stroke-width':o.bgStroke?5:null},g);g._padX=o.padX||32;}
+  pieces.forEach(pc=>{const [s,q={}]=Array.isArray(pc)?pc:[pc,{}];const sz=q.size||S;let rect=null;
+    if(q.box)rect=el('rect',{y:y-sz*.68,height:sz*1.36,rx:12,fill:q.box},g);
+    const t=el('text',{x,y,dy:'.35em','font-size':sz,'font-weight':q.weight||o.weight||500,'text-anchor':'start',
+      fill:q.fill||(q.box?'--tink':(o.fill||'--ink')),class:'td',text:s.replace(/ /g,'\u00A0')},g);
+    g._pc.push({t,rect,pad:q.box?12:0});});
+  layoutRow(g);if(BUILDING)BUILDING.rows.push(g);return g;
+}
+let MEAS=null;const MCACHE={};
+function measure(t){
+  if(!MEAS)MEAS=el('text',{x:-5000,y:-5000,class:'td',opacity:0,'aria-hidden':'true'},svg);
+  const sz=t.getAttribute('font-size'),w=t.getAttribute('font-weight'),s=t.textContent,key=FONTV+'|'+sz+'|'+w+'|'+s;
+  if(MCACHE[key]!=null)return MCACHE[key];
+  MEAS.setAttribute('font-size',sz);MEAS.setAttribute('font-weight',w);MEAS.textContent=s;
+  let l=0;try{l=MEAS.getComputedTextLength();}catch(e){}
+  return MCACHE[key]=l;
+}
+function layoutRow(g){
+  const ws=g._pc.map(pc=>measure(pc.t)+pc.pad*2);
+  const tot=ws.reduce((a,b)=>a+b,0);let x=g._anchor==='middle'?g._ax-tot/2:g._ax;g._x0=x;g._w=tot;
+  g._pc.forEach((pc,i)=>{if(pc.rect){pc.rect.setAttribute('x',(x+3).toFixed(1));pc.rect.setAttribute('width',Math.max(ws[i]-6,0).toFixed(1));}
+    pc.t.setAttribute('x',(x+pc.pad).toFixed(1));pc.x=x;pc.w=ws[i];x+=ws[i];});
+  if(g._bg){g._bg.setAttribute('x',(g._x0-g._padX).toFixed(1));g._bg.setAttribute('width',(tot+2*g._padX).toFixed(1));}
+}
+function frac(p,x,y,num,den,o={}){const g=G(p,x,y),s=o.size||48,w=o.w||Math.max(num.length,den.length)*s*.55+24;
+  txt(g,0,-s*.78,num,{size:s,weight:o.weight||500,fill:o.fill});
+  el('line',{x1:-w/2,y1:0,x2:w/2,y2:0,stroke:o.fill||'--ink','stroke-width':5,'stroke-linecap':'round'},g);
+  txt(g,0,s*.78,den,{size:s,weight:o.weight||500,fill:o.fill});return g;}
+function tracker(p,x,y,gap,labels,o={}){
+  const W=o.w||250;
+  const items=labels.map((l,i)=>{const g=G(p,o.horiz?x+gap*i:x,o.horiz?y:y+gap*i);
+    const bg=el('rect',{x:-W/2,y:-30,width:W,height:60,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+    const c=el('circle',{cx:-W/2+32,cy:0,r:20,fill:'--line'},g);
+    const n=txt(g,-W/2+32,0,String(i+1),{size:24,weight:700,fill:'--muted'});
+    const tx=txt(g,-W/2+62,0,l,{size:28,weight:600,anchor:'start',fill:'--muted'});
+    return {g,bg,c,n,tx};});
+  return {items,update(t,times,end,appear){items.forEach((it,i)=>{
+    const on=t>=times[i],done=t>=(i<items.length-1?times[i+1]:end),st=done?2:on?1:0;
+    if(it._st!==st){it._st=st;
+      it.bg.setAttribute('style','fill:var('+(st===1?'--sun':'--card')+');stroke:var('+(st===1?'--sun':st===2?'--mint':'--line')+')');
+      it.c.setAttribute('style','fill:var('+(st===0?'--line':st===1?'--tink':'--mint')+')');
+      it.n.setAttribute('style','fill:var('+(st===0?'--muted':st===1?'--sun':'--tink')+')');it.n.textContent=st===2?'✓':String(i+1);
+      it.tx.setAttribute('style','fill:var('+(st===1?'--tink':st===2?'--ink':'--muted')+')');}
+    const k=P(t,appear+i*.15,appear+.4+i*.15);place(it.g,{o:k,s:1+.08*(on&&!done?bump(t,times[i],.4):0)});});}};
+}
+function check(p,x,y){const c=G(p,x,y);el('circle',{r:24,fill:'--mint'},c);
+  el('path',{d:'M-10 0 L-3 8 L11 -8',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},c);return c;}
+
+/* =================================================================
+   SCENES  (each: title, dur, caps [local time, text], build, update)
+   ================================================================= */
+const scenes=[];
+
+/* 1. A method gets a name */
+scenes.push((()=>{
+  let pG,qG,arrG,arrow,ARR=748,aLab,dLab,title,sub,h2,weeks=[],checks=[],banner,small,masc;
+  const W=[['Week 5','double inclusion'],['Week 6','equivalence relations'],['Week 7','bijections']];
+  return {title:'A method gets a name',dur:14,
+  caps:[[0.3,'Lecture 22: direct proof. Assume something is true, then show what has to follow.'],[4.8,'You’ve already written proofs: double inclusion, equivalence relations, bijections.'],[9.6,'Now the method gets a name. The next three weeks build on it.']],
+  build(r){
+    arrG=G(r,0,0);
+    arrow=el('path',{d:'M640 302 H930 M640 338 H930 M896 268 L962 320 L896 372',fill:'none',stroke:'--ink','stroke-width':16,'stroke-linecap':'round','stroke-linejoin':'round','stroke-dasharray':ARR},arrG);
+    pG=G(r,520,320);el('circle',{r:92,fill:'--sky'},pG);txt(pG,0,0,'P',{size:104,weight:600,fill:'--on-strong'});
+    qG=G(r,1080,320);el('circle',{r:92,fill:'--mint'},qG);txt(qG,0,0,'Q',{size:104,weight:600,fill:'--tink'});
+    aLab=gt(r,520,456,'assume',{size:36,weight:500,fill:'--muted'});dLab=gt(r,1080,456,'derive',{size:36,weight:500,fill:'--muted'});
+    title=gt(r,800,612,'Assume, Then Derive',{size:108,weight:600});
+    sub=gt(r,800,712,'Direct proof, the method behind almost every theorem',{size:38,weight:400,fill:'--muted'});
+    h2=gt(r,800,170,'You’ve already written proofs',{size:56,weight:600});
+    W.forEach(([a,b],i)=>{const g=G(r,330+470*i,350);ticket(g,390,170);txt(g,0,-34,a,{size:30,weight:500,fill:'--tink'});txt(g,0,22,b,{size:33,weight:700,fill:'--tink'});weeks.push(g);
+      checks.push(check(r,330+470*i+165,272));});
+    banner=G(r,800,600);pill(banner,960,110,'--grape','Now the method gets a name: direct proof',{size:40,color:'--on-strong'});
+    small=gt(r,800,712,'The next three weeks are the heart of CS 341',{size:32,weight:500,fill:'--muted'});
+    masc=G(r,1430,800);mascot(masc);
+  },
+  update(t){
+    const lv=P(t,4.2,5,ein);
+    let v=pv(t,.3);place(pG,{s:v.s,o:v.o*(1-lv),dy:-lv*60});
+    v=pv(t,1.6);place(qG,{s:v.s,o:v.o*(1-lv),dy:-lv*60});
+    const d=P(t,.8,1.8);arrow.setAttribute('stroke-dashoffset',(ARR*(1-d)).toFixed(1));place(arrG,{o:(d>0?1:0)*(1-lv),dy:-lv*60});
+    place(aLab,{o:P(t,.8,1.3)*(1-lv),dy:-lv*60});place(dLab,{o:P(t,2,2.5)*(1-lv),dy:-lv*60});
+    place(title,{o:P(t,2.2,2.9)*(1-lv),dy:(1-P(t,2.2,2.9,eout))*30-lv*40});
+    place(sub,{o:P(t,2.8,3.5)*(1-lv),dy:(1-P(t,2.8,3.5,eout))*20-lv*40});
+    place(h2,{o:P(t,4.9,5.4)});
+    weeks.forEach((g,i)=>show(g,t,5.2+i*.6));checks.forEach((c,i)=>show(c,t,5.6+i*.6));
+    show(banner,t,9.8);place(small,{o:P(t,10.6,11.2)});
+    show(masc,t,10.2,1e9,{dy:RM?0:-Math.abs(Math.sin(t*4))*10});
+  }};
+})());
+
+/* 2. The template */
+scenes.push((()=>{
+  let head,form,read,tab,rowsG=[],wrongLbl,strike,stamp,okG,card;
+  const R=[['T','T','T'],['T','F','F'],['F','T','T'],['F','F','T']];
+  const CX=[620,760,930],CW=[110,110,170],RY=i=>420+80*i;
+  return {title:'The template',dur:30,
+  caps:[[0.6,'Almost every theorem looks like this: for every x in S, if P(x), then Q(x).'],[5,'An “if… then” statement is false in only one case: P true, Q false.'],[12.6,'Direct proof starts by assuming P is true. That leaves two rows.'],[16.4,'Then we derive Q. That knocks out the only bad row.'],[21.4,'That’s the whole method: assume P(x) for an arbitrary x in S, then derive Q(x).']],
+  build(r){
+    head=gt(r,800,95,'The template',{size:60,weight:600});
+    form=gt(r,800,200,'∀x ∈ S,  P(x) ⇒ Q(x)',{size:64,weight:600});
+    read=gt(r,800,262,'“For every x in S, if P(x), then Q(x).”',{size:32,weight:500,fill:'--muted'});
+    tab=G(r,0,0);
+    ['P','Q','P ⇒ Q'].forEach((h,j)=>txt(tab,CX[j],345,h,{size:38,weight:700}));
+    R.forEach((rw,i)=>{const g=G(tab,0,0);rw.forEach((v,j)=>{const T=v==='T';
+      el('rect',{x:CX[j]-CW[j]/2,y:RY(i)-30,width:CW[j],height:60,rx:16,fill:T?'--mint':'--pop'},g);
+      txt(g,CX[j],RY(i),v,{size:34,weight:700,fill:T?'--tink':'--on-strong'});});rowsG.push(g);});
+    strike=el('line',{x1:540,y1:RY(1),x2:1040,y2:RY(1),stroke:'--ink','stroke-width':9,'stroke-linecap':'round','stroke-dasharray':500},tab);
+    wrongLbl=G(r,1310,RY(1));
+    el('path',{d:'M-196 0 L-246 0 M-232 -13 L-248 0 L-232 13',fill:'none',stroke:'--pop','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'},wrongLbl);
+    pill(wrongLbl,370,64,'--pop','the only way to be false',{size:28,color:'--on-strong'});
+    stamp=G(r,1250,RY(1));pill(stamp,260,64,'--ink','ruled out!',{size:30,color:'--stage'});
+    okG=G(r,1250,RY(0));pill(okG,260,64,'--mint','still standing',{size:30});
+    card=G(r,1150,540);ticket(card,640,330);
+    txt(card,0,-110,'Direct proof',{size:46,weight:700,fill:'--tink'});
+    txt(card,-250,-30,'1. Assume P(x)',{size:40,weight:600,fill:'--tink',anchor:'start'});
+    txt(card,-212,22,'for an arbitrary x ∈ S',{size:32,weight:500,fill:'--tink',anchor:'start'});
+    txt(card,-250,100,'2. Derive Q(x)',{size:40,weight:600,fill:'--tink',anchor:'start'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    place(form,{o:P(t,.8,1.4),dy:(1-P(t,.8,1.4,eout))*20});place(read,{o:P(t,1.8,2.4)});
+    place(tab,{o:P(t,4.4,4.9),dx:-330*P(t,20.8,21.8)});
+    rowsG.forEach((g,i)=>{const k=P(t,4.6+i*.35,5.1+i*.35,eout);let o=k;
+      if(i>=2)o*=1-.75*P(t,12.8,13.4);if(i===1)o*=1-.5*P(t,17,17.4);place(g,{dx:-(1-k)*40,o});});
+    strike.setAttribute('stroke-dashoffset',(500*(1-P(t,16.6,17.2))).toFixed(1));strike.setAttribute('opacity',t>16.6?1:0);
+    show(wrongLbl,t,6.2,12.4,{dx:RM?0:Math.sin(t*5)*4});
+    show(stamp,t,17.2,20.6);show(okG,t,18.4,20.6);
+    show(card,t,21.8);
+  }};
+})());
+
+/* 3. Why arbitrary */
+scenes.push((()=>{
+  let head,claim,chart,bars=[],vals=[],nl=[],oks=[],ghosts=[],more,box,flick,qs=[],boxLbl,may,c1,c2,c3,fin;
+  const NN=[1,3,5,7,9],X=i=>300+150*i,BASE=690,SC=5.6;
+  const FL=['3','11','−5','7','101','−9','1','23','−1','57'];
+  return {title:'Why “arbitrary”',dur:26,
+  caps:[[0.6,'Claim: if n is odd, then 5n + 3 is even. Let’s test a few odd numbers.'],[5.8,'Every example works. But there are infinitely many odd numbers to check.'],[12.8,'So we prove it for an arbitrary odd n: one we know nothing else about.'],[17.6,'You may assume n is an integer and n is odd. Nothing else.'],[21.8,'If the proof works for that mystery n, it works for every odd n.']],
+  build(r){
+    head=gt(r,800,95,'Why “arbitrary” matters',{size:60,weight:600});
+    claim=G(r,800,185);ticket(claim,1000,84);txt(claim,0,0,'Claim: if n is odd, then 5n + 3 is even.',{size:38,weight:600,fill:'--tink'});
+    chart=G(r,0,0);
+    el('line',{x1:200,y1:BASE,x2:1480,y2:BASE,stroke:'--ink','stroke-width':5,'stroke-linecap':'round'},chart);
+    NN.forEach((n,i)=>{const v=5*n+3;bars.push({b:el('rect',{x:X(i)-45,y:BASE,width:90,height:0,rx:14,fill:'--sky'},chart),v});
+      vals.push(gt(chart,X(i),BASE-v*SC-30,String(v),{size:36,weight:700}));
+      nl.push(gt(chart,X(i),BASE+40,'n = '+n,{size:30,weight:500,fill:'--muted'}));
+      const ok=G(chart,X(i),BASE-v*SC-78);pill(ok,104,40,'--mint','even',{size:24});oks.push(ok);});
+    [11,13,15].forEach((n,i)=>{const v=5*n+3,x=X(5+i),g=G(chart,0,0);
+      el('rect',{x:x-45,y:BASE-v*SC,width:90,height:v*SC,rx:14,fill:'none',stroke:'--muted','stroke-width':4,'stroke-dasharray':'10 10'},g);
+      txt(g,x,BASE+40,'n = '+n,{size:30,weight:500,fill:'--muted'});txt(g,x,BASE-v*SC-30,'?',{size:36,weight:700,fill:'--muted'});ghosts.push(g);});
+    more=G(chart,1180,800);pill(more,560,70,'--sun','…and infinitely many more',{size:32});
+    box=G(r,480,460);el('rect',{x:-150,y:-150,width:300,height:300,rx:40,fill:'--grape'},box);flick=txt(box,0,0,'7',{size:150,weight:600,fill:'--on-strong'});
+    for(let i=0;i<5;i++)qs.push(gt(r,480,460,'?',{size:46,weight:700,fill:'--pop'}));
+    boxLbl=gt(r,480,712,'an arbitrary odd integer',{size:36,weight:600});
+    may=gt(r,1140,300,'You may assume:',{size:38,weight:700});
+    c1=G(r,1140,390);pill(c1,440,72,'--mint','n is an integer',{size:32});
+    c2=G(r,1140,480);pill(c2,440,72,'--mint','n is odd',{size:32});
+    c3=G(r,1140,590);pill(c3,500,72,'--pop','nothing else (not even n = 7)',{size:30,color:'--on-strong'});
+    fin=G(r,800,800);pill(fin,960,80,'--grape','Works for the mystery n, so it works for every odd n',{size:32,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});show(claim,t,.6);
+    place(chart,{o:1-P(t,12.4,13)});
+    bars.forEach(({b,v},i)=>{const a=1.6+i*.7,k=P(t,a,a+.6,eout),h=v*SC*k;b.setAttribute('y',(BASE-h).toFixed(1));b.setAttribute('height',h.toFixed(1));
+      place(vals[i],{o:P(t,a+.4,a+.7),dy:(1-k)*v*SC});place(nl[i],{o:P(t,a,a+.4)});show(oks[i],t,a+.7);});
+    ghosts.forEach((g,i)=>place(g,{o:P(t,6.4+i*.5,6.9+i*.5)*(1-.25*i)}));
+    show(more,t,8.2);
+    const bk=pv(t,13);place(box,{s:bk.s,o:bk.o,r:RM||t>=15.4?0:Math.sin(t*20)*3});
+    const fi=Math.floor((t-13)*8),want=t<15.4?FL[((fi%FL.length)+FL.length)%FL.length]:'n';if(flick.textContent!==want)flick.textContent=want;
+    qs.forEach((q,i)=>{const a=i*1.2566+(RM?0:t*.6);q._x=480+Math.cos(a)*232;q._y=460+Math.sin(a)*196;place(q,{o:P(t,15.4,16)});});
+    place(boxLbl,{o:P(t,15.6,16.2)});
+    place(may,{o:P(t,17.4,17.9)});show(c1,t,17.8);show(c2,t,18.4);show(c3,t,19.4);
+    show(fin,t,22);
+  }};
+})());
+
+/* 4. Even and odd */
+scenes.push((()=>{
+  let head,evenDots=[],evenPairs=[],evenLbl,oddDots=[],oddPairs=[],extra,leftLbl,oddLbl,cE,cO,hiE,hiO;
+  const DX=i=>170+80*i;
+  return {title:'Even and odd',dur:24,
+  caps:[[0.6,'Even means everything pairs up. 8 = 2 · 4.'],[6.2,'Odd means pairs, plus one left over. 7 = 2 · 3 + 1.'],[12,'So the exact definitions: even is 2a, and odd is 2b + 1…'],[17.6,'…each ending with “for some integer.” Those words matter more than they look.']],
+  build(r){
+    head=gt(r,800,95,'Even and odd, exactly',{size:60,weight:600});
+    for(let i=0;i<4;i++){evenPairs.push(el('rect',{x:DX(i)-36,y:232,width:72,height:156,rx:36,fill:'none',stroke:'--mint','stroke-width':5},r));
+      [270,350].forEach(y=>{const g=G(r,DX(i),y);el('circle',{r:26,fill:'--sky'},g);evenDots.push(g);});}
+    evenLbl=gt(r,290,446,'8 = 2 · 4',{size:48,weight:600});
+    for(let i=0;i<3;i++){oddPairs.push(el('rect',{x:DX(i)-36,y:522,width:72,height:156,rx:36,fill:'none',stroke:'--mint','stroke-width':5},r));
+      [560,640].forEach(y=>{const g=G(r,DX(i),y);el('circle',{r:26,fill:'--sky'},g);oddDots.push(g);});}
+    extra=G(r,DX(3)+6,600);el('circle',{r:26,fill:'--pop'},extra);
+    leftLbl=G(r,DX(3)+150,600);pill(leftLbl,190,52,'--pop','left over',{size:26,color:'--on-strong'});
+    oddLbl=gt(r,290,736,'7 = 2 · 3 + 1',{size:48,weight:600});
+    cE=G(r,1110,330);ticket(cE,760,200);pill(G(cE,-300,-62),120,46,'--sky','Even',{size:26,color:'--on-strong'});
+    txt(cE,0,-10,'n = 2a',{size:64,weight:600,fill:'--tink'});
+    hiE=G(cE,0,58);pill(hiE,340,52,'--sun','for some integer a',{size:30});
+    cO=G(r,1110,620);ticket(cO,760,200);pill(G(cO,-300,-62),120,46,'--pop','Odd',{size:26,color:'--on-strong'});
+    txt(cO,0,-10,'n = 2b + 1',{size:64,weight:600,fill:'--tink'});
+    hiO=G(cO,0,58);pill(hiO,340,52,'--sun','for some integer b',{size:30});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    evenDots.forEach((g,i)=>show(g,t,.8+i*.12));
+    evenPairs.forEach((p,i)=>p.setAttribute('opacity',P(t,2.6+i*.3,2.9+i*.3)));
+    place(evenLbl,{o:P(t,3.8,4.3)});
+    oddDots.forEach((g,i)=>show(g,t,6.4+i*.12));
+    oddPairs.forEach((p,i)=>p.setAttribute('opacity',P(t,7.6+i*.3,7.9+i*.3)));
+    show(extra,t,8.8,1e9,{dx:t>9.3&&!RM?Math.sin((t-9.3)*14)*8*Math.exp(-(t-9.3)*1.5):0});
+    show(leftLbl,t,9.4);place(oddLbl,{o:P(t,9.8,10.3)});
+    show(cE,t,12.2);show(cO,t,13.4);
+    let v=pv(t,14.4);place(hiE,{s:v.s*(1+.14*(bump(t,17.8,.5)+bump(t,18.8,.5))),o:v.o});
+    v=pv(t,14.8);place(hiO,{s:v.s*(1+.14*(bump(t,18.3,.5)+bump(t,19.3,.5))),o:v.o});
+  }};
+})());
+
+/* 5. For some integer + free tools */
+scenes.push((()=>{
+  let head1,head2,partA,eq,arr,sol,masc,huh,stampG,parade=[],partB,intro,tools=[],lockCard,lockBg,lockBody,shackle,lt1,lt2,lt3;
+  const PAR=['7 = 2(3.5)','1 = 2(0.5)','π = 2(π/2)','0.3 = 2(0.15)','√2 = 2(√2/2)'];
+  return {title:'For some integer',dur:26,
+  caps:[[0.6,'Why insist on “for some integer”? Watch: 7 = 2a works if a = 3.5.'],[6,'By that logic, 7 would be even! Every number is twice something.'],[12.6,'Here’s what you may assume for free: if a and b are integers, so are −a, a + b, and ab.'],[18.4,'But “even + even is even” is not free. Prove it first, then you can use it.']],
+  build(r){
+    head1=gt(r,800,95,'Why “for some integer”?',{size:60,weight:600});
+    head2=gt(r,800,95,'What you may assume for free',{size:60,weight:600});
+    partA=G(r,0,0);
+    eq=gt(partA,560,280,'7 = 2a',{size:88,weight:600});
+    arr=gt(partA,560,380,'↓',{size:56,weight:600,fill:'--muted'});
+    sol=gt(partA,560,470,'a = 3.5',{size:76,weight:600});
+    masc=G(partA,1010,420);mascot(masc);
+    huh=G(partA,1270,330);speech(huh,380,90,'So 7 is even?!',{size:38});
+    stampG=G(partA,1150,545);el('rect',{x:-280,y:-56,width:560,height:112,rx:18,fill:'--stage',stroke:'--pop','stroke-width':8},stampG);
+    txt(stampG,0,0,'3.5 isn’t an integer!',{size:46,weight:700,fill:'--pop'});
+    PAR.forEach(s=>{const g=G(partA,0,712);pill(g,330,74,'--sky',s,{size:34,color:'--on-strong'});parade.push(g);});
+    partB=G(r,0,0);
+    intro=gt(partB,800,215,'If a and b are integers, so are:',{size:40,weight:600});
+    ['−a','a + b','a · b'].forEach((s,i)=>{const g=G(partB,480+320*i,350);ticket(g,260,130,'--mint');txt(g,0,0,s,{size:60,weight:600,fill:'--tink'});tools.push(g);});
+    lockCard=G(partB,800,600);
+    lockBg=el('rect',{x:-440,y:-82,width:880,height:164,rx:30,fill:'--card',stroke:'--line','stroke-width':4},lockCard);
+    const lk=G(lockCard,-350,10);shackle=G(lk,0,-26);
+    el('path',{d:'M-20 0 V-16 A20 20 0 0 1 20 -16 V0',fill:'none',stroke:'--ink','stroke-width':9,'stroke-linecap':'round'},shackle);
+    lockBody=el('rect',{x:-30,y:-26,width:60,height:50,rx:10,fill:'--ink'},lk);
+    lt1=txt(lockCard,-280,-24,'even + even is even',{size:46,weight:600,anchor:'start'});
+    lt2=txt(lockCard,-280,36,'not free: you have to prove it first',{size:30,weight:500,fill:'--muted',anchor:'start'});
+    lt3=txt(lockCard,-280,36,'proved once, now it’s yours to use ✓',{size:30,weight:700,anchor:'start'});
+  },
+  update(t){
+    const A=1-P(t,12,12.6);
+    place(head1,{o:P(t,.4,1)*A});place(head2,{o:P(t,12.6,13.2)});
+    place(partA,{o:A});
+    place(eq,{o:P(t,.8,1.3),dy:(1-P(t,.8,1.3,eout))*20});place(arr,{o:P(t,2.4,2.8),dy:-(1-P(t,2.4,2.8))*15});show(sol,t,3);
+    show(masc,t,4.2,1e9,{dy:RM||t>7?0:-Math.abs(Math.sin(t*6))*8});show(huh,t,4.6);
+    const sk=clamp((t-6.6)/.4);place(stampG,{s:sk?lerp(1.8,1,eout(sk)):.001,o:clamp(sk*4),r:-6});
+    parade.forEach((g,i)=>{g._x=1700+i*370-(t-7.4)*340;place(g,{o:P(t,7.4,7.8)});});
+    place(partB,{o:P(t,12.6,13.1)});
+    place(intro,{o:P(t,12.8,13.3)});
+    tools.forEach((g,i)=>show(g,t,13.4+i*.6));
+    show(lockCard,t,18.6);
+    const u=P(t,21.6,22.2,eout);
+    place(shackle,{dy:-16*u,r:28*u});
+    lockBody.setAttribute('style','fill:var('+(u>.5?'--mint':'--ink')+')');
+    lockBg.setAttribute('style','fill:var(--card);stroke:var('+(u>.5?'--mint':'--line')+')');
+    lt2.setAttribute('opacity',(1-u).toFixed(2));lt3.setAttribute('opacity',u.toFixed(2));
+  }};
+})());
+
+/* 6. The four steps */
+scenes.push((()=>{
+  let head,track,TL,st=[],labs=[],subs=[],masc,crown,banner;
+  const S=[['Unfold','turn the hypothesis','into an equation','--sky','--on-strong'],['Substitute','plug it into the','expression you want','--mint','--tink'],
+    ['Algebra','simplify toward','the target form','--sun','--tink'],['Finish','factor out the 2,','say “integer”','--pop','--on-strong']];
+  const X=i=>260+360*i,Y=400,ST=[4.8,6.2,7.6,10.6],HS=[5.5,6.9,9.8];
+  return {title:'The four steps',dur:18,
+  caps:[[0.6,'Every proof today has the same shape: four steps.'],[4.6,'Unfold the definition. Substitute. Do the algebra.'],[10.4,'Then the finish: factor out the 2 and say the leftover is an integer.'],[14.6,'Step 4 is where the proof actually finishes. Everything before it is arithmetic.']],
+  build(r){
+    head=gt(r,800,95,'The shape of every parity proof',{size:60,weight:600});
+    TL=X(3)-X(0);track=el('line',{x1:X(0),y1:Y,x2:X(3),y2:Y,stroke:'--line','stroke-width':14,'stroke-linecap':'round','stroke-dasharray':TL},r);
+    S.forEach(([a,b,c,f,tc],i)=>{const g=G(r,X(i),Y);el('circle',{r:80,fill:f},g);txt(g,0,0,String(i+1),{size:76,weight:700,fill:tc});st.push(g);
+      labs.push(gt(r,X(i),Y+130,a,{size:44,weight:700}));
+      const sg=G(r,X(i),Y+192);txt(sg,0,-19,b,{size:28,weight:500,fill:'--muted'});txt(sg,0,19,c,{size:28,weight:500,fill:'--muted'});subs.push(sg);});
+    crown=G(r,X(3)+100,Y-100);star(crown,0,0,30,'--sun');
+    masc=G(r,X(0),Y-150);mascot(masc);
+    banner=G(r,800,790);pill(banner,1080,96,'--grape','Step 4 is where the proof finishes',{size:40,color:'--on-strong'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    track.setAttribute('stroke-dashoffset',(TL*(1-P(t,1.2,3))).toFixed(1));
+    st.forEach((g,i)=>{const v=pv(t,1+i*.6);place(g,{s:v.s*(1+.12*bump(t,ST[i],.5)),o:v.o});});
+    labs.forEach((g,i)=>place(g,{o:P(t,1.4+i*.6,1.9+i*.6)}));
+    subs.forEach((g,i)=>place(g,{o:P(t,ST[i],ST[i]+.5)}));
+    let x=X(0),y=Y-150;
+    for(let i=0;i<3;i++)if(t>=HS[i]){const k=clamp((t-HS[i])/.7),e=eio(k);x=lerp(X(i),X(i+1),e);y=Y-150-Math.sin(Math.PI*k)*80;}
+    masc._x=x;masc._y=y;place(masc,{o:P(t,4,4.4)});
+    show(crown,t,10.8,1e9,{r:RM?0:t*40});
+    show(banner,t,14.6);
+  }};
+})());
+
+/* 7. Result 3.16 */
+scenes.push((()=>{
+  let thm,trk,L=[],callP,callTxt,badge;
+  const T=[3.4,9,14.6,20.6],END=30.4,LT=[4,9.6,15.2,17.2,21.2];
+  return {title:'Result 3.16',dur:36,
+  caps:[[0.6,'Result 3.16: if n is odd, then 5n + 3 is even.'],[3.4,'Step 1, unfold: n is odd, so n = 2k + 1 for some integer k.'],[9,'Step 2, substitute that into 5n + 3.'],[14.6,'Step 3, algebra: 10k + 5 + 3, which is 10k + 8.'],[20.6,'Step 4, finish: factor out the 2 to get 2(5k + 4).'],[25,'5k + 4 is an integer, so 5n + 3 has the form 2a. It’s even!'],[30.4,'Unfold, substitute, simplify, finish. That’s a direct proof.']],
+  build(r){
+    thm=G(r,800,150);ticket(thm,1120,96);row(thm,0,0,[['Result 3.16',{weight:700}],'   If n is odd, then 5n + 3 is even.'],{size:38,anchor:'middle',fill:'--tink'});
+    trk=tracker(r,220,320,92,['Unfold','Substitute','Algebra','Finish']);
+    L.push(row(r,440,300,['n = ',['2k + 1',{fill:'--sky',weight:600}],'   ',['for some integer k',{box:'--sun',size:32,weight:600}]],{size:48}));
+    L.push(row(r,440,390,['5n + 3 ','= 5',['(2k + 1)',{fill:'--sky',weight:600}],' + 3'],{size:48}));
+    L.push(row(r,640,475,['= 10k + 5 + 3'],{size:48}));
+    L.push(row(r,640,560,['= 10k + 8'],{size:48}));
+    L.push(row(r,640,648,['= ',['2',{fill:'--pop',weight:700}],['(5k + 4)',{box:'--sun',weight:600}]],{size:48}));
+    callP=el('path',{d:'M0 0',fill:'none',stroke:'--mint','stroke-width':7,'stroke-linecap':'round'},r);
+    callTxt=G(r,1230,648);pill(callTxt,330,66,'--mint','an integer ✓',{size:32});
+    badge=G(r,800,795);pill(badge,820,90,'--grape','So 5n + 3 is even.  ∎',{size:40,color:'--on-strong'});
+  },
+  update(t){
+    show(thm,t,.5);trk.update(t,T,END,1.2);
+    const eqX=L[1]._pc[1].x;for(let i=2;i<5;i++)if(Math.abs(L[i]._ax-eqX)>.5){L[i]._ax=eqX;layoutRow(L[i]);}
+    L.forEach((g,i)=>{const k=P(t,LT[i],LT[i]+.5,eout);place(g,{dx:-(1-k)*40,o:k*(i<4?1-.45*P(t,24.6,25.2):1)});});
+    const pc=L[4]._pc[2],x0=pc.x+pc.w+12,x1=1058,ak=P(t,25.2,25.8);
+    callP.setAttribute('d','M'+x0.toFixed(1)+' 648 L'+lerp(x0,x1,ak).toFixed(1)+' 648');callP.setAttribute('opacity',ak>0?1:0);
+    show(callTxt,t,25.6);
+    show(badge,t,28.6);
+  }};
+})());
+
+/* 8. Result 3.17 and the -1 trap */
+scenes.push((()=>{
+  let thm,L1,L2,slotLbl,slot,slotRect,slotRow,W,X_,neq,L3,F,fits,badge;
+  const SX=1210,SY=470;
+  return {title:'Result 3.17',dur:44,chapters:[[0,'Result 3.17'],[14,'The −1 trap']],
+  caps:[[0.6,'Result 3.17: if n is even, then n² + 4n − 3 is odd.'],[3,'Unfold: n = 2k for some integer k. Substitute: 4k² + 8k − 3.'],[11.4,'Our target is the exact odd shape: 2 times an integer, plus 1.'],[15,'A tempting move: 2(2k² + 4k − 1) − 1. It’s true… but does it fit?'],[20.6,'No! The definition says + 1, not − 1. Same numbers, wrong shape.'],[24.2,'A proof has to match the definition exactly as written.'],[27,'So fix the algebra: split −3 into −4 + 1.'],[31.6,'Now it’s 2(2k² + 4k − 2) + 1. A perfect fit.'],[37.4,'2k² + 4k − 2 is an integer, so n² + 4n − 3 is odd.']],
+  build(r){
+    thm=G(r,800,150);ticket(thm,1180,96);row(thm,0,0,[['Result 3.17',{weight:700}],'   If n is even, then n² + 4n − 3 is odd.'],{size:38,anchor:'middle',fill:'--tink'});
+    L1=row(r,130,280,['n = 2k   ',['for some integer k',{box:'--sun',size:30,weight:600}]],{size:44});
+    L2=row(r,130,365,['n² + 4n − 3 = 4k² + 8k − 3'],{size:44});
+    slotLbl=gt(r,SX,370,'Odd means exactly:',{size:32,weight:600,fill:'--muted'});
+    slot=G(r,SX,SY);slotRect=el('rect',{x:-290,y:-54,width:580,height:108,rx:26,fill:'none',stroke:'--ink','stroke-width':4,'stroke-dasharray':'14 10'},slot);
+    slotRow=row(slot,0,0,['2(',['  an integer  ',{box:'--sun',size:30,weight:600}],') + 1'],{size:46,anchor:'middle',fill:'--muted',weight:600});
+    W=G(r,520,480);row(W,0,0,['= 2(2k² + 4k − 1) ',['− 1',{box:'--pop',fill:'--on-strong',weight:700}]],{size:44,anchor:'middle',bg:'--stage',bgStroke:'--pop',bgH:92,padX:28});
+    X_=el('line',{x1:-250,y1:0,x2:250,y2:0,stroke:'--pop','stroke-width':7,'stroke-linecap':'round','stroke-dasharray':500},W);
+    neq=G(r,520,580);pill(neq,250,60,'--pop','− 1 ≠ + 1',{size:32,color:'--on-strong'});
+    L3=row(r,130,668,['= 4k² + 8k ',['− 4 + 1',{box:'--sun',weight:600}]],{size:44});
+    F=G(r,520,775);row(F,0,0,['= 2(2k² + 4k − 2) ',['+ 1',{box:'--mint',weight:700}]],{size:44,anchor:'middle',bg:'--stage',bgStroke:'--mint',bgH:92,padX:28});
+    fits=G(r,SX,SY+100);pill(fits,200,60,'--mint','fits! ✓',{size:32});
+    badge=G(r,SX,690);pill(badge,560,88,'--grape','So n² + 4n − 3 is odd.  ∎',{size:36,color:'--on-strong'});
+  },
+  update(t){
+    show(thm,t,.5);
+    let k=P(t,3,3.5,eout);place(L1,{dx:-(1-k)*40,o:k});
+    k=P(t,6.6,7.1,eout);place(L2,{dx:-(1-k)*40,o:k});
+    place(slotLbl,{o:P(t,11.4,11.9)});show(slot,t,11.8);
+    const wv=pv(t,15.2),go=P(t,17,18.1,ein),bk=P(t,18.1,18.9,eout);
+    const wd=t<18.1?480*go:480*(1-bk),shake=t>18.9&&t<19.8&&!RM?Math.sin((t-18.9)*40)*10*(1-(t-18.9)/.9):0;
+    place(W,{s:wv.s,o:wv.o*(1-.6*P(t,22.4,23)),dx:wd+shake,dy:-10*(t<18.1?go:1-bk)});
+    X_.setAttribute('stroke-dashoffset',(500*(1-P(t,22.4,23))).toFixed(1));X_.setAttribute('opacity',t>22.4?1:0);
+    const hit=bump(t,18,.7);
+    slotRect.setAttribute('style','fill:none;stroke:var('+(hit>.05?'--pop':(t>34.3?'--mint':'--ink'))+')');
+    show(neq,t,19.4);
+    k=P(t,27.2,27.7,eout);place(L3,{dx:-(1-k)*40,o:k});
+    const fv=pv(t,31.4),fk=P(t,32.8,34.2);
+    place(F,{s:fv.s*(1+.06*bump(t,34.2,.4)),o:fv.o,dx:(SX-520)*fk,dy:(SY-775)*fk});
+    slotRow.setAttribute('opacity',(1-P(t,33.6,34.1)).toFixed(2));
+    show(fits,t,34.4);
+    show(badge,t,37.6);
+  }};
+})());
+
+/* 9. Beyond parity */
+scenes.push((()=>{
+  let thm,def,uR,uS,uNote,sum,fR,chk=[],rat,trk;
+  const T=[5.4,11,13,16],END=21.4;
+  return {title:'Beyond parity',dur:26,
+  caps:[[0.6,'The recipe works beyond even and odd. Result 3.19: rational + rational is rational.'],[5.4,'Unfold: r = a/b and s = c/d, with integers on top and nonzero integers below.'],[11,'Substitute and add the fractions: ad + bc over bd.'],[16,'Finish: the top is an integer, and the bottom is a nonzero integer. Rational!'],[21.4,'Same four steps: unfold, substitute, algebra, check the target form.']],
+  build(r){
+    thm=G(r,800,150);ticket(thm,1260,96);row(thm,0,0,[['Result 3.19',{weight:700}],'   If r and s are rational, then r + s is rational.'],{size:38,anchor:'middle',fill:'--tink'});
+    def=G(r,800,250);row(def,0,0,['Rational means ',['a / b',{weight:700}],' with a and b integers and b ≠ 0'],{size:32,anchor:'middle',fill:'--muted',weight:500});
+    uR=G(r,250,440);txt(uR,-55,0,'r =',{size:48,weight:600});frac(uR,52,0,'a','b',{size:48});
+    uS=G(r,530,440);txt(uS,-55,0,'s =',{size:48,weight:600});frac(uS,52,0,'c','d',{size:48});
+    uNote=G(r,400,580);row(uNote,0,0,['a, b, c, d integers;  b, d ≠ 0'],{size:30,anchor:'middle',fill:'--muted',weight:600});
+    sum=G(r,0,0);txt(sum,850,440,'r + s =',{size:48,weight:600});
+    frac(sum,975,440,'a','b',{size:48});txt(sum,1035,440,'+',{size:48,weight:600});frac(sum,1095,440,'c','d',{size:48});txt(sum,1160,440,'=',{size:48,weight:600});
+    fR=G(r,1325,440);el('rect',{x:-128,y:-92,width:256,height:184,rx:24,fill:'none',stroke:'--sun','stroke-width':6},fR);frac(fR,0,0,'ad + bc','bd',{size:48,weight:600});
+    ['ad + bc is an integer','bd is an integer','bd ≠ 0'].forEach((s,i)=>{const g=G(r,1170,578+68*i);pill(g,440,58,'--mint',s+'  ✓',{size:30});chk.push(g);});
+    rat=G(r,1325,318);pill(rat,230,58,'--grape','rational!',{size:32,color:'--on-strong'});
+    trk=tracker(r,380,832,280,['Unfold','Substitute','Algebra','Check form'],{horiz:true});
+  },
+  update(t){
+    show(thm,t,.5);place(def,{o:P(t,1.6,2.2)});
+    trk.update(t,T,END,2.4);
+    show(uR,t,5.8);show(uS,t,6.6);place(uNote,{o:P(t,7.6,8.2)});
+    place(sum,{o:P(t,11.2,11.7),dx:(1-P(t,11.2,11.7,eout))*40});
+    show(fR,t,13.2);
+    chk.forEach((g,i)=>show(g,t,16.4+i*.7));
+    show(rat,t,18.8);
+  }};
+})());
+
+/* 10. Takeaways */
+scenes.push((()=>{
+  let head,tk=[];
+  const L=['Assume P(x) for an arbitrary x, then derive Q(x).','Use exact definitions: 2a, 2b + 1, for some integer.','Reshape until the form matches, then say “integer.”'];
+  const A=[.6,5.6,10.6];
+  return {title:'Takeaways',dur:16,
+  caps:[[0.6,'Assume the hypothesis for an arbitrary x, then derive the conclusion.'],[5.6,'Use the exact definitions, and never drop “for some integer.”'],[10.6,'Reshape until it matches the definition exactly, then name the integer.']],
+  build(r){
+    head=gt(r,800,95,'Three things to remember',{size:60,weight:600});
+    L.forEach((s,i)=>{const g=G(r,800,265+190*i);ticket(g,1180,150);
+      el('line',{x1:-410,y1:-58,x2:-410,y2:58,stroke:'--tink','stroke-width':4,'stroke-dasharray':'6 10','stroke-linecap':'round',opacity:.45},g);
+      const ic=G(g,-500,0);
+      if(i===0){el('circle',{cx:-34,cy:0,r:16,fill:'--sky'},ic);el('circle',{cx:34,cy:0,r:16,fill:'--mint'},ic);
+        el('path',{d:'M-12 0 H10 M2 -9 L12 0 L2 9',fill:'none',stroke:'--tink','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'},ic);}
+      else if(i===1)txt(ic,0,0,'2b + 1',{size:32,weight:700,fill:'--tink'});
+      else{el('rect',{x:-40,y:-30,width:80,height:60,rx:14,fill:'none',stroke:'--tink','stroke-width':5,'stroke-dasharray':'9 7'},ic);
+        el('path',{d:'M-16 2 L-4 14 L18 -12',fill:'none',stroke:'--tink','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'},ic);}
+      txt(g,-372,0,s,{size:36,weight:600,fill:'--tink',anchor:'start'});tk.push(g);});
+  },
+  update(t){place(head,{o:P(t,.4,1)});tk.forEach((g,i)=>{const k=P(t,A[i],A[i]+.6,eout);place(g,{dx:-(1-k)*120,o:k,r:(1-k)*-3});});}
+  };
+})());
+
+/* 11. Exit ticket */
+scenes.push((()=>{
+  let head,cards=[],backs=[],ans=[],timer,arc,cnt,foot;
+  const C=2*Math.PI*40;
+  const Q=[{q:'Q1',lines:['Prove: if n is odd,','then 7n + 4 is odd.'],sz:42,a:[['n = 2k + 1, with k an integer',30,500],['7n + 4 = 14k + 11',36,600],['= 2(7k + 5) + 1, so it’s odd ✓',34,700]]},
+           {q:'Q2',lines:['Why isn’t n = 2a enough','without saying a is an integer?'],sz:36,a:[['Every number is twice something.',32,700],['7 = 2(3.5), so 7 would',32,500],['count as “even.”',32,500]]}];
+  return {title:'Exit ticket',dur:18,
+  caps:[[0.6,'Exit ticket: try both in your head before the reveal.'],[8,'Check yourself!'],[10.6,'Q1: 7n + 4 = 14k + 11 = 2(7k + 5) + 1, and 7k + 5 is an integer. Odd!'],[14.6,'Next up: proof by contrapositive.']],
+  build(r){
+    head=gt(r,800,95,'Exit ticket',{size:60,weight:600});
+    Q.forEach((d,i)=>{const g=G(r,i?1170:430,445);
+      el('rect',{x:-345,y:-235,width:690,height:470,rx:30,fill:'--card',stroke:'--line','stroke-width':3},g);
+      pill(G(g,-275,-185),84,52,'--pop',d.q,{size:28,color:'--on-strong',weight:700});
+      d.lines.forEach((s,j)=>txt(g,0,-125+56*j,s,{size:d.sz,weight:600}));
+      const b=G(g,0,100);el('rect',{x:-305,y:-100,width:610,height:200,rx:26,fill:'--line'},b);txt(b,0,0,'Think first…',{size:34,weight:600,fill:'--muted'});backs.push(b);
+      const a=G(g,0,100);el('rect',{x:-305,y:-100,width:610,height:200,rx:26,fill:'--stage',stroke:'--mint','stroke-width':5},a);
+      d.a.forEach(([s,sz,w],j)=>txt(a,0,-58+58*j,s,{size:sz,weight:w}));ans.push(a);cards.push(g);});
+    timer=G(r,800,800);el('circle',{r:40,fill:'none',stroke:'--line','stroke-width':10},timer);
+    arc=el('circle',{r:40,fill:'none',stroke:'--sun','stroke-width':10,'stroke-linecap':'round','stroke-dasharray':C.toFixed(1),transform:'rotate(-90)'},timer);
+    cnt=txt(timer,0,0,'5',{size:34,weight:700});
+    foot=gt(r,800,800,'Next up: proof by contrapositive (Section 3.3)',{size:36,weight:500,fill:'--muted'});
+  },
+  update(t){
+    place(head,{o:P(t,.4,1)});
+    cards.forEach((g,i)=>show(g,t,.6+i*.3));
+    [8,8.6].forEach((a,i)=>{const k=P(t,a,a+.6),sy=Math.max(Math.abs(Math.cos(k*Math.PI)),.03);
+      place(backs[i],{sx:1,sy,o:k<.5?1:0});place(ans[i],{sx:1,sy,o:k>=.5?1:0});});
+    const tk=P(t,.9,7.6,x=>x);arc.setAttribute('stroke-dashoffset',(C*tk).toFixed(1));
+    const n=String(Math.max(1,5-Math.floor(tk*5)));if(cnt.textContent!==n)cnt.textContent=n;
+    place(timer,{o:Math.min(P(t,.9,1.3),1-P(t,7.6,8.1))});
+    place(foot,{o:P(t,14.6,15.2)});
+  }};
+})());
+
+/* ---------- assemble timeline ---------- */
+const root=el('g',{},svg);
+const starts=[];let acc=0;
+scenes.forEach(s=>{starts.push(acc);s.g=el('g',{},root);s.rows=[];BUILDING=s;s.build(s.g);BUILDING=null;s._lv=-1;s.g.style.display='none';acc+=s.dur;});
+const TOTAL=acc;
+const chapters=[];scenes.forEach((s,i)=>(s.chapters||[[0,s.title]]).forEach(([o,ti])=>chapters.push({t:starts[i]+o,title:ti})));
+const caps=[];scenes.forEach((s,i)=>s.caps.forEach(([o,c])=>caps.push([starts[i]+o,c])));
+
+/* ticket-wipe transition between scenes, carrying the next chapter's title */
+const wipe=el('g',{},svg);wipe._x=0;wipe._y=0;
+el('path',{d:'M0 0 H2000 L1800 900 H-200Z',fill:'--sun'},wipe);
+el('line',{x1:46,y1:0,x2:-154,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+el('line',{x1:1954,y1:0,x2:1754,y2:900,stroke:'--stage','stroke-width':8,'stroke-dasharray':'2 22','stroke-linecap':'round'},wipe);
+const wNum=txt(wipe,900,372,'',{size:34,weight:600,fill:'--tink'});
+const wTitle=txt(wipe,900,456,'',{size:92,weight:700,fill:'--tink'});
+function renderWipe(t){
+  let b=null;for(let i=1;i<starts.length;i++)if(Math.abs(t-starts[i])<.6){b=starts[i];break;}
+  if(b===null){place(wipe,{o:0});return;}
+  const u=(t-(b-.6))/1.2;
+  const ci=chapters.findIndex(c=>Math.abs(c.t-b)<.01);
+  if(ci>=0&&wTitle.textContent!==chapters[ci].title){wTitle.textContent=chapters[ci].title;wNum.textContent='Part '+(ci+1)+' of '+chapters.length;}
+  if(RM){place(wipe,{dx:-100,o:clamp((.5-Math.abs(u-.5))*4)});return;}
+  const tx=u<.4?lerp(1800,0,eout(u/.4)):u<.6?lerp(0,-200,(u-.4)/.2):lerp(-200,-2000,ein((u-.6)/.4));
+  place(wipe,{dx:tx,o:1});
+}
+
+/* ---------- player ---------- */
+const $=id=>document.getElementById(id);
+const capEl=$('caption'),playBtn=$('play'),scrub=$('scrub'),timeEl=$('time'),poster=$('poster'),chapNav=$('chapters'),player=$('player');
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+scrub.max=TOTAL;
+$('posterLen').textContent=Math.floor(TOTAL/60)+' min '+Math.round(TOTAL%60)+' s';
+poster.setAttribute('aria-label','Play the explainer ('+Math.floor(TOTAL/60)+' minutes '+Math.round(TOTAL%60)+' seconds)');
+const ICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/><rect x="14" y="4.5" width="4.5" height="15" rx="1.5" fill="currentColor"/></svg>',
+  replay:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M3.5 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+const ticksEl=$('ticks');
+chapters.forEach((c,i)=>{if(i){const s=document.createElement('span');s.style.left=(c.t/TOTAL*100)+'%';ticksEl.appendChild(s);}
+  const b=document.createElement('button');b.type='button';b.className='chip';b.innerHTML='<b>'+(i+1)+'</b>';b.appendChild(document.createTextNode(c.title));
+  b.addEventListener('click',()=>{seek(c.t+.01);setPlaying(true);});c.btn=b;chapNav.appendChild(b);});
+
+let T=0,playing=false,started=false,speed=1,last=null,dirty=true,lastScene=-1,lastCap=null,lastChap=-1;
+const sceneAt=t=>{let i=0;for(let k=0;k<starts.length;k++)if(t>=starts[k])i=k;return i;};
+function render(){
+  const t=started?T:3.8;
+  const i=sceneAt(Math.min(t,TOTAL-1e-6));
+  if(i!==lastScene){scenes.forEach((s,k)=>s.g.style.display=k===i?'':'none');lastScene=i;}
+  if(scenes[i]._lv!==FONTV){scenes[i].rows.forEach(layoutRow);scenes[i]._lv=FONTV;}
+  scenes[i].update(t-starts[i]);
+  renderWipe(t);
+  let c='';if(started){for(const [ct,s] of caps){if(ct<=T)c=s;else break;}}
+  if(c!==lastCap){capEl.textContent=c;lastCap=c;}
+  scrub.value=T;scrub.style.setProperty('--pct',(T/TOTAL*100).toFixed(2)+'%');
+  timeEl.textContent=fmt(T)+' / '+fmt(TOTAL);
+  let ch=0;chapters.forEach((cc,k)=>{if(T>=cc.t-.001)ch=k;});
+  if(ch!==lastChap){chapters.forEach((cc,k)=>cc.btn.setAttribute('aria-current',k===ch?'true':'false'));
+    if(started){const b=chapters[ch].btn;chapNav.scrollTo({left:b.offsetLeft-chapNav.clientWidth/2+b.offsetWidth/2,behavior:RM?'auto':'smooth'});}lastChap=ch;}
+}
+function setPlaying(p){
+  if(p&&T>=TOTAL-.01)T=0;
+  playing=p;last=null;
+  if(p){started=true;poster.hidden=true;}
+  const ended=!p&&T>=TOTAL-.01;
+  playBtn.innerHTML=p?ICON.pause:(ended?ICON.replay:ICON.play);
+  playBtn.setAttribute('aria-label',p?'Pause':(ended?'Replay':'Play'));
+  dirty=true;
+}
+function seek(t){started=true;poster.hidden=true;T=clamp(t,0,TOTAL);dirty=true;}
+function loop(now){
+  if(playing){if(last!==null)T+=Math.min((now-last)/1000,.1)*speed;last=now;if(T>=TOTAL){T=TOTAL;setPlaying(false);}dirty=true;}
+  if(dirty){render();dirty=false;}
+  requestAnimationFrame(loop);
+}
+playBtn.addEventListener('click',()=>setPlaying(!playing));
+poster.addEventListener('click',()=>{T=0;setPlaying(true);playBtn.focus({preventScroll:true});});
+$('restart').addEventListener('click',()=>{seek(0);setPlaying(true);});
+scrub.addEventListener('input',()=>seek(parseFloat(scrub.value)));
+const speeds=[1,1.25,1.5,.75];
+$('speed').addEventListener('click',e=>{speed=speeds[(speeds.indexOf(speed)+1)%speeds.length];e.currentTarget.textContent=speed+'×';e.currentTarget.setAttribute('aria-label','Playback speed '+speed+' times');});
+$('cc').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);capEl.hidden=!on;});
+const fsBtn=$('fs');
+if(!(document.fullscreenEnabled&&player.requestFullscreen))fsBtn.hidden=true;
+fsBtn.addEventListener('click',()=>{try{if(document.fullscreenElement)document.exitFullscreen();else player.requestFullscreen().catch(()=>{});}catch(e){}});
+document.addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(e.altKey||e.ctrlKey||e.metaKey)return;
+  if(e.key===' '||e.key==='k'){if(tag==='button'&&e.key===' ')return;if(tag==='input'&&e.key===' '){e.preventDefault();setPlaying(!playing);return;}
+    if(tag!=='input'){e.preventDefault();setPlaying(!playing);}}
+  else if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&tag!=='input'){e.preventDefault();seek(T+(e.key==='ArrowRight'?5:-5));}
+});
+setPlaying(false);
+if(document.fonts){if(document.fonts.ready)document.fonts.ready.then(()=>{FONTV++;dirty=true;});document.fonts.addEventListener&&document.fonts.addEventListener('loadingdone',()=>{FONTV++;dirty=true;});}
+window.__seek=t=>{seek(t);render();};
+window.__total=TOTAL;
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
