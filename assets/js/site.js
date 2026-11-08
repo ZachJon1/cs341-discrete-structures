@@ -82,6 +82,37 @@
       spotlight.innerHTML = item ? `<div class="spotlight-top"><span class="spotlight-tag">${published.length ? 'LATEST AVAILABLE MATERIAL' : 'LECTURE PREVIEW'}</span><span class="spotlight-number">${String(item.number).padStart(2,'0')}</span></div><h3>${esc(item.title)}</h3><p>${esc(item.summary || '')}</p><div class="spotlight-footer"><span class="${isAvailable(item) ? '' : 'planned'}">${isAvailable(item) ? 'Course materials available' : 'MATERIALS COMING SOON'}</span><a href="lectures.html">View lectures →</a></div>` : '<h3>Lecture index</h3><p>Lecture materials will appear here as they are added.</p><a class="text-link" href="lectures.html">Open lectures →</a>';
     }
   };
+  const setupPracticeSets = async () => {
+    const list = document.getElementById('practice-list');
+    if (!list) return;
+    const count = document.getElementById('practice-count');
+    const search = document.getElementById('practice-search');
+    const result = document.getElementById('practice-results');
+    let sets;
+    try {
+      sets = await getJSON('data/practice_sets.json');
+      if (!Array.isArray(sets)) throw new Error('Practice set data must be an array');
+      sets = sets.filter(s => s && Number.isFinite(Number(s.number)) && s.title && cleanHref(s.practice) && cleanHref(s.solutions)).sort((a,b) => Number(a.number) - Number(b.number));
+    } catch (err) {
+      list.innerHTML = '<div class="empty-state">The practice set catalog could not be loaded. Please refresh the page or check data/practice_sets.json.</div>';
+      if (result) result.textContent = 'Practice sets are temporarily unavailable.';
+      console.error(err);
+      return;
+    }
+    if (count) count.textContent = sets.length;
+    const render = () => {
+      const q = (search?.value || '').toLowerCase().trim();
+      const filtered = sets.filter(s => [s.number,s.title].join(' ').toLowerCase().includes(q));
+      if (result) result.textContent = `Showing ${filtered.length} of ${sets.length} practice set${sets.length === 1 ? '' : 's'}`;
+      list.innerHTML = filtered.length ? filtered.map(s => `<article class="lecture-card practice-card">
+        <div class="lecture-card-top"><span class="lecture-ordinal">PRACTICE SET ${String(s.number).padStart(2,'0')}</span></div>
+        <h3>${esc(s.title)}</h3><p>Work through the student set, then compare your answers with the solution key.</p>
+        <div class="lecture-links"><a href="${esc(cleanHref(s.practice))}">Practice set ↗</a><a href="${esc(cleanHref(s.solutions))}">Solutions ↗</a></div>
+        </article>`).join('') : '<div class="empty-state">No practice sets matched your search.</div>';
+    };
+    search?.addEventListener('input', render);
+    render();
+  };
   const setupRoadmap = async () => {
     const list = document.getElementById('roadmap-list');
     if(!list) return;
@@ -102,5 +133,5 @@
       }
     } catch(err) {console.error(err);}
   };
-  Promise.all([setupLectures(),setupRoadmap(),setupSite()]);
+  Promise.all([setupLectures(),setupPracticeSets(),setupRoadmap(),setupSite()]);
 })();
