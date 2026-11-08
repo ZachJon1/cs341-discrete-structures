@@ -86,13 +86,17 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .player:fullscreen .stage{width:min(100%,calc((100vh - 200px) * 16 / 9));margin:0 auto}
 .player:fullscreen .caption,.player:fullscreen .controls,.player:fullscreen .chapters{width:min(100%,calc((100vh - 200px) * 16 / 9));margin-left:auto;margin-right:auto}
 @media (max-width:560px){.time{min-width:0;font-size:13px}.btn{min-width:40px;height:40px}}
+.gc-total-visitors{margin-left:auto;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font:700 10px var(--body);letter-spacing:.08em;color:var(--muted)}.gc-total-visitors strong{font:600 13px var(--display);letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}@media(max-width:560px){.gc-total-visitors{margin-left:0}}
 </style>
+
+<script data-goatcounter="https://cs341.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <main class="wrap">
   <header class="intro">
     <h1>Lecture 28, animated</h1>
     <p>Mathematical induction for CS 341: two steps, infinitely many cases, and why the base step matters.</p>
+    <span class="gc-total-visitors" aria-label="Total site visitors"><span aria-hidden="true">◉</span><span>VISITORS</span><strong data-goatcounter-total aria-live="polite">—</strong></span>
   </header>
   <section class="player" id="player" aria-label="Animated explainer player">
     <div class="stage">
@@ -710,5 +714,6 @@ window.__total=TOTAL;
 requestAnimationFrame(loop);
 })();
 </script>
+<script src="../assets/js/site.js" defer></script>
 </body>
 </html>

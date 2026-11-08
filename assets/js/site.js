@@ -24,6 +24,20 @@
     if (!response.ok) throw new Error(`Could not load ${path}`);
     return await response.json();
   };
+  const setupVisitorCount = async () => {
+    const counts = [...document.querySelectorAll('[data-goatcounter-total]')];
+    if (!counts.length) return;
+    try {
+      const response = await fetch('https://cs341.goatcounter.com/counter/TOTAL.json', {mode:'cors',cache:'no-store'});
+      if (!response.ok) throw new Error('Could not load the GoatCounter visitor total');
+      const data = await response.json();
+      const total = typeof data.count === 'string' || Number.isFinite(data.count) ? data.count : '—';
+      counts.forEach(count => { count.textContent = total; });
+    } catch (err) {
+      counts.forEach(count => { count.textContent = '—'; });
+      console.warn('GoatCounter visitor count is unavailable.', err);
+    }
+  };
   const isAvailable = l => Boolean(cleanHref(l.notes) || cleanHref(l.notes_filled) || cleanHref(l.animation) || cleanHref(l.slides) || cleanHref(l.video));
   const resourceLinks = l => {
     const fields = [['notes','Student notes ↗'],['notes_filled','Filled notes / key ↗'],['animation','View animation ↗'],['slides','Slides ↗'],['video','Watch video ↗']];
@@ -133,5 +147,5 @@
       }
     } catch(err) {console.error(err);}
   };
-  Promise.all([setupLectures(),setupPracticeSets(),setupRoadmap(),setupSite()]);
+  Promise.all([setupLectures(),setupPracticeSets(),setupRoadmap(),setupSite(),setupVisitorCount()]);
 })();
